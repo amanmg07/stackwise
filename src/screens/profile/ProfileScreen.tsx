@@ -34,7 +34,7 @@ export default function ProfileScreen({ navigation }: any) {
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statNum}>{completedCycles}</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+          <Text style={styles.statLabel} numberOfLines={1}>Done</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statNum}>{totalDoses}</Text>
