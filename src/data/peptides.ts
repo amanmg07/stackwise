@@ -436,4 +436,396 @@ export const peptides: Peptide[] = [
     storage: "Mixed: fridge, use within 30 days.",
     notes: "FDA-approved as Vyleesi. Max 8 doses per month. Start with 1 mg to test your tolerance for nausea. Don't use if you have uncontrolled high blood pressure. Talk to a doctor first.",
   },
+  {
+    id: "tesamorelin",
+    name: "Tesamorelin",
+    abbreviation: "Tesa",
+    categories: ["fat_loss", "anti_aging"],
+    description:
+      "An FDA-approved injectable that boosts your body's own growth hormone production. Mainly used to burn stubborn belly fat — especially the deep visceral fat around your organs.",
+    mechanism:
+      "Mimics the natural brain signal (GHRH) that tells your pituitary gland to release growth hormone. More GH means your body gets better at burning fat, especially around the midsection.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Belly fat reduction",
+        doseRange: "1.4-2 mg",
+        frequency: "1x daily",
+        cycleDuration: "Reassess at 6 months. Stop if no improvement.",
+        timing: "Morning on empty stomach. Inject in belly area.",
+      },
+    ],
+    sideEffects: ["Injection site redness/itching (~25%)", "Joint pain", "Swelling in hands/feet", "Muscle pain", "Numbness/tingling"],
+    stacksWith: ["ipamorelin", "cjc1295_nodac", "ghrp2"],
+    halfLife: "~26-38 minutes",
+    storage: "Fridge. Use immediately after mixing.",
+    notes: "FDA-approved for HIV-related belly fat buildup (as Egrifta). Off-label use for general fat loss is common but not FDA-sanctioned. Don't use if you have active cancer or pituitary issues.",
+  },
+  {
+    id: "retatrutide",
+    name: "Retatrutide",
+    abbreviation: "Reta",
+    categories: ["fat_loss"],
+    description:
+      "The first 'triple agonist' weight loss drug — hits three different hunger/metabolism receptors at once. In trials, people lost up to 24% body weight in 48 weeks. More weight loss than any other medication tested.",
+    mechanism:
+      "Activates three receptors at once: GLP-1 (kills appetite and slows digestion), GIP (improves sugar and fat handling), and glucagon (burns stored fat and sugar). The triple hit is why it outperforms semaglutide and tirzepatide.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Weight loss",
+        doseRange: "Start at 2 mg, increase up to 12 mg",
+        frequency: "1x per week",
+        cycleDuration: "Ongoing (48 weeks in trials)",
+        timing: "Any time of day, with or without food.",
+      },
+    ],
+    sideEffects: ["Nausea", "Diarrhea", "Vomiting", "Constipation", "Decreased appetite"],
+    stacksWith: [],
+    halfLife: "~6 days (supports once-weekly dosing)",
+    storage: "Fridge at 2-8°C.",
+    notes: "NOT yet FDA-approved — still in Phase 3 trials (Eli Lilly's TRIUMPH program). Any product sold as retatrutide right now is a research chemical. Expected to be a blockbuster if approved.",
+  },
+  {
+    id: "kpv",
+    name: "KPV",
+    categories: ["immune", "recovery"],
+    description:
+      "A tiny 3-amino-acid peptide with powerful anti-inflammatory effects. Especially popular for gut health issues and inflammation. Part of the popular 'KLOW' blend along with BPC-157, TB-500, and GHK-Cu.",
+    mechanism:
+      "Blocks NF-kB — the master switch for inflammation in your body. Gets into gut cells through a special transporter (PepT1), which is why it works so well for gut inflammation specifically.",
+    routes: ["subcutaneous", "oral", "topical"],
+    dosingProtocols: [
+      {
+        purpose: "Gut inflammation / general anti-inflammatory",
+        doseRange: "200-500 mcg (injection) or 500 mcg - 1 mg (oral)",
+        frequency: "1x daily",
+        cycleDuration: "4-8 weeks",
+        timing: "Empty stomach. Morning or evening.",
+      },
+      {
+        purpose: "Skin inflammation (topical)",
+        doseRange: "Applied to affected area",
+        frequency: "1-2x daily",
+        cycleDuration: "As needed",
+        timing: "On clean skin.",
+      },
+    ],
+    sideEffects: ["Very well tolerated", "Mild injection site irritation", "Rare mild fatigue"],
+    stacksWith: ["bpc157", "tb500", "ghkcu", "ll37"],
+    halfLife: "Short (exact human data not established)",
+    storage: "Fridge at 2-8°C. Use mixed solution within a few weeks.",
+    notes: "Part of the KLOW blend (KPV + BPC-157 + TB-500 + GHK-Cu). The GLOW blend is the same minus KPV. One of the rare peptides that works well orally because of how it's absorbed in the gut. Not FDA-approved.",
+  },
+  {
+    id: "thymosin_a1",
+    name: "Thymosin Alpha-1",
+    abbreviation: "TA1",
+    categories: ["immune", "anti_aging"],
+    description:
+      "An immune-boosting peptide from the thymus gland (the organ that trains your immune cells). Approved in 35+ countries for hepatitis and immune support. One of the most studied peptides with an excellent safety record.",
+    mechanism:
+      "Wakes up your immune system's 'scout' cells (dendritic cells) which then train your T-cells to fight infections and abnormal cells better. Think of it as giving your immune system a training upgrade.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Immune support",
+        doseRange: "1-1.6 mg",
+        frequency: "2-3x per week",
+        cycleDuration: "4-12 weeks",
+        timing: "Any time of day. Keep a consistent schedule.",
+      },
+      {
+        purpose: "Acute immune support (getting sick)",
+        doseRange: "1.6 mg",
+        frequency: "Daily for short bursts",
+        cycleDuration: "1-2 weeks",
+        timing: "Morning.",
+      },
+    ],
+    sideEffects: ["Very well tolerated", "Occasional injection site irritation", "No significant side effects across 11,000+ study subjects"],
+    stacksWith: ["ll37", "kpv", "bpc157"],
+    halfLife: "~2 hours",
+    storage: "Fridge at 2-8°C. Use mixed solution promptly.",
+    notes: "Approved as Zadaxin in 35+ countries (not the US). Studied in 30+ clinical trials with 11,000+ people. One of the safest peptides known. Was studied as a COVID-19 treatment.",
+  },
+  {
+    id: "motsc",
+    name: "MOTS-c",
+    categories: ["anti_aging", "fat_loss", "recovery"],
+    description:
+      "A peptide your mitochondria (cell power plants) naturally make. Acts like an exercise signal — improves how your body handles sugar and fat, similar to working out. Levels drop as you age.",
+    mechanism:
+      "Activates AMPK — the same energy sensor that gets turned on when you exercise or take metformin. Tells your cells to burn more fat and sugar. Basically tricks your cells into thinking you just worked out.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Metabolic optimization / anti-aging",
+        doseRange: "5-10 mg",
+        frequency: "3-5x per week",
+        cycleDuration: "8 weeks on, 4 weeks off",
+        timing: "Morning (to mimic natural exercise signaling).",
+      },
+    ],
+    sideEffects: ["Limited human data", "Injection site irritation", "Appears well-tolerated in animal studies"],
+    stacksWith: ["humanin", "ss31"],
+    halfLife: "Not well-established in humans",
+    storage: "Fridge at 2-8°C. Protect from light.",
+    notes: "Not FDA-approved. Mostly studied in animals and cell cultures — very early for human use. One of the most promising longevity peptides but still research-stage. Natural levels decline with age.",
+  },
+  {
+    id: "ss31",
+    name: "SS-31",
+    abbreviation: "Elamipretide",
+    categories: ["anti_aging", "recovery", "cognitive"],
+    description:
+      "A peptide that targets and protects your mitochondria from the inside. Recently FDA-approved (2025) for a rare genetic condition. Keeps your cellular power plants running clean and efficiently.",
+    mechanism:
+      "Binds to cardiolipin — a special fat molecule inside your mitochondria that's essential for energy production. When cardiolipin gets damaged (which happens with aging), your cells make less energy. SS-31 protects it.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Anti-aging / mitochondrial support",
+        doseRange: "5-40 mg",
+        frequency: "Daily",
+        cycleDuration: "Variable — consult a practitioner",
+        timing: "Morning. Rotate injection sites.",
+      },
+    ],
+    sideEffects: ["Injection site reactions (most common)", "Mild blood pressure drop at higher doses", "Generally well tolerated"],
+    stacksWith: ["motsc", "humanin"],
+    halfLife: "Short — cleared by kidneys within 48 hours",
+    storage: "Fridge at 2-8°C.",
+    notes: "FDA-approved for Barth syndrome as Forzinity (2025) — the first mitochondria-targeted peptide to get FDA approval. Cleared entirely by kidneys (no liver processing). Dose adjustment needed if you have kidney issues.",
+  },
+  {
+    id: "kisspeptin",
+    name: "Kisspeptin",
+    abbreviation: "KP",
+    categories: [],
+    description:
+      "The master switch for your reproductive hormone system. Tells your brain to start producing the hormones needed for fertility and sexual function. Being researched as a gentler way to stimulate reproductive hormones.",
+    mechanism:
+      "Triggers your brain to release GnRH, which then signals your pituitary to release LH and FSH — the hormones that drive testosterone, estrogen, and fertility. It sits at the very top of the hormone chain.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Hormone stimulation / fertility (research)",
+        doseRange: "Varies widely by study protocol",
+        frequency: "Single or repeated doses",
+        cycleDuration: "Per clinical protocol",
+        timing: "Timed with clinical monitoring.",
+      },
+    ],
+    sideEffects: ["Generally well tolerated", "No significant side effects in clinical trials"],
+    stacksWith: ["gonadorelin", "pt141"],
+    halfLife: "~28 minutes",
+    storage: "Fridge at 2-8°C.",
+    notes: "Not FDA-approved. Research-stage only. Very short half-life is a big limitation — longer-acting versions are in development. Very promising for IVF as a safer alternative to hCG trigger shots.",
+  },
+  {
+    id: "dihexa",
+    name: "Dihexa",
+    categories: ["cognitive"],
+    description:
+      "A research compound designed for brain function and memory. In animal studies, it was millions of times more potent than BDNF at growing new brain connections. One of the most discussed cognitive peptides in biohacking.",
+    mechanism:
+      "Activates the HGF/c-Met system in your brain, which promotes new connections between neurons. Think of it as fertilizer for your brain's wiring — helps neurons form new connections and strengthens existing ones.",
+    routes: ["oral", "subcutaneous", "nasal"],
+    dosingProtocols: [
+      {
+        purpose: "Cognitive enhancement",
+        doseRange: "10-20 mg oral, or 5-10 mg subcutaneous/nasal",
+        frequency: "1x daily",
+        cycleDuration: "2-4 weeks on, 2-4 weeks off",
+        timing: "Morning.",
+      },
+    ],
+    sideEffects: ["Very limited human data", "Headache (anecdotal)", "Mild anxiety (anecdotal)", "Vivid dreams", "Long-term safety unknown"],
+    stacksWith: ["semax", "selank"],
+    halfLife: "Not established in humans",
+    storage: "Room temperature or fridge. Protect from light.",
+    notes: "NO human clinical trials have ever been done. All data is from animal studies. One of the riskier peptides to try because the pathway it activates (HGF/c-Met) is also involved in cancer growth. Use extreme caution.",
+  },
+  {
+    id: "foxo4dri",
+    name: "FOXO4-DRI",
+    categories: ["anti_aging"],
+    description:
+      "A senolytic peptide — meaning it selectively kills 'zombie cells' that build up as you age and cause chronic inflammation. In animal studies, it restored fur, kidney function, and fitness in old mice.",
+    mechanism:
+      "In old 'zombie cells,' a protein called FOXO4 keeps them alive when they should die. FOXO4-DRI breaks that bond, freeing the cell to self-destruct. Only works on zombie cells — healthy cells aren't affected.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Senolytic therapy (research)",
+        doseRange: "No established human dose (animal dose: 5 mg/kg)",
+        frequency: "Varies — some protocols use 3x/week",
+        cycleDuration: "Short courses (2-4 weeks)",
+        timing: "Any time.",
+      },
+    ],
+    sideEffects: ["Very limited data", "Mild diarrhea in animal studies", "Long-term safety unknown"],
+    stacksWith: ["humanin", "epithalon"],
+    halfLife: "Extended (designed to resist breakdown in the body)",
+    storage: "Fridge at 2-8°C. Protect from light. Very expensive.",
+    notes: "NO human clinical trials. All data is from animals. Extremely expensive — one of the costliest research peptides. Scientifically exciting concept but years away from any real clinical use.",
+  },
+  {
+    id: "humanin",
+    name: "Humanin",
+    abbreviation: "HN",
+    categories: ["anti_aging", "cognitive", "recovery"],
+    description:
+      "A peptide your mitochondria naturally make to protect cells from dying. Originally discovered for protecting brain cells from Alzheimer's damage. Also supports heart health and insulin sensitivity. Levels drop with age.",
+    mechanism:
+      "Blocks cell death, reduces inflammation, and helps cells handle stress better. Works both inside cells and through receptors on cell surfaces. Naked mole-rats (which live 10x longer than mice) keep stable humanin levels their whole lives.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Anti-aging / neuroprotection",
+        doseRange: "0.5-4 mg (using HNG analog)",
+        frequency: "Daily to 3x per week",
+        cycleDuration: "4-8 weeks",
+        timing: "Any time of day.",
+      },
+    ],
+    sideEffects: ["Very limited human data", "Animal studies show good tolerability", "No significant side effects reported"],
+    stacksWith: ["motsc", "ss31", "foxo4dri"],
+    halfLife: "Short for native humanin. The S14G analog (HNG) is 1000x more potent.",
+    storage: "Fridge at 2-8°C.",
+    notes: "Not FDA-approved. Research-stage only. The more potent analog HNG (S14G-Humanin) is typically what's available. Part of the 'mitochondrial triad' with MOTS-c and SS-31.",
+  },
+  {
+    id: "ll37",
+    name: "LL-37",
+    abbreviation: "Cathelicidin",
+    categories: ["immune", "recovery"],
+    description:
+      "The only cathelicidin antimicrobial peptide your body naturally makes. Like a Swiss Army knife for your immune system — kills bacteria, viruses, and fungi directly while also directing your immune cells.",
+    mechanism:
+      "Has a positive charge that's attracted to bacteria membranes, poking holes in them and killing them. Also activates your immune cells, helps them eat bacteria, and controls inflammation. Your body makes more of it when you take vitamin D.",
+    routes: ["subcutaneous", "topical", "nasal"],
+    dosingProtocols: [
+      {
+        purpose: "Immune support",
+        doseRange: "50-100 mcg",
+        frequency: "Daily or 3-5x per week",
+        cycleDuration: "2-4 weeks",
+        timing: "Any time. Morning preferred.",
+      },
+      {
+        purpose: "Wound healing (topical)",
+        doseRange: "Applied to wound",
+        frequency: "1-2x daily",
+        cycleDuration: "As needed",
+        timing: "On clean wound.",
+      },
+    ],
+    sideEffects: ["Injection site irritation", "Can be toxic to your own cells at very high doses", "Theoretical concern for autoimmune activation"],
+    stacksWith: ["thymosin_a1", "kpv", "bpc157"],
+    halfLife: "Short (breaks down quickly in the body)",
+    storage: "Fridge at 2-8°C. Protect from light.",
+    notes: "Not FDA-approved for injection. Fun fact: vitamin D supplementation increases your body's own LL-37 production — that's one reason vitamin D helps immune function. Main challenge for clinical use is that it breaks down quickly.",
+  },
+  {
+    id: "hexarelin",
+    name: "Hexarelin",
+    abbreviation: "Hex",
+    categories: ["muscle_gain", "recovery", "fat_loss"],
+    description:
+      "One of the strongest growth hormone releasing peptides. Causes a big, fast GH spike and has unique heart-protective benefits other GH peptides don't have. Downside: your body gets used to it faster.",
+    mechanism:
+      "Binds to ghrelin receptors in your pituitary gland, triggering a powerful growth hormone pulse. Also has direct heart-protective effects that work independently of GH release.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "GH release / recovery",
+        doseRange: "100-200 mcg",
+        frequency: "1-3x daily",
+        cycleDuration: "4-8 weeks (stops working as well after that)",
+        timing: "Empty stomach. Before bed and/or upon waking.",
+      },
+    ],
+    sideEffects: ["Increased appetite (less than GHRP-6)", "Mild cortisol and prolactin increase", "Water retention", "Numbness/tingling", "Desensitization within 4-16 weeks"],
+    stacksWith: ["cjc1295_nodac", "cjc1295_dac", "ghrp2", "tesamorelin"],
+    halfLife: "~70-120 minutes. GH peaks at ~30 minutes.",
+    storage: "Fridge at 2-8°C. Use mixed solution within 2-4 weeks.",
+    notes: "Not FDA-approved. Most potent GHRP for peak GH release, but desensitizes faster than Ipamorelin or GHRP-2. The cortisol/prolactin increase makes it less 'clean' than Ipamorelin. Consider rotating with other GH peptides.",
+  },
+  {
+    id: "ghrp6",
+    name: "GHRP-6",
+    abbreviation: "GHRP-6",
+    categories: ["muscle_gain", "recovery", "fat_loss", "sleep"],
+    description:
+      "One of the original growth hormone peptides. Strong GH release but famous for making you extremely hungry. Great if you're trying to bulk up and eat more, not great if you're cutting.",
+    mechanism:
+      "Binds to ghrelin receptors in your brain, triggering growth hormone release. Also strongly stimulates ghrelin signaling — which is why the hunger increase is so intense. Works through a different pathway than CJC-1295, so they stack well.",
+    routes: ["subcutaneous", "nasal"],
+    dosingProtocols: [
+      {
+        purpose: "GH release / muscle gain",
+        doseRange: "100-300 mcg",
+        frequency: "2-3x daily",
+        cycleDuration: "8-12 weeks, then break",
+        timing: "Empty stomach — fasting 30+ min before and after. Food blunts the GH response.",
+      },
+    ],
+    sideEffects: ["Very strong hunger increase", "Water retention", "Cortisol elevation", "Prolactin elevation", "Numbness/tingling", "Blood sugar effects"],
+    stacksWith: ["cjc1295_nodac", "cjc1295_dac", "hexarelin", "ghrp2"],
+    halfLife: "~2.5 hours. GH peaks at ~15-30 minutes.",
+    storage: "Fridge at 2-8°C. Use mixed solution within 2-4 weeks.",
+    notes: "Not FDA-approved. The appetite boost is the main feature/drawback depending on your goal. Popular during bulking phases. Must take on empty stomach or it won't work well.",
+  },
+  {
+    id: "ghrp2",
+    name: "GHRP-2",
+    abbreviation: "Pralmorelin",
+    categories: ["muscle_gain", "recovery", "fat_loss", "sleep"],
+    description:
+      "Considered the strongest GHRP for total GH output. A good middle ground between GHRP-6 (too hungry) and Ipamorelin (very clean but weaker). Moderate appetite increase with robust GH pulses.",
+    mechanism:
+      "Binds to ghrelin receptors to trigger GH release from your pituitary. Produces the highest total GH output of any GHRP. More potent than Ipamorelin, cleaner than GHRP-6.",
+    routes: ["subcutaneous", "nasal"],
+    dosingProtocols: [
+      {
+        purpose: "GH release / body composition",
+        doseRange: "100-300 mcg",
+        frequency: "2-3x daily",
+        cycleDuration: "8-12 weeks, then 4-week break",
+        timing: "Empty stomach. Before bed is ideal. Wait 20 min before eating.",
+      },
+    ],
+    sideEffects: ["Moderate appetite increase", "Cortisol elevation", "Prolactin elevation", "Water retention", "Drowsiness", "Numbness/tingling"],
+    stacksWith: ["cjc1295_nodac", "cjc1295_dac", "hexarelin", "tesamorelin"],
+    halfLife: "~33 minutes. GH peaks at ~15-30 minutes.",
+    storage: "Fridge at 2-8°C. Use mixed solution within 2-4 weeks.",
+    notes: "Approved in Japan (as Pralmorelin) for testing GH deficiency. Highest total GH output of all GHRPs. Cortisol/prolactin increase is moderate — more than Ipamorelin but manageable. Cycling recommended to avoid desensitization.",
+  },
+  {
+    id: "gonadorelin",
+    name: "Gonadorelin",
+    abbreviation: "GnRH",
+    categories: [],
+    description:
+      "A synthetic copy of the GnRH hormone your brain naturally makes. Tells your pituitary to release LH and FSH — the hormones that drive testosterone and fertility. Popular in TRT protocols to keep natural hormone production alive.",
+    mechanism:
+      "Identical to your body's own GnRH. When injected in pulses, it keeps your LH and FSH signaling active. This is why men on testosterone use it — it preserves testicular function and fertility while on TRT.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Fertility preservation during TRT",
+        doseRange: "100-200 mcg",
+        frequency: "2-3x per week",
+        cycleDuration: "Ongoing with TRT",
+        timing: "Any consistent time of day.",
+      },
+    ],
+    sideEffects: ["Generally well tolerated", "Rare: headache, flushing, nausea", "In women: ovarian hyperstimulation risk"],
+    stacksWith: ["kisspeptin", "pt141"],
+    halfLife: "~2-4 minutes (very short)",
+    storage: "Fridge at 2-8°C.",
+    notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues.",
+  },
 ];
