@@ -828,4 +828,199 @@ export const peptides: Peptide[] = [
     storage: "Fridge at 2-8°C.",
     notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues.",
   },
+
+  // ── Pre-Mixed Blends (sold as single vials) ──
+
+  {
+    id: "glow_blend",
+    name: "GLOW Blend",
+    categories: ["recovery", "anti_aging"],
+    description:
+      "A popular pre-mixed 3-peptide blend for healing, skin rejuvenation, and anti-aging. Sold as a single vial — no need to buy each peptide separately. The go-to blend for recovery and that 'glow' effect.",
+    mechanism:
+      "BPC-157 repairs tissue and grows new blood vessels. TB-500 sends repair cells body-wide and reduces inflammation. GHK-Cu boosts collagen, elastin, and skin health. Together they cover healing from the inside out.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Recovery + skin rejuvenation",
+        doseRange: "0.3-0.5 mL per injection (from 70mg vial reconstituted with 3 mL bac water)",
+        frequency: "1x daily, 5 days on / 2 days off",
+        cycleDuration: "8-12 weeks, then 4-week break",
+        timing: "Morning or evening. Rotate injection sites.",
+      },
+    ],
+    sideEffects: ["Mild injection site reactions", "Temporary fatigue", "Occasional headache or nausea", "Avoid if copper allergy"],
+    stacksWith: ["kpv", "epithalon", "dsip"],
+    halfLife: "Varies by component — effects build over days to weeks.",
+    storage: "Powder: freezer. Mixed: fridge at 2-8°C, use within 28 days. Protect from light.",
+    notes: "Contains: BPC-157 (5-10mg) + TB-500 (10mg) + GHK-Cu (50mg). The KLOW blend is this plus KPV. Sold by Peptide Sciences, Polaris, and many others. Pre-mixed means you don't have to worry about mixing ratios yourself.",
+  },
+  {
+    id: "klow_blend",
+    name: "KLOW Blend",
+    categories: ["recovery", "anti_aging", "immune"],
+    description:
+      "The upgraded version of GLOW — adds KPV (a powerful anti-inflammatory) to the healing trio. Best for people dealing with gut issues, inflammation, or autoimmune concerns on top of wanting recovery and skin benefits.",
+    mechanism:
+      "Everything GLOW does (BPC-157 repairs, TB-500 heals body-wide, GHK-Cu rebuilds collagen) plus KPV shuts down the NF-kB inflammation pathway. The KPV is especially effective for gut inflammation because of how it's absorbed.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Recovery + anti-inflammation + gut healing",
+        doseRange: "0.3-0.5 mL per injection (from 80mg vial reconstituted with 3 mL bac water)",
+        frequency: "1x daily, 5 days on / 2 days off",
+        cycleDuration: "8-12 weeks, then 4-week break",
+        timing: "Morning or evening. Rotate injection sites.",
+      },
+    ],
+    sideEffects: ["Mild injection site reactions", "Temporary fatigue", "Occasional headache, nausea, or lightheadedness"],
+    stacksWith: ["epithalon", "dsip", "thymosin_a1"],
+    halfLife: "Varies by component — effects build over days to weeks.",
+    storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C, use within 28 days. Protect from light.",
+    notes: "Contains: BPC-157 (10mg) + TB-500 (10mg) + GHK-Cu (50mg) + KPV (10mg). The 'K' in KLOW is for KPV. If you don't have gut/inflammation issues, GLOW is enough. If you do, upgrade to KLOW.",
+  },
+  {
+    id: "wolverine_blend",
+    name: "Wolverine Stack (BPC-157 + TB-500)",
+    categories: ["recovery"],
+    description:
+      "The classic healing duo sold as a single pre-mixed vial. BPC-157 heals locally, TB-500 heals body-wide. Named 'Wolverine' because of how fast it helps injuries recover. The most popular peptide blend.",
+    mechanism:
+      "BPC-157 grows new blood vessels near the injury and boosts collagen. TB-500 sends repair cells throughout your body and reduces inflammation. Together they cover both local and systemic healing.",
+    routes: ["subcutaneous", "intramuscular"],
+    dosingProtocols: [
+      {
+        purpose: "Injury healing / recovery",
+        doseRange: "0.3 mL per injection (from 10mg vial reconstituted with 3 mL bac water = ~500 mcg each peptide)",
+        frequency: "1x daily",
+        cycleDuration: "6-8 weeks",
+        timing: "Inject near the injury site for best results. Morning or evening.",
+      },
+    ],
+    sideEffects: ["Mild injection site irritation", "Occasional nausea (rare)", "Headache (rare)"],
+    stacksWith: ["ghkcu", "kpv", "ipamorelin"],
+    halfLife: "BPC-157: <30 min. TB-500: 2-4 days. Mixed effects last days.",
+    storage: "Powder: freezer. Mixed: fridge at 2-8°C, use within 28 days.",
+    notes: "Contains: BPC-157 (5mg) + TB-500 (5mg) in 10mg vials, or 10mg + 10mg in 20mg vials. The single most popular peptide combo for injuries. Pre-mixed saves you from buying two separate vials.",
+  },
+  {
+    id: "cjc_ipa_blend",
+    name: "CJC/Ipa Blend",
+    categories: ["muscle_gain", "fat_loss", "sleep"],
+    description:
+      "The gold standard GH combo sold as a single pre-mixed vial. CJC-1295 and Ipamorelin work through different pathways to release 2-3x more growth hormone together than either alone. Cleanest GH stack available.",
+    mechanism:
+      "CJC-1295 (GHRH analog) tells your pituitary to release GH. Ipamorelin (ghrelin mimetic) pulls the same lever from a different angle. Together they amplify your natural GH pulses without raising cortisol or appetite.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "GH boost / lean muscle / fat loss / better sleep",
+        doseRange: "100-300 mcg each peptide per injection (0.1-0.3 mL from 10mg vial with 3 mL bac water)",
+        frequency: "1x daily before bed, 5 days on / 2 days off",
+        cycleDuration: "12 weeks, then 4-week break",
+        timing: "Empty stomach, 30 min before bed. Don't eat for 20 min after.",
+      },
+    ],
+    sideEffects: ["Mild injection site irritation", "Water retention", "Tingling/numbness (temporary)", "Occasional headache"],
+    stacksWith: ["bpc157", "aod9604", "tesamorelin"],
+    halfLife: "CJC: ~30 min. Ipamorelin: ~2 hours. GH elevation lasts hours.",
+    storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C. Avoid freeze-thaw.",
+    notes: "Contains: CJC-1295 no DAC (5mg) + Ipamorelin (5mg). The most popular GH peptide combo. You can mix them in the same syringe. Take on empty stomach or it won't work as well. Considered the cleanest GH stack (no cortisol/hunger spikes).",
+  },
+  {
+    id: "fat_burner_blend",
+    name: "Fat Burner Blend",
+    categories: ["fat_loss"],
+    description:
+      "A triple-action fat loss blend. AOD-9604 burns fat directly, MOTS-c boosts your metabolism like exercise, and Tesamorelin targets stubborn belly fat through growth hormone. Attacks fat from three different angles.",
+    mechanism:
+      "AOD-9604 mimics the fat-burning part of growth hormone without side effects. MOTS-c activates AMPK (your exercise sensor) to burn more calories. Tesamorelin boosts real GH to specifically target visceral belly fat.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Fat loss / metabolic boost",
+        doseRange: "Per vendor dosing (typically 0.2-0.5 mL per injection)",
+        frequency: "1x daily",
+        cycleDuration: "8-12 weeks",
+        timing: "Morning on empty stomach, ideally before cardio.",
+      },
+    ],
+    sideEffects: ["Injection site reactions", "Possible nausea", "Headache", "Water retention"],
+    stacksWith: ["semaglutide", "cjc_ipa_blend"],
+    halfLife: "Varies by component.",
+    storage: "Fridge at 2-8°C after mixing.",
+    notes: "Contains: AOD-9604 + MOTS-c + Tesamorelin. Sold by RegenMD, Elite Health HRT, and others. Doses vary by vendor so follow their specific protocol. Do NOT combine with semaglutide/tirzepatide without medical supervision.",
+  },
+  {
+    id: "cognitive_blend",
+    name: "Cognitive Blend (Semax + Selank)",
+    categories: ["cognitive"],
+    description:
+      "The brain-boosting duo in one vial. Semax sharpens focus, memory, and motivation. Selank kills anxiety without drowsiness. Together they give you a calm, clear, focused mind — no needles needed if you use the nasal version.",
+    mechanism:
+      "Semax boosts BDNF and dopamine for focus and memory. Selank works on GABA and serotonin for calm and mood. They complement each other perfectly — Semax energizes while Selank prevents overstimulation.",
+    routes: ["subcutaneous", "nasal"],
+    dosingProtocols: [
+      {
+        purpose: "Focus + calm + mental clarity",
+        doseRange: "500-1000 mcg total daily (injectable) or 1-2 sprays per nostril (nasal)",
+        frequency: "1-2x daily",
+        cycleDuration: "2-4 weeks on, 2 weeks off",
+        timing: "Morning/afternoon for Semax (stimulating). Selank anytime. Space nasal doses 15-30 min apart.",
+      },
+    ],
+    sideEffects: ["Mild nasal irritation (spray)", "Occasional headache", "No sedation or dependency"],
+    stacksWith: ["dsip", "bpc157", "dihexa"],
+    halfLife: "Short for both — effects last much longer than blood levels.",
+    storage: "Fridge at 2-8°C.",
+    notes: "Contains: Semax + Selank. Both are approved drugs in Russia. No addiction, tolerance, or withdrawal. Nasal version means no needles. The go-to nootropic peptide combo.",
+  },
+  {
+    id: "sleep_blend",
+    name: "Sleep Blend",
+    categories: ["sleep", "recovery"],
+    description:
+      "A pre-mixed sleep and overnight recovery blend. DSIP gives you deeper sleep, CJC-1295 boosts your natural nighttime GH spike, and BPC-157 repairs tissue while you rest. Take before bed and wake up recovered.",
+    mechanism:
+      "DSIP increases deep delta-wave sleep. CJC-1295 amplifies your body's natural nighttime growth hormone pulse for better recovery. BPC-157 heals tissue and reduces inflammation while you sleep.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Better sleep + overnight recovery",
+        doseRange: "0.2-0.5 mL per injection (per vendor dosing)",
+        frequency: "1x nightly, 5 days on / 2 days off",
+        cycleDuration: "4-8 weeks",
+        timing: "30-60 minutes before bed on empty stomach.",
+      },
+    ],
+    sideEffects: ["Vivid dreams", "Possible morning grogginess", "Mild injection site irritation", "Fluid retention"],
+    stacksWith: ["ipamorelin", "selank", "mk677"],
+    halfLife: "Varies by component.",
+    storage: "Fridge at 2-8°C after mixing.",
+    notes: "Contains: DSIP + CJC-1295 + BPC-157. Sold by RegenMD, Elite Health HRT, Bio Access Labs. Don't mix with sleeping pills or alcohol. Great during hard training blocks or stressful periods.",
+  },
+  {
+    id: "triple_gh_blend",
+    name: "Triple GH Blend",
+    categories: ["muscle_gain", "fat_loss"],
+    description:
+      "The most powerful GH-boosting blend available. Three growth hormone secretagogues in one vial — Tesamorelin, CJC-1295, and Ipamorelin. For serious users who want maximum GH output and fat loss.",
+    mechanism:
+      "Tesamorelin is the strongest GHRH analog (FDA-approved for belly fat). CJC-1295 extends the GH-releasing signal. Ipamorelin pulls from the ghrelin side for synergy. Three pathways working together for massive GH release.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Maximum GH release / body recomposition",
+        doseRange: "0.2-0.5 mL per injection (from 12mg vial reconstituted with 3 mL bac water)",
+        frequency: "1x daily before bed",
+        cycleDuration: "8-12 weeks, then break",
+        timing: "Empty stomach, 30 min before bed.",
+      },
+    ],
+    sideEffects: ["Water retention", "Joint pain", "Tingling/numbness", "Possible increased heart rate", "Injection site reactions"],
+    stacksWith: ["bpc157", "aod9604"],
+    halfLife: "Varies — Tesamorelin ~30 min, CJC ~30 min, Ipamorelin ~2 hours.",
+    storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C. Avoid freeze-thaw.",
+    notes: "Contains: Tesamorelin (6mg) + CJC-1295 no DAC (3mg) + Ipamorelin (3mg). Sold by Peptide Sciences, Liberty Peptides, LIVV Natural. Not for beginners — start with CJC/Ipa blend first.",
+  },
 ];
