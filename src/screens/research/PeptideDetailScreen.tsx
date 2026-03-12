@@ -83,7 +83,7 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
               </View>
               <View style={[styles.protoRow, { borderBottomWidth: 0 }]}>
                 <Text style={styles.protoLabel}>Timing</Text>
-                <Text style={[styles.protoValue, { flex: 1, textAlign: "right" }]}>{proto.timing}</Text>
+                <Text style={styles.protoValue}>{proto.timing}</Text>
               </View>
             </View>
           )}
@@ -142,8 +142,8 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   errorText: { color: colors.error, fontSize: 16, textAlign: "center", marginTop: 40 },
-  header: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 8 },
-  name: { fontSize: 28, fontWeight: "800", color: colors.text },
+  header: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" },
+  name: { fontSize: 28, fontWeight: "800", color: colors.text, flexShrink: 1 },
   abbr: { fontSize: 16, color: colors.textSecondary },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
   metaPill: {
@@ -151,8 +151,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 8,
     paddingHorizontal: 10, paddingVertical: 6,
     borderWidth: 1, borderColor: colors.border,
+    flexShrink: 1, maxWidth: "100%",
   },
-  metaText: { fontSize: 12, color: colors.textSecondary, textTransform: "capitalize" },
+  metaText: { fontSize: 12, color: colors.textSecondary, textTransform: "capitalize", flexShrink: 1 },
   desc: { fontSize: 15, color: colors.text, lineHeight: 23, marginBottom: 24 },
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md,
-    borderWidth: 1, borderColor: colors.border, marginBottom: 12,
+    borderWidth: 1, borderColor: colors.border, marginBottom: 12, overflow: "hidden",
   },
   cardBody: { fontSize: 14, color: colors.text, lineHeight: 22 },
   protoHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
@@ -168,16 +169,17 @@ const styles = StyleSheet.create({
   protoDetails: { marginTop: 12 },
   protoRow: {
     flexDirection: "row", justifyContent: "space-between", paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
+    borderBottomWidth: 1, borderBottomColor: colors.border, gap: 12,
   },
-  protoLabel: { fontSize: 13, color: colors.textSecondary },
-  protoValue: { fontSize: 13, fontWeight: "600", color: colors.text },
+  protoLabel: { fontSize: 13, color: colors.textSecondary, flexShrink: 0 },
+  protoValue: { fontSize: 13, fontWeight: "600", color: colors.text, flexShrink: 1, textAlign: "right" },
   bulletRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 6 },
   bullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.warning, marginTop: 6 },
   bulletText: { fontSize: 14, color: colors.text, flex: 1 },
   stackCard: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 14, width: 180,
     marginRight: 10, borderWidth: 1, borderColor: colors.border, marginBottom: 12,
+    overflow: "hidden",
   },
   stackName: { fontSize: 15, fontWeight: "700", color: colors.accent, marginBottom: 4 },
   stackDesc: { fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
