@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../theme";
 
-import ResearchHubScreen from "../screens/research/ResearchHubScreen";
+import ExploreScreen from "../screens/explore/ExploreScreen";
 import PeptideDetailScreen from "../screens/research/PeptideDetailScreen";
 import CycleTrackerScreen from "../screens/cycle/CycleTrackerScreen";
 import NewCycleScreen from "../screens/cycle/NewCycleScreen";
@@ -23,14 +23,14 @@ const screenOptions = {
   headerShadowVisible: false,
 };
 
-// Research Stack
-const ResearchStack = createNativeStackNavigator();
-function ResearchNavigator() {
+// Explore Stack (Chat + Browse)
+const ExploreStack = createNativeStackNavigator();
+function ExploreNavigator() {
   return (
-    <ResearchStack.Navigator screenOptions={screenOptions}>
-      <ResearchStack.Screen name="ResearchHub" component={ResearchHubScreen} options={{ title: "Research" }} />
-      <ResearchStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
-    </ResearchStack.Navigator>
+    <ExploreStack.Navigator screenOptions={screenOptions}>
+      <ExploreStack.Screen name="ExploreHub" component={ExploreScreen} options={{ headerShown: false }} />
+      <ExploreStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
+    </ExploreStack.Navigator>
   );
 }
 
@@ -39,7 +39,7 @@ const CycleStack = createNativeStackNavigator();
 function CycleNavigator() {
   return (
     <CycleStack.Navigator screenOptions={screenOptions}>
-      <CycleStack.Screen name="CycleTracker" component={CycleTrackerScreen} options={{ title: "Cycle" }} />
+      <CycleStack.Screen name="CycleTracker" component={CycleTrackerScreen} options={{ headerShown: false }} />
       <CycleStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
       <CycleStack.Screen name="LogDose" component={LogDoseScreen} options={{ title: "Log Dose" }} />
     </CycleStack.Navigator>
@@ -51,18 +51,18 @@ const JournalStack = createNativeStackNavigator();
 function JournalNavigator() {
   return (
     <JournalStack.Navigator screenOptions={screenOptions}>
-      <JournalStack.Screen name="Journal" component={JournalScreen} options={{ title: "Journal" }} />
+      <JournalStack.Screen name="Journal" component={JournalScreen} options={{ headerShown: false }} />
       <JournalStack.Screen name="NewEntry" component={NewEntryScreen} options={{ title: "New Entry" }} />
     </JournalStack.Navigator>
   );
 }
 
-// Protocol Stack
+// Protocol/Home Stack
 const ProtocolStack = createNativeStackNavigator();
 function ProtocolNavigator() {
   return (
     <ProtocolStack.Navigator screenOptions={screenOptions}>
-      <ProtocolStack.Screen name="ProtocolBuilder" component={ProtocolBuilderScreen} options={{ title: "Protocols" }} />
+      <ProtocolStack.Screen name="ProtocolBuilder" component={ProtocolBuilderScreen} options={{ headerShown: false }} />
       <ProtocolStack.Screen name="ProtocolResult" component={ProtocolResultScreen} options={{ title: "Results" }} />
       <ProtocolStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
     </ProtocolStack.Navigator>
@@ -82,9 +82,9 @@ function ProfileNavigator() {
 type TabIconName = React.ComponentProps<typeof Ionicons>["name"];
 
 const TAB_ICONS: Record<string, { focused: TabIconName; default: TabIconName }> = {
-  ResearchTab: { focused: "flask", default: "flask-outline" },
+  HomeTab: { focused: "home", default: "home-outline" },
   CycleTab: { focused: "repeat", default: "repeat-outline" },
-  ProtocolTab: { focused: "layers", default: "layers-outline" },
+  ExploreTab: { focused: "compass", default: "compass-outline" },
   JournalTab: { focused: "book", default: "book-outline" },
   ProfileTab: { focused: "person", default: "person-outline" },
 };
@@ -111,9 +111,9 @@ export default function RootNavigator() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
       })}
     >
-      <Tab.Screen name="ResearchTab" component={ResearchNavigator} options={{ title: "Research" }} />
+      <Tab.Screen name="HomeTab" component={ProtocolNavigator} options={{ title: "Home" }} />
       <Tab.Screen name="CycleTab" component={CycleNavigator} options={{ title: "Cycle" }} />
-      <Tab.Screen name="ProtocolTab" component={ProtocolNavigator} options={{ title: "Protocols" }} />
+      <Tab.Screen name="ExploreTab" component={ExploreNavigator} options={{ title: "Explore" }} />
       <Tab.Screen name="JournalTab" component={JournalNavigator} options={{ title: "Journal" }} />
       <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: "Profile" }} />
     </Tab.Navigator>

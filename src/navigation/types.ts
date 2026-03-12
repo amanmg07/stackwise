@@ -1,7 +1,7 @@
 import { Goal } from "../types";
 
-export type ResearchStackParams = {
-  ResearchHub: undefined;
+export type ExploreStackParams = {
+  ExploreHub: undefined;
   PeptideDetail: { peptideId: string };
 };
 

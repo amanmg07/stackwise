@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
-  View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView,
+  View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView, Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
@@ -28,7 +28,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   immune: "#2dd4bf",
 };
 
-export default function ResearchHubScreen({ navigation }: any) {
+export default function ResearchHubScreen({ navigation, embedded }: any) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<PeptideCategory | "all">("all");
 
@@ -44,7 +44,7 @@ export default function ResearchHubScreen({ navigation }: any) {
   }, [search, category]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, embedded && styles.containerEmbedded]}>
       {/* Search */}
       <View style={styles.searchBar}>
         <Ionicons name="search" size={18} color={colors.textSecondary} />
@@ -123,7 +123,8 @@ export default function ResearchHubScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === "ios" ? 60 : 0 },
+  containerEmbedded: { paddingTop: 0 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",

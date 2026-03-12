@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing } from "../../theme";
@@ -78,6 +78,9 @@ export default function ProfileScreen({ navigation }: any) {
         />
       </TouchableOpacity>
 
+      <Text style={styles.sectionTitle}>AI Chat</Text>
+      <ApiKeyInput settings={settings} updateSettings={updateSettings} />
+
       <Text style={styles.sectionTitle}>Cycle History</Text>
 
       {cycles.length === 0 ? (
@@ -112,8 +115,101 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
+function ApiKeyInput({ settings, updateSettings }: any) {
+  const [editing, setEditing] = useState(false);
+  const [key, setKey] = useState(settings.claudeApiKey || "");
+  const hasKey = !!settings.claudeApiKey;
+
+  const saveKey = () => {
+    updateSettings({ claudeApiKey: key.trim() || undefined });
+    setEditing(false);
+  };
+
+  const removeKey = () => {
+    Alert.alert("Remove API Key", "This will disable the AI chat feature.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => {
+          updateSettings({ claudeApiKey: undefined });
+          setKey("");
+        },
+      },
+    ]);
+  };
+
+  if (!editing && hasKey) {
+    return (
+      <View style={styles.settingRow}>
+        <View style={styles.settingLeft}>
+          <Ionicons name="key-outline" size={20} color={colors.success} />
+          <View>
+            <Text style={styles.settingLabel}>Claude API Key</Text>
+            <Text style={styles.apiKeyMask}>sk-ant-•••••{settings.claudeApiKey.slice(-4)}</Text>
+          </View>
+        </View>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <TouchableOpacity onPress={() => setEditing(true)}>
+            <Ionicons name="pencil-outline" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={removeKey}>
+            <Ionicons name="close-circle-outline" size={18} color={colors.error} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  if (!editing && !hasKey) {
+    return (
+      <TouchableOpacity style={styles.settingRow} onPress={() => setEditing(true)}>
+        <View style={styles.settingLeft}>
+          <Ionicons name="key-outline" size={20} color={colors.text} />
+          <View>
+            <Text style={styles.settingLabel}>Claude API Key</Text>
+            <Text style={styles.apiKeyHint}>Required for AI chat</Text>
+          </View>
+        </View>
+        <Ionicons name="add-circle-outline" size={22} color={colors.accent} />
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <View style={styles.apiKeyEdit}>
+      <Text style={styles.apiKeyEditLabel}>Enter your Claude API key</Text>
+      <TextInput
+        style={styles.apiKeyInput}
+        value={key}
+        onChangeText={setKey}
+        placeholder="sk-ant-..."
+        placeholderTextColor={colors.textSecondary}
+        autoCapitalize="none"
+        autoCorrect={false}
+        secureTextEntry
+      />
+      <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+        <TouchableOpacity
+          style={styles.apiKeyCancel}
+          onPress={() => { setEditing(false); setKey(settings.claudeApiKey || ""); }}
+        >
+          <Text style={styles.apiKeyCancelText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.apiKeySave, !key.trim() && { opacity: 0.4 }]}
+          disabled={!key.trim()}
+          onPress={saveKey}
+        >
+          <Text style={styles.apiKeySaveText}>Save</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
+  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: Platform.OS === "ios" ? 60 : spacing.md },
   title: { fontSize: 28, fontWeight: "800", color: colors.text, marginBottom: 20 },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 24 },
   statBox: {
@@ -152,4 +248,25 @@ const styles = StyleSheet.create({
   },
   dangerText: { fontSize: 15, color: colors.error },
   version: { fontSize: 12, color: colors.textSecondary, textAlign: "center", marginTop: 32 },
+  apiKeyMask: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  apiKeyHint: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  apiKeyEdit: {
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: colors.border, marginBottom: 8,
+  },
+  apiKeyEditLabel: { fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
+  apiKeyInput: {
+    backgroundColor: colors.background, borderRadius: 8, padding: 12,
+    fontSize: 14, color: colors.text, borderWidth: 1, borderColor: colors.border,
+  },
+  apiKeyCancel: {
+    flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 8,
+    padding: 12, alignItems: "center",
+  },
+  apiKeyCancelText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
+  apiKeySave: {
+    flex: 1, backgroundColor: colors.accent, borderRadius: 8,
+    padding: 12, alignItems: "center",
+  },
+  apiKeySaveText: { fontSize: 14, fontWeight: "600", color: colors.background },
 });
