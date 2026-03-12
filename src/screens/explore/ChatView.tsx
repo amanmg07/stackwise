@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function ChatView({ navigation }: Props) {
-  const { cycles, journal, settings } = useApp();
+  const { cycles, journal, settings, updateSettings } = useApp();
   const activeCycle = cycles.find((c) => c.isActive) || null;
   const recentJournal = [...journal].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
 
@@ -34,10 +34,10 @@ export default function ChatView({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  const hasKey = !!settings.claudeApiKey;
+  const hasKey = !!settings.geminiApiKey;
 
   const send = async (text: string) => {
-    if (!text.trim() || loading || !settings.claudeApiKey) return;
+    if (!text.trim() || loading || !settings.geminiApiKey) return;
 
     const userMsg: ChatMessage = {
       id: generateId(),
@@ -55,7 +55,7 @@ export default function ChatView({ navigation }: Props) {
       const { content, peptideRefs } = await sendChatMessage(
         updated,
         { activeCycle, recentJournal },
-        settings.claudeApiKey
+        settings.geminiApiKey
       );
 
       const assistantMsg: ChatMessage = {
@@ -115,21 +115,41 @@ export default function ChatView({ navigation }: Props) {
     );
   };
 
+  const [apiKeyInput, setApiKeyInput] = useState("");
+
+  const saveApiKey = () => {
+    if (!apiKeyInput.trim()) return;
+    updateSettings({ geminiApiKey: apiKeyInput.trim() });
+    setApiKeyInput("");
+  };
+
   if (!hasKey) {
     return (
       <View style={styles.noKey}>
         <View style={styles.noKeyIcon}>
-          <Ionicons name="key-outline" size={36} color={colors.border} />
+          <Ionicons name="chatbubbles-outline" size={36} color={colors.accent} />
         </View>
-        <Text style={styles.noKeyTitle}>API Key Required</Text>
+        <Text style={styles.noKeyTitle}>Set Up AI Chat</Text>
         <Text style={styles.noKeyDesc}>
-          Add your Claude API key in Profile settings to start chatting with StackWise AI.
+          Enter your free Gemini API key to chat with StackWise AI.{"\n"}
+          Get one at aistudio.google.com → Get API Key
         </Text>
+        <TextInput
+          style={styles.noKeyInput}
+          value={apiKeyInput}
+          onChangeText={setApiKeyInput}
+          placeholder="Paste your Gemini API key here"
+          placeholderTextColor={colors.textSecondary}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
         <TouchableOpacity
-          style={styles.noKeyBtn}
-          onPress={() => navigation.navigate("ProfileTab")}
+          style={[styles.noKeyBtn, !apiKeyInput.trim() && { opacity: 0.4 }]}
+          disabled={!apiKeyInput.trim()}
+          onPress={saveApiKey}
         >
-          <Text style={styles.noKeyBtnText}>Go to Profile</Text>
+          <Ionicons name="checkmark" size={18} color={colors.background} />
+          <Text style={styles.noKeyBtnText}>Save & Start Chatting</Text>
         </TouchableOpacity>
       </View>
     );
@@ -208,7 +228,13 @@ const styles = StyleSheet.create({
   },
   noKeyTitle: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 8 },
   noKeyDesc: { fontSize: 14, color: colors.textSecondary, textAlign: "center", marginBottom: 24, lineHeight: 20 },
+  noKeyInput: {
+    width: "100%", backgroundColor: colors.surface, borderRadius: 12,
+    padding: 14, fontSize: 14, color: colors.text, marginBottom: 12,
+    borderWidth: 1, borderColor: colors.border,
+  },
   noKeyBtn: {
+    flexDirection: "row", alignItems: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 14,
   },
   noKeyBtnText: { fontSize: 15, fontWeight: "700", color: colors.background },

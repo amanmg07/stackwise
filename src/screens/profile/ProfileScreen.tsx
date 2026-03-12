@@ -117,11 +117,11 @@ export default function ProfileScreen({ navigation }: any) {
 
 function ApiKeyInput({ settings, updateSettings }: any) {
   const [editing, setEditing] = useState(false);
-  const [key, setKey] = useState(settings.claudeApiKey || "");
-  const hasKey = !!settings.claudeApiKey;
+  const [key, setKey] = useState(settings.geminiApiKey || "");
+  const hasKey = !!settings.geminiApiKey;
 
   const saveKey = () => {
-    updateSettings({ claudeApiKey: key.trim() || undefined });
+    updateSettings({ geminiApiKey: key.trim() || undefined });
     setEditing(false);
   };
 
@@ -132,7 +132,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         text: "Remove",
         style: "destructive",
         onPress: () => {
-          updateSettings({ claudeApiKey: undefined });
+          updateSettings({ geminiApiKey: undefined });
           setKey("");
         },
       },
@@ -145,8 +145,8 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         <View style={styles.settingLeft}>
           <Ionicons name="key-outline" size={20} color={colors.success} />
           <View>
-            <Text style={styles.settingLabel}>Claude API Key</Text>
-            <Text style={styles.apiKeyMask}>sk-ant-•••••{settings.claudeApiKey.slice(-4)}</Text>
+            <Text style={styles.settingLabel}>Gemini API Key</Text>
+            <Text style={styles.apiKeyMask}>AIza•••••{settings.geminiApiKey.slice(-4)}</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 8 }}>
@@ -167,7 +167,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         <View style={styles.settingLeft}>
           <Ionicons name="key-outline" size={20} color={colors.text} />
           <View>
-            <Text style={styles.settingLabel}>Claude API Key</Text>
+            <Text style={styles.settingLabel}>Gemini API Key</Text>
             <Text style={styles.apiKeyHint}>Required for AI chat</Text>
           </View>
         </View>
@@ -183,7 +183,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         style={styles.apiKeyInput}
         value={key}
         onChangeText={setKey}
-        placeholder="sk-ant-..."
+        placeholder="AIza..."
         placeholderTextColor={colors.textSecondary}
         autoCapitalize="none"
         autoCorrect={false}
@@ -192,7 +192,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
       <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
         <TouchableOpacity
           style={styles.apiKeyCancel}
-          onPress={() => { setEditing(false); setKey(settings.claudeApiKey || ""); }}
+          onPress={() => { setEditing(false); setKey(settings.geminiApiKey || ""); }}
         >
           <Text style={styles.apiKeyCancelText}>Cancel</Text>
         </TouchableOpacity>

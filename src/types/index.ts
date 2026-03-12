@@ -104,7 +104,7 @@ export interface UserSettings {
   weightUnit: "lbs" | "kg";
   notificationsEnabled: boolean;
   reminderTimes: string[];
-  claudeApiKey?: string;
+  geminiApiKey?: string;
 }
 
 export interface ChatMessage {

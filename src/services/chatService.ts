@@ -71,36 +71,44 @@ export async function sendChatMessage(
 ): Promise<{ content: string; peptideRefs: string[] }> {
   const systemPrompt = buildSystemPrompt(context.activeCycle, context.recentJournal);
 
-  const apiMessages = messages.map((m) => ({
-    role: m.role,
-    content: m.content,
+  // Build Gemini conversation format
+  // System instruction goes separately, then alternating user/model turns
+  const geminiContents = messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
   }));
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: apiMessages,
-    }),
-  });
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: geminiContents,
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.7,
+        },
+      }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.text();
-    if (response.status === 401) {
+    if (response.status === 400 && error.includes("API_KEY_INVALID")) {
       throw new Error("Invalid API key. Check your key in Profile settings.");
+    }
+    if (response.status === 429) {
+      throw new Error("Rate limit reached. Wait a moment and try again.");
     }
     throw new Error(`API error: ${response.status}`);
   }
 
   const data = await response.json();
-  const content = data.content?.[0]?.text || "I couldn't generate a response. Please try again.";
+  const content =
+    data.candidates?.[0]?.content?.parts?.[0]?.text ||
+    "I couldn't generate a response. Please try again.";
   const peptideRefs = extractPeptideRefs(content);
 
   return { content, peptideRefs };
