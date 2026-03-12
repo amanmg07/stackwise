@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
@@ -202,6 +202,43 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
           )}
         </>
       )}
+
+      {/* Where to Find */}
+      {peptide.sources && peptide.sources.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Where to Find</Text>
+          <View style={styles.card}>
+            {peptide.sources.map((src, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.sourceRow, i === peptide.sources!.length - 1 && { borderBottomWidth: 0 }]}
+                onPress={() => src.url ? Linking.openURL(src.url) : null}
+                disabled={!src.url}
+                activeOpacity={src.url ? 0.6 : 1}
+              >
+                <View style={styles.sourceLeft}>
+                  <Ionicons
+                    name={src.url ? "storefront-outline" : "medical-outline"}
+                    size={16}
+                    color={src.url ? colors.accent : colors.textSecondary}
+                  />
+                  <Text style={[styles.sourceName, !src.url && { color: colors.textSecondary }]}>
+                    {src.name}
+                  </Text>
+                </View>
+                {src.url ? (
+                  <Ionicons name="open-outline" size={16} color={colors.accent} />
+                ) : (
+                  <Text style={styles.sourceRx}>Rx</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+            <Text style={styles.sourceDisclaimer}>
+              Sold as research chemicals. Not medical advice — consult a healthcare provider.
+            </Text>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -275,5 +312,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md,
     borderWidth: 1, borderColor: colors.border, borderTopWidth: 0,
     borderTopLeftRadius: 0, borderTopRightRadius: 0, marginBottom: 12,
+  },
+  sourceRow: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  sourceLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  sourceName: { fontSize: 14, fontWeight: "600", color: colors.text },
+  sourceRx: {
+    fontSize: 11, fontWeight: "700", color: colors.textSecondary,
+    backgroundColor: colors.border, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2,
+  },
+  sourceDisclaimer: {
+    fontSize: 11, color: colors.textSecondary, marginTop: 12, lineHeight: 16,
+    fontStyle: "italic",
   },
 });

@@ -19,6 +19,11 @@ export interface DosingProtocol {
   timing: string;
 }
 
+export interface PeptideSource {
+  name: string;
+  url: string;
+}
+
 export interface Peptide {
   id: string;
   name: string;
@@ -34,6 +39,7 @@ export interface Peptide {
   storage: string;
   notes: string;
   isBlend?: boolean;
+  sources?: PeptideSource[];
 }
 
 export interface CyclePeptide {

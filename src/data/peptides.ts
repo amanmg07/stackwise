@@ -31,7 +31,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["tb500", "ghkcu"],
     halfLife: "Under 30 minutes in blood. Detectable in urine up to 4 days.",
     storage: "Powder: freezer for long-term (2-3 years), fridge for short-term. Mixed: keep in fridge, use within 30 days. Mix with bacteriostatic water. Never freeze after mixing.",
-    notes: "Often paired with TB-500 ('Wolverine stack') — but don't mix them in the same vial, they lose strength. No toxic dose found in animal studies. Not FDA-approved. Banned by WADA.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Often paired with TB-500 ('Wolverine stack') — but don't mix them in the same vial, they lose strength. No toxic dose found in animal studies. Not FDA-approved. Banned by WADA.",
   },
   {
     id: "tb500",
@@ -63,7 +69,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["bpc157", "ghkcu"],
     halfLife: "2-4 days (stays active much longer than BPC-157)",
     storage: "Powder: fridge short-term, freezer long-term. Mixed: keep in fridge, use within 30 days with bacteriostatic water. Never freeze after mixing.",
-    notes: "Best paired with BPC-157 — BPC targets the injury locally while TB-500 heals body-wide. Caution: because it promotes cell growth, avoid if you have active cancer. Not FDA-approved. Banned by WADA.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Best paired with BPC-157 — BPC targets the injury locally while TB-500 heals body-wide. Caution: because it promotes cell growth, avoid if you have active cancer. Not FDA-approved. Banned by WADA.",
   },
   {
     id: "cjc1295_nodac",
@@ -88,7 +100,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["ipamorelin", "bpc157", "tb500"],
     halfLife: "~30 minutes",
     storage: "Powder: freezer long-term, fridge short-term. Mixed: fridge, use within 30 days. Never freeze after mixing. Toss if cloudy.",
-    notes: "Almost always used with Ipamorelin — together they release 2-3x more GH than either alone. Going above 100 mcg doesn't help much but increases side effects. Preferred over the DAC version for natural GH pulsing.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Almost always used with Ipamorelin — together they release 2-3x more GH than either alone. Going above 100 mcg doesn't help much but increases side effects. Preferred over the DAC version for natural GH pulsing.",
   },
   {
     id: "cjc1295_dac",
@@ -112,7 +130,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["bpc157", "tb500"],
     halfLife: "5.8-8.1 days (confirmed in human studies)",
     storage: "Powder: fridge short-term, freezer long-term. Mixed: fridge, use within 30 days. Never freeze after mixing.",
-    notes: "Less popular than the no-DAC version. Keeps GH constantly elevated instead of natural pulses — more convenient (fewer shots) but higher risk of your pituitary becoming less responsive over time. Side effects last longer since you can't 'turn it off.'",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Less popular than the no-DAC version. Keeps GH constantly elevated instead of natural pulses — more convenient (fewer shots) but higher risk of your pituitary becoming less responsive over time. Side effects last longer since you can't 'turn it off.'",
   },
   {
     id: "ipamorelin",
@@ -143,7 +166,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["cjc1295_nodac", "dsip", "bpc157", "tb500"],
     halfLife: "~2 hours",
     storage: "Powder: fridge 12-18 months, freezer for longer. Mixed: fridge, use within 30 days. Never freeze after mixing.",
-    notes: "The #1 GH peptide for beginners. Best combo is with CJC-1295 (no DAC) — you can mix them in the same syringe. Don't stack multiple GH peptides together (diminishing returns, more side effects).",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "The #1 GH peptide for beginners. Best combo is with CJC-1295 (no DAC) — you can mix them in the same syringe. Don't stack multiple GH peptides together (diminishing returns, more side effects).",
   },
   {
     id: "ghkcu",
@@ -175,7 +204,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["bpc157", "tb500", "epithalon"],
     halfLife: "30-60 minutes in blood, but the healing effects last days.",
     storage: "Powder: freezer for long-term (2-3 years). Mixed: fridge, use within 30 days. Never freeze after mixing. Keep away from light.",
-    notes: "One of the safest peptides. Popular triple stack: GHK-Cu + BPC-157 + TB-500 for full-body healing. If you take copper or zinc supplements, space them 2 hours from injection. Topical versions available over-the-counter in skincare products.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "One of the safest peptides. Popular triple stack: GHK-Cu + BPC-157 + TB-500 for full-body healing. If you take copper or zinc supplements, space them 2 hours from injection. Topical versions available over-the-counter in skincare products.",
   },
   {
     id: "semaglutide",
@@ -216,7 +250,10 @@ export const peptides: Peptide[] = [
     stacksWith: ["aod9604"],
     halfLife: "~7 days. Takes 4-5 weeks to reach full levels in your body.",
     storage: "Unopened: fridge. After first use: room temp or fridge, up to 56 days (Ozempic) or 28 days (Wegovy). Never freeze.",
-    notes: "Do NOT take with tirzepatide or other GLP-1 drugs — same mechanism, double the side effects. Start low and increase slowly to minimize nausea. Not safe if you or your family have thyroid cancer history. B12 supplements recommended.",
+    sources: [
+      { name: "Prescription Only", url: "" },
+    ],
+        notes: "Do NOT take with tirzepatide or other GLP-1 drugs — same mechanism, double the side effects. Start low and increase slowly to minimize nausea. Not safe if you or your family have thyroid cancer history. B12 supplements recommended.",
   },
   {
     id: "tirzepatide",
@@ -249,7 +286,10 @@ export const peptides: Peptide[] = [
     stacksWith: [],
     halfLife: "~5 days. Full levels after ~4 weeks of weekly dosing.",
     storage: "Unopened: fridge. Room temp up to 30°C for max 21 days — don't put it back in the fridge after. Never freeze.",
-    notes: "Do NOT combine with semaglutide or other GLP-1 drugs. Increase dose slowly to avoid bad nausea. Not safe with thyroid cancer history. If it's not working well enough, switch to a different drug — don't add another one on top.",
+    sources: [
+      { name: "Prescription Only", url: "" },
+    ],
+        notes: "Do NOT combine with semaglutide or other GLP-1 drugs. Increase dose slowly to avoid bad nausea. Not safe with thyroid cancer history. If it's not working well enough, switch to a different drug — don't add another one on top.",
   },
   {
     id: "dsip",
@@ -274,7 +314,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["ipamorelin", "bpc157", "epithalon"],
     halfLife: "~15 minutes in blood, but the sleep effects last all night.",
     storage: "Powder: freezer, stable up to 2 years. Mixed: fridge, use within 3-4 weeks. Never freeze after mixing. Swirl gently — don't shake.",
-    notes: "Considered very safe — no lethal dose has ever been found in animal studies. Don't mix with sleeping pills, alcohol, or other sedating substances.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Considered very safe — no lethal dose has ever been found in animal studies. Don't mix with sleeping pills, alcohol, or other sedating substances.",
   },
   {
     id: "epithalon",
@@ -299,7 +344,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["ghkcu", "dsip"],
     halfLife: "Short, but the effects on your DNA last much longer than the peptide stays in your blood.",
     storage: "Powder: freezer 3 years, fridge 2 years. Mixed: fridge, use within 2-4 weeks. Don't freeze and thaw repeatedly.",
-    notes: "Run in short bursts, not continuously. A Russian study followed 266 elderly people for 6-8 years on Epithalon with no significant side effects. Often combined with GHK-Cu for a full anti-aging protocol.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Run in short bursts, not continuously. A Russian study followed 266 elderly people for 6-8 years on Epithalon with no significant side effects. Often combined with GHK-Cu for a full anti-aging protocol.",
   },
   {
     id: "selank",
@@ -323,7 +373,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["semax", "dsip", "bpc157"],
     halfLife: "~10 minutes in blood, but brain effects last much longer.",
     storage: "Powder: fridge short-term, freezer long-term (2+ years). Keep away from light and moisture.",
-    notes: "Approved as a prescription drug in Russia. Big advantage over benzos: no amnesia, no addiction, no tolerance, no withdrawal, no drowsiness. Pairs perfectly with Semax — Selank calms, Semax focuses. Space nasal doses 15-30 minutes apart.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Approved as a prescription drug in Russia. Big advantage over benzos: no amnesia, no addiction, no tolerance, no withdrawal, no drowsiness. Pairs perfectly with Semax — Selank calms, Semax focuses. Space nasal doses 15-30 minutes apart.",
   },
   {
     id: "semax",
@@ -347,7 +402,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["selank", "bpc157"],
     halfLife: "Over 1 hour in blood. Effects last 20-24 hours.",
     storage: "Powder: fridge short-term, freezer long-term (2+ years). Keep away from light and moisture. Don't freeze after mixing.",
-    notes: "Approved in Russia for brain disorders and stroke recovery. The NASA form (N-Acetyl Semax Amidate) is stronger and longer-lasting. Classic combo: Semax for focus + Selank for calm. Can't be taken orally — must be nasal or injected.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Approved in Russia for brain disorders and stroke recovery. The NASA form (N-Acetyl Semax Amidate) is stronger and longer-lasting. Classic combo: Semax for focus + Selank for calm. Can't be taken orally — must be nasal or injected.",
   },
   {
     id: "aod9604",
@@ -372,7 +432,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["semaglutide", "cjc1295_nodac", "ipamorelin"],
     halfLife: "~1 hour",
     storage: "Mixed: fridge, use within 30 days. Powder: room temp or fridge.",
-    notes: "Has GRAS (Generally Recognized As Safe) status in the US. Much safer than full growth hormone for fat loss — no joint pain, insulin resistance, or organ growth. Not FDA-approved as a drug. Limited clinical trial data.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Has GRAS (Generally Recognized As Safe) status in the US. Much safer than full growth hormone for fat loss — no joint pain, insulin resistance, or organ growth. Not FDA-approved as a drug. Limited clinical trial data.",
   },
   {
     id: "mk677",
@@ -403,7 +469,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["cjc1295_nodac", "ipamorelin"],
     halfLife: "4-6 hours, but GH stays elevated ~24 hours.",
     storage: "Room temperature. Keep cool, dry, and away from light.",
-    notes: "Technically not a peptide — it's a pill. Never FDA-approved; sold as a research compound. Watch your blood sugar on longer cycles. The hunger increase can be significant — plan for it.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Technically not a peptide — it's a pill. Never FDA-approved; sold as a research compound. Watch your blood sugar on longer cycles. The hunger increase can be significant — plan for it.",
   },
   {
     id: "pt141",
@@ -434,7 +505,12 @@ export const peptides: Peptide[] = [
     stacksWith: [],
     halfLife: "~2.7 hours",
     storage: "Mixed: fridge, use within 30 days.",
-    notes: "FDA-approved as Vyleesi. Max 8 doses per month. Start with 1 mg to test your tolerance for nausea. Don't use if you have uncontrolled high blood pressure. Talk to a doctor first.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "FDA-approved as Vyleesi. Max 8 doses per month. Start with 1 mg to test your tolerance for nausea. Don't use if you have uncontrolled high blood pressure. Talk to a doctor first.",
   },
   {
     id: "tesamorelin",
@@ -459,7 +535,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["ipamorelin", "cjc1295_nodac", "ghrp2"],
     halfLife: "~26-38 minutes",
     storage: "Fridge. Use immediately after mixing.",
-    notes: "FDA-approved for HIV-related belly fat buildup (as Egrifta). Off-label use for general fat loss is common but not FDA-sanctioned. Don't use if you have active cancer or pituitary issues.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "FDA-approved for HIV-related belly fat buildup (as Egrifta). Off-label use for general fat loss is common but not FDA-sanctioned. Don't use if you have active cancer or pituitary issues.",
   },
   {
     id: "retatrutide",
@@ -484,7 +565,11 @@ export const peptides: Peptide[] = [
     stacksWith: [],
     halfLife: "~6 days (supports once-weekly dosing)",
     storage: "Fridge at 2-8°C.",
-    notes: "NOT yet FDA-approved — still in Phase 3 trials (Eli Lilly's TRIUMPH program). Any product sold as retatrutide right now is a research chemical. Expected to be a blockbuster if approved.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "NOT yet FDA-approved — still in Phase 3 trials (Eli Lilly's TRIUMPH program). Any product sold as retatrutide right now is a research chemical. Expected to be a blockbuster if approved.",
   },
   {
     id: "kpv",
@@ -515,7 +600,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["bpc157", "tb500", "ghkcu", "ll37"],
     halfLife: "Short (exact human data not established)",
     storage: "Fridge at 2-8°C. Use mixed solution within a few weeks.",
-    notes: "Part of the KLOW blend (KPV + BPC-157 + TB-500 + GHK-Cu). The GLOW blend is the same minus KPV. One of the rare peptides that works well orally because of how it's absorbed in the gut. Not FDA-approved.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Part of the KLOW blend (KPV + BPC-157 + TB-500 + GHK-Cu). The GLOW blend is the same minus KPV. One of the rare peptides that works well orally because of how it's absorbed in the gut. Not FDA-approved.",
   },
   {
     id: "thymosin_a1",
@@ -547,7 +637,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["ll37", "kpv", "bpc157"],
     halfLife: "~2 hours",
     storage: "Fridge at 2-8°C. Use mixed solution promptly.",
-    notes: "Approved as Zadaxin in 35+ countries (not the US). Studied in 30+ clinical trials with 11,000+ people. One of the safest peptides known. Was studied as a COVID-19 treatment.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Approved as Zadaxin in 35+ countries (not the US). Studied in 30+ clinical trials with 11,000+ people. One of the safest peptides known. Was studied as a COVID-19 treatment.",
   },
   {
     id: "motsc",
@@ -571,7 +666,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["humanin", "ss31"],
     halfLife: "Not well-established in humans",
     storage: "Fridge at 2-8°C. Protect from light.",
-    notes: "Not FDA-approved. Mostly studied in animals and cell cultures — very early for human use. One of the most promising longevity peptides but still research-stage. Natural levels decline with age.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Not FDA-approved. Mostly studied in animals and cell cultures — very early for human use. One of the most promising longevity peptides but still research-stage. Natural levels decline with age.",
   },
   {
     id: "ss31",
@@ -596,7 +696,11 @@ export const peptides: Peptide[] = [
     stacksWith: ["motsc", "humanin"],
     halfLife: "Short — cleared by kidneys within 48 hours",
     storage: "Fridge at 2-8°C.",
-    notes: "FDA-approved for Barth syndrome as Forzinity (2025) — the first mitochondria-targeted peptide to get FDA approval. Cleared entirely by kidneys (no liver processing). Dose adjustment needed if you have kidney issues.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "FDA-approved for Barth syndrome as Forzinity (2025) — the first mitochondria-targeted peptide to get FDA approval. Cleared entirely by kidneys (no liver processing). Dose adjustment needed if you have kidney issues.",
   },
   {
     id: "kisspeptin",
@@ -621,7 +725,11 @@ export const peptides: Peptide[] = [
     stacksWith: ["gonadorelin", "pt141"],
     halfLife: "~28 minutes",
     storage: "Fridge at 2-8°C.",
-    notes: "Not FDA-approved. Research-stage only. Very short half-life is a big limitation — longer-acting versions are in development. Very promising for IVF as a safer alternative to hCG trigger shots.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Not FDA-approved. Research-stage only. Very short half-life is a big limitation — longer-acting versions are in development. Very promising for IVF as a safer alternative to hCG trigger shots.",
   },
   {
     id: "dihexa",
@@ -645,7 +753,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["semax", "selank"],
     halfLife: "Not established in humans",
     storage: "Room temperature or fridge. Protect from light.",
-    notes: "NO human clinical trials have ever been done. All data is from animal studies. One of the riskier peptides to try because the pathway it activates (HGF/c-Met) is also involved in cancer growth. Use extreme caution.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "NO human clinical trials have ever been done. All data is from animal studies. One of the riskier peptides to try because the pathway it activates (HGF/c-Met) is also involved in cancer growth. Use extreme caution.",
   },
   {
     id: "foxo4dri",
@@ -669,7 +782,11 @@ export const peptides: Peptide[] = [
     stacksWith: ["humanin", "epithalon"],
     halfLife: "Extended (designed to resist breakdown in the body)",
     storage: "Fridge at 2-8°C. Protect from light. Very expensive.",
-    notes: "NO human clinical trials. All data is from animals. Extremely expensive — one of the costliest research peptides. Scientifically exciting concept but years away from any real clinical use.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "NO human clinical trials. All data is from animals. Extremely expensive — one of the costliest research peptides. Scientifically exciting concept but years away from any real clinical use.",
   },
   {
     id: "humanin",
@@ -694,7 +811,11 @@ export const peptides: Peptide[] = [
     stacksWith: ["motsc", "ss31", "foxo4dri"],
     halfLife: "Short for native humanin. The S14G analog (HNG) is 1000x more potent.",
     storage: "Fridge at 2-8°C.",
-    notes: "Not FDA-approved. Research-stage only. The more potent analog HNG (S14G-Humanin) is typically what's available. Part of the 'mitochondrial triad' with MOTS-c and SS-31.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Not FDA-approved. Research-stage only. The more potent analog HNG (S14G-Humanin) is typically what's available. Part of the 'mitochondrial triad' with MOTS-c and SS-31.",
   },
   {
     id: "ll37",
@@ -726,7 +847,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["thymosin_a1", "kpv", "bpc157"],
     halfLife: "Short (breaks down quickly in the body)",
     storage: "Fridge at 2-8°C. Protect from light.",
-    notes: "Not FDA-approved for injection. Fun fact: vitamin D supplementation increases your body's own LL-37 production — that's one reason vitamin D helps immune function. Main challenge for clinical use is that it breaks down quickly.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Not FDA-approved for injection. Fun fact: vitamin D supplementation increases your body's own LL-37 production — that's one reason vitamin D helps immune function. Main challenge for clinical use is that it breaks down quickly.",
   },
   {
     id: "hexarelin",
@@ -751,7 +877,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["cjc1295_nodac", "cjc1295_dac", "ghrp2", "tesamorelin"],
     halfLife: "~70-120 minutes. GH peaks at ~30 minutes.",
     storage: "Fridge at 2-8°C. Use mixed solution within 2-4 weeks.",
-    notes: "Not FDA-approved. Most potent GHRP for peak GH release, but desensitizes faster than Ipamorelin or GHRP-2. The cortisol/prolactin increase makes it less 'clean' than Ipamorelin. Consider rotating with other GH peptides.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Not FDA-approved. Most potent GHRP for peak GH release, but desensitizes faster than Ipamorelin or GHRP-2. The cortisol/prolactin increase makes it less 'clean' than Ipamorelin. Consider rotating with other GH peptides.",
   },
   {
     id: "ghrp6",
@@ -776,7 +907,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["cjc1295_nodac", "cjc1295_dac", "hexarelin", "ghrp2"],
     halfLife: "~2.5 hours. GH peaks at ~15-30 minutes.",
     storage: "Fridge at 2-8°C. Use mixed solution within 2-4 weeks.",
-    notes: "Not FDA-approved. The appetite boost is the main feature/drawback depending on your goal. Popular during bulking phases. Must take on empty stomach or it won't work well.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Not FDA-approved. The appetite boost is the main feature/drawback depending on your goal. Popular during bulking phases. Must take on empty stomach or it won't work well.",
   },
   {
     id: "ghrp2",
@@ -801,7 +938,13 @@ export const peptides: Peptide[] = [
     stacksWith: ["cjc1295_nodac", "cjc1295_dac", "hexarelin", "tesamorelin"],
     halfLife: "~33 minutes. GH peaks at ~15-30 minutes.",
     storage: "Fridge at 2-8°C. Use mixed solution within 2-4 weeks.",
-    notes: "Approved in Japan (as Pralmorelin) for testing GH deficiency. Highest total GH output of all GHRPs. Cortisol/prolactin increase is moderate — more than Ipamorelin but manageable. Cycling recommended to avoid desensitization.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+      { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
+    ],
+        notes: "Approved in Japan (as Pralmorelin) for testing GH deficiency. Highest total GH output of all GHRPs. Cortisol/prolactin increase is moderate — more than Ipamorelin but manageable. Cycling recommended to avoid desensitization.",
   },
   {
     id: "gonadorelin",
@@ -826,7 +969,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["kisspeptin", "pt141"],
     halfLife: "~2-4 minutes (very short)",
     storage: "Fridge at 2-8°C.",
-    notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues.",
   },
 
   // ── Pre-Mixed Blends (sold as single vials) ──
@@ -854,7 +1002,10 @@ export const peptides: Peptide[] = [
     stacksWith: ["kpv", "epithalon", "dsip"],
     halfLife: "Varies by component — effects build over days to weeks.",
     storage: "Powder: freezer. Mixed: fridge at 2-8°C, use within 28 days. Protect from light.",
-    notes: "Contains: BPC-157 (5-10mg) + TB-500 (10mg) + GHK-Cu (50mg). The KLOW blend is this plus KPV. Sold by Peptide Sciences, Polaris, and many others. Pre-mixed means you don't have to worry about mixing ratios yourself.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+    ],
+        notes: "Contains: BPC-157 (5-10mg) + TB-500 (10mg) + GHK-Cu (50mg). The KLOW blend is this plus KPV. Sold by Peptide Sciences, Polaris, and many others. Pre-mixed means you don't have to worry about mixing ratios yourself.",
   },
   {
     id: "klow_blend",
@@ -879,7 +1030,10 @@ export const peptides: Peptide[] = [
     stacksWith: ["epithalon", "dsip", "thymosin_a1"],
     halfLife: "Varies by component — effects build over days to weeks.",
     storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C, use within 28 days. Protect from light.",
-    notes: "Contains: BPC-157 (10mg) + TB-500 (10mg) + GHK-Cu (50mg) + KPV (10mg). The 'K' in KLOW is for KPV. If you don't have gut/inflammation issues, GLOW is enough. If you do, upgrade to KLOW.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+    ],
+        notes: "Contains: BPC-157 (10mg) + TB-500 (10mg) + GHK-Cu (50mg) + KPV (10mg). The 'K' in KLOW is for KPV. If you don't have gut/inflammation issues, GLOW is enough. If you do, upgrade to KLOW.",
   },
   {
     id: "wolverine_blend",
@@ -904,7 +1058,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["ghkcu", "kpv", "ipamorelin"],
     halfLife: "BPC-157: <30 min. TB-500: 2-4 days. Mixed effects last days.",
     storage: "Powder: freezer. Mixed: fridge at 2-8°C, use within 28 days.",
-    notes: "Contains: BPC-157 (5mg) + TB-500 (5mg) in 10mg vials, or 10mg + 10mg in 20mg vials. The single most popular peptide combo for injuries. Pre-mixed saves you from buying two separate vials.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Contains: BPC-157 (5mg) + TB-500 (5mg) in 10mg vials, or 10mg + 10mg in 20mg vials. The single most popular peptide combo for injuries. Pre-mixed saves you from buying two separate vials.",
   },
   {
     id: "cjc_ipa_blend",
@@ -929,7 +1088,12 @@ export const peptides: Peptide[] = [
     stacksWith: ["bpc157", "aod9604", "tesamorelin"],
     halfLife: "CJC: ~30 min. Ipamorelin: ~2 hours. GH elevation lasts hours.",
     storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C. Avoid freeze-thaw.",
-    notes: "Contains: CJC-1295 no DAC (5mg) + Ipamorelin (5mg). The most popular GH peptide combo. You can mix them in the same syringe. Take on empty stomach or it won't work as well. Considered the cleanest GH stack (no cortisol/hunger spikes).",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+      { name: "Core Peptides", url: "https://www.corepeptides.com" },
+      { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
+    ],
+        notes: "Contains: CJC-1295 no DAC (5mg) + Ipamorelin (5mg). The most popular GH peptide combo. You can mix them in the same syringe. Take on empty stomach or it won't work as well. Considered the cleanest GH stack (no cortisol/hunger spikes).",
   },
   {
     id: "fat_burner_blend",
@@ -954,7 +1118,10 @@ export const peptides: Peptide[] = [
     stacksWith: ["semaglutide", "cjc_ipa_blend"],
     halfLife: "Varies by component.",
     storage: "Fridge at 2-8°C after mixing.",
-    notes: "Contains: AOD-9604 + MOTS-c + Tesamorelin. Sold by RegenMD, Elite Health HRT, and others. Doses vary by vendor so follow their specific protocol. Do NOT combine with semaglutide/tirzepatide without medical supervision.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+    ],
+        notes: "Contains: AOD-9604 + MOTS-c + Tesamorelin. Sold by RegenMD, Elite Health HRT, and others. Doses vary by vendor so follow their specific protocol. Do NOT combine with semaglutide/tirzepatide without medical supervision.",
   },
   {
     id: "cognitive_blend",
@@ -979,7 +1146,10 @@ export const peptides: Peptide[] = [
     stacksWith: ["dsip", "bpc157", "dihexa"],
     halfLife: "Short for both — effects last much longer than blood levels.",
     storage: "Fridge at 2-8°C.",
-    notes: "Contains: Semax + Selank. Both are approved drugs in Russia. No addiction, tolerance, or withdrawal. Nasal version means no needles. The go-to nootropic peptide combo.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+    ],
+        notes: "Contains: Semax + Selank. Both are approved drugs in Russia. No addiction, tolerance, or withdrawal. Nasal version means no needles. The go-to nootropic peptide combo.",
   },
   {
     id: "sleep_blend",
@@ -1004,7 +1174,10 @@ export const peptides: Peptide[] = [
     stacksWith: ["ipamorelin", "selank", "mk677"],
     halfLife: "Varies by component.",
     storage: "Fridge at 2-8°C after mixing.",
-    notes: "Contains: DSIP + CJC-1295 + BPC-157. Sold by RegenMD, Elite Health HRT, Bio Access Labs. Don't mix with sleeping pills or alcohol. Great during hard training blocks or stressful periods.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+    ],
+        notes: "Contains: DSIP + CJC-1295 + BPC-157. Sold by RegenMD, Elite Health HRT, Bio Access Labs. Don't mix with sleeping pills or alcohol. Great during hard training blocks or stressful periods.",
   },
   {
     id: "triple_gh_blend",
@@ -1029,6 +1202,9 @@ export const peptides: Peptide[] = [
     stacksWith: ["bpc157", "aod9604"],
     halfLife: "Varies — Tesamorelin ~30 min, CJC ~30 min, Ipamorelin ~2 hours.",
     storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C. Avoid freeze-thaw.",
-    notes: "Contains: Tesamorelin (6mg) + CJC-1295 no DAC (3mg) + Ipamorelin (3mg). Sold by Peptide Sciences, Liberty Peptides, LIVV Natural. Not for beginners — start with CJC/Ipa blend first.",
+    sources: [
+      { name: "Peptide Sciences", url: "https://www.peptidesciences.com" },
+    ],
+        notes: "Contains: Tesamorelin (6mg) + CJC-1295 no DAC (3mg) + Ipamorelin (3mg). Sold by Peptide Sciences, Liberty Peptides, LIVV Natural. Not for beginners — start with CJC/Ipa blend first.",
   },
 ];
