@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { v4 as uuid } from "uuid";
+import { generateId } from "../../utils/id";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
@@ -24,7 +24,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
 
   const save = () => {
     addDoseLog({
-      id: uuid(),
+      id: generateId(),
       cycleId,
       peptideId: initPeptideId,
       amount: parseFloat(amount) || 0,

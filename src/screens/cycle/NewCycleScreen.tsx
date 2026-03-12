@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { v4 as uuid } from "uuid";
+import { generateId } from "../../utils/id";
 import { format, addWeeks } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -72,7 +72,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
     const endDate = format(addWeeks(new Date(), parseInt(durationWeeks) || 8), "yyyy-MM-dd");
 
     addCycle({
-      id: uuid(),
+      id: generateId(),
       name: name.trim(),
       peptides: cyclePeptides,
       startDate,

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { v4 as uuid } from "uuid";
+import { generateId } from "../../utils/id";
 import { format } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing } from "../../theme";
@@ -43,7 +43,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
   const save = () => {
     const entry = {
-      id: existing?.id || uuid(),
+      id: existing?.id || generateId(),
       cycleId: activeCycle?.id,
       date: existing?.date || format(new Date(), "yyyy-MM-dd"),
       weight: weight ? parseFloat(weight) : undefined,
