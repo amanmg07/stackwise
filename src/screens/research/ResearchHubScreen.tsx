@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   searchInput: { flex: 1, fontSize: 15, color: colors.text },
-  chips: { paddingHorizontal: spacing.md, marginBottom: spacing.sm, maxHeight: 40 },
+  chips: { paddingHorizontal: spacing.md, marginBottom: spacing.sm },
   chip: {
     backgroundColor: colors.surface,
     borderRadius: 20,

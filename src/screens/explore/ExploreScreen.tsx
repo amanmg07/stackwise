@@ -62,10 +62,10 @@ const styles = StyleSheet.create({
   },
   toggleBtn: {
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    borderRadius: 10, paddingVertical: 10,
+    borderRadius: 10, paddingVertical: 12,
   },
   toggleBtnActive: { backgroundColor: colors.accent },
-  toggleText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
+  toggleText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary, lineHeight: 18 },
   toggleTextActive: { color: colors.background },
   content: { flex: 1 },
 });
