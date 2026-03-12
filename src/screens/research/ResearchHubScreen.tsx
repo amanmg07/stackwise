@@ -63,7 +63,12 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
       </View>
 
       {/* Category chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chips}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.chips}
+        contentContainerStyle={styles.chipsContent}
+      >
         {CATEGORIES.map((cat) => (
           <TouchableOpacity
             key={cat.key}
@@ -139,18 +144,19 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   searchInput: { flex: 1, fontSize: 15, color: colors.text },
-  chips: { paddingHorizontal: spacing.md, marginBottom: spacing.sm },
+  chips: { flexGrow: 0, marginBottom: spacing.sm },
+  chipsContent: { paddingHorizontal: spacing.md, alignItems: "center" },
   chip: {
     backgroundColor: colors.surface,
     borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     marginRight: 8,
     borderWidth: 1,
     borderColor: colors.border,
   },
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
+  chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary, includeFontPadding: false },
   chipTextActive: { color: colors.background },
   card: {
     backgroundColor: colors.surface,
