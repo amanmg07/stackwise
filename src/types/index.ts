@@ -84,7 +84,7 @@ export interface JournalEntry {
   createdAt: string;
 }
 
-export type Goal = "recovery" | "fat_loss" | "muscle_gain" | "anti_aging" | "sleep" | "cognitive";
+export type Goal = "recovery" | "fat_loss" | "muscle_gain" | "anti_aging" | "sleep" | "cognitive" | "immune" | "sexual_health" | "hormone";
 
 export interface ProtocolTemplate {
   id: string;

@@ -12,6 +12,9 @@ const GOALS: { key: Goal; label: string; icon: keyof typeof Ionicons.glyphMap; c
   { key: "anti_aging", label: "Anti-Aging", icon: "sparkles-outline", color: "#c084fc" },
   { key: "sleep", label: "Sleep", icon: "moon-outline", color: "#818cf8" },
   { key: "cognitive", label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
+  { key: "immune", label: "Immune Health", icon: "shield-checkmark-outline", color: "#2dd4bf" },
+  { key: "sexual_health", label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
+  { key: "hormone", label: "Hormone Support", icon: "pulse-outline", color: "#fb923c" },
 ];
 
 const LEVELS = [

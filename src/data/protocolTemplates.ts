@@ -113,7 +113,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
   {
     id: "klow_blend",
     name: "KLOW Healing Blend",
-    goals: ["recovery", "anti_aging"],
+    goals: ["recovery", "anti_aging", "immune"],
     description: "The popular KLOW blend — four peptides working together for deep healing, gut repair, and skin rejuvenation. Great for inflammation and full-body recovery.",
     peptides: [
       { peptideId: "bpc157", role: "Primary", suggestedDose: "250-500 mcg", suggestedFrequency: "1-2x daily", suggestedDuration: "4-8 weeks" },
@@ -128,7 +128,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
   {
     id: "immune_shield",
     name: "Immune Shield",
-    goals: ["recovery"],
+    goals: ["immune"],
     description: "Boost your immune system and fight off infections faster. Great for people who get sick often or want extra immune support.",
     peptides: [
       { peptideId: "thymosin_a1", role: "Primary", suggestedDose: "1-1.6 mg", suggestedFrequency: "2-3x per week", suggestedDuration: "4-12 weeks" },
@@ -156,7 +156,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
   {
     id: "trt_support",
     name: "TRT Fertility Support",
-    goals: ["recovery"],
+    goals: ["hormone"],
     description: "Keep your natural hormone production and fertility alive while on testosterone replacement therapy (TRT).",
     peptides: [
       { peptideId: "gonadorelin", role: "Primary", suggestedDose: "100-200 mcg", suggestedFrequency: "2-3x per week", suggestedDuration: "Ongoing with TRT" },
@@ -177,5 +177,17 @@ export const protocolTemplates: ProtocolTemplate[] = [
     cycleDuration: "12 weeks",
     difficulty: "advanced",
     notes: "Tesamorelin (GHRH) + GHRP-2 (ghrelin mimetic) work through different pathways for synergistic GH release. Take GHRP-2 on empty stomach. Watch for appetite increase and monitor blood sugar. Not for beginners.",
+  },
+  {
+    id: "sexual_wellness",
+    name: "Sexual Wellness",
+    goals: ["sexual_health"],
+    description: "Boost desire and arousal the right way. PT-141 works in your brain — not just blood flow like Viagra. Used as-needed, not daily.",
+    peptides: [
+      { peptideId: "pt141", role: "Primary", suggestedDose: "1-1.75 mg", suggestedFrequency: "As needed (max 8x/month)", suggestedDuration: "As needed" },
+    ],
+    cycleDuration: "As needed",
+    difficulty: "beginner",
+    notes: "PT-141 is FDA-approved as Vyleesi. Take 45+ min before. Start at 1 mg to test nausea tolerance. Don't use more than once per day or 8x per month. Don't use with uncontrolled high blood pressure.",
   },
 ];
