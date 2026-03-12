@@ -107,8 +107,17 @@ export default function NewCycleScreen({ route, navigation }: any) {
       />
 
       <Text style={styles.label}>Peptides</Text>
+      {template && (
+        <View style={styles.recBanner}>
+          <Ionicons name="sparkles" size={14} color={colors.accent} />
+          <Text style={styles.recBannerText}>
+            Pre-filled from {template.name} protocol. You can adjust values below.
+          </Text>
+        </View>
+      )}
       {cyclePeptides.map((cp) => {
         const pep = peptideDB.find((p) => p.id === cp.peptideId);
+        const templatePep = template?.peptides.find((tp) => tp.peptideId === cp.peptideId);
         return (
           <View key={cp.peptideId} style={styles.peptideCard}>
             <View style={styles.peptideHeader}>
@@ -117,6 +126,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
                 <Ionicons name="close-circle" size={22} color={colors.error} />
               </TouchableOpacity>
             </View>
+            {templatePep && (
+              <View style={styles.recRow}>
+                <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                <Text style={styles.recText}>
+                  Recommended: {templatePep.suggestedDose} · {templatePep.suggestedFrequency} · {templatePep.suggestedDuration}
+                </Text>
+              </View>
+            )}
             <View style={styles.fieldRow}>
               <View style={styles.fieldHalf}>
                 <Text style={styles.fieldLabel}>Dose</Text>
@@ -193,12 +210,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     fontSize: 15, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
+  recBanner: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: colors.accent + "10", borderRadius: 10, padding: 12,
+    borderWidth: 1, borderColor: colors.accent + "25", marginBottom: 12,
+  },
+  recBannerText: { fontSize: 13, color: colors.accent, flex: 1, lineHeight: 18 },
   peptideCard: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: colors.border, marginBottom: 10,
   },
-  peptideHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  peptideHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
   peptideName: { fontSize: 16, fontWeight: "700", color: colors.accent },
+  recRow: {
+    flexDirection: "row", alignItems: "flex-start", gap: 6,
+    backgroundColor: colors.success + "10", borderRadius: 8, padding: 8,
+    marginBottom: 10,
+  },
+  recText: { fontSize: 12, color: colors.success, flex: 1, lineHeight: 17 },
   fieldRow: { flexDirection: "row", gap: 12, marginBottom: 10 },
   fieldHalf: { flex: 1 },
   fieldLabel: { fontSize: 12, color: colors.textSecondary, marginBottom: 4 },
