@@ -63,24 +63,25 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
       </View>
 
       {/* Category chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.chips}
-        contentContainerStyle={styles.chipsContent}
-      >
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.key}
-            style={[styles.chip, category === cat.key && styles.chipActive]}
-            onPress={() => setCategory(cat.key)}
-          >
-            <Text style={[styles.chipText, category === cat.key && styles.chipTextActive]}>
-              {cat.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.chipsWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsContent}
+        >
+          {CATEGORIES.map((cat) => (
+            <TouchableOpacity
+              key={cat.key}
+              style={[styles.chip, category === cat.key && styles.chipActive]}
+              onPress={() => setCategory(cat.key)}
+            >
+              <Text style={[styles.chipText, category === cat.key && styles.chipTextActive]}>
+                {cat.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Peptide list */}
       <FlatList
@@ -144,19 +145,20 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   searchInput: { flex: 1, fontSize: 15, color: colors.text },
-  chips: { flexGrow: 0, marginBottom: spacing.sm },
-  chipsContent: { paddingHorizontal: spacing.md, alignItems: "center" },
+  chipsWrapper: { height: 44, marginBottom: spacing.sm },
+  chipsContent: { paddingHorizontal: spacing.md, alignItems: "center", height: 44 },
   chip: {
     backgroundColor: colors.surface,
     borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    height: 36,
+    justifyContent: "center",
     marginRight: 8,
     borderWidth: 1,
     borderColor: colors.border,
   },
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary, includeFontPadding: false },
+  chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
   chipTextActive: { color: colors.background },
   card: {
     backgroundColor: colors.surface,
