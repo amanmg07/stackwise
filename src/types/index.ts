@@ -5,7 +5,9 @@ export type PeptideCategory =
   | "anti_aging"
   | "cognitive"
   | "sleep"
-  | "immune";
+  | "immune"
+  | "sexual_health"
+  | "hormone";
 
 export type AdministrationRoute = "subcutaneous" | "intramuscular" | "oral" | "topical" | "nasal";
 
@@ -31,6 +33,7 @@ export interface Peptide {
   halfLife: string;
   storage: string;
   notes: string;
+  isBlend?: boolean;
 }
 
 export interface CyclePeptide {

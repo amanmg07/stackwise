@@ -409,7 +409,7 @@ export const peptides: Peptide[] = [
     id: "pt141",
     name: "PT-141",
     abbreviation: "Bremelanotide",
-    categories: [],
+    categories: ["sexual_health"],
     description:
       "FDA-approved (as Vyleesi) for low sexual desire. Unlike Viagra which works on blood flow, PT-141 works in your brain to boost actual desire and arousal. Used as-needed, not daily.",
     mechanism:
@@ -602,7 +602,7 @@ export const peptides: Peptide[] = [
     id: "kisspeptin",
     name: "Kisspeptin",
     abbreviation: "KP",
-    categories: [],
+    categories: ["hormone"],
     description:
       "The master switch for your reproductive hormone system. Tells your brain to start producing the hormones needed for fertility and sexual function. Being researched as a gentler way to stimulate reproductive hormones.",
     mechanism:
@@ -807,7 +807,7 @@ export const peptides: Peptide[] = [
     id: "gonadorelin",
     name: "Gonadorelin",
     abbreviation: "GnRH",
-    categories: [],
+    categories: ["hormone"],
     description:
       "A synthetic copy of the GnRH hormone your brain naturally makes. Tells your pituitary to release LH and FSH — the hormones that drive testosterone and fertility. Popular in TRT protocols to keep natural hormone production alive.",
     mechanism:
@@ -835,6 +835,7 @@ export const peptides: Peptide[] = [
     id: "glow_blend",
     name: "GLOW Blend",
     categories: ["recovery", "anti_aging"],
+    isBlend: true,
     description:
       "A popular pre-mixed 3-peptide blend for healing, skin rejuvenation, and anti-aging. Sold as a single vial — no need to buy each peptide separately. The go-to blend for recovery and that 'glow' effect.",
     mechanism:
@@ -859,6 +860,7 @@ export const peptides: Peptide[] = [
     id: "klow_blend",
     name: "KLOW Blend",
     categories: ["recovery", "anti_aging", "immune"],
+    isBlend: true,
     description:
       "The upgraded version of GLOW — adds KPV (a powerful anti-inflammatory) to the healing trio. Best for people dealing with gut issues, inflammation, or autoimmune concerns on top of wanting recovery and skin benefits.",
     mechanism:
@@ -883,6 +885,7 @@ export const peptides: Peptide[] = [
     id: "wolverine_blend",
     name: "Wolverine Stack (BPC-157 + TB-500)",
     categories: ["recovery"],
+    isBlend: true,
     description:
       "The classic healing duo sold as a single pre-mixed vial. BPC-157 heals locally, TB-500 heals body-wide. Named 'Wolverine' because of how fast it helps injuries recover. The most popular peptide blend.",
     mechanism:
@@ -907,6 +910,7 @@ export const peptides: Peptide[] = [
     id: "cjc_ipa_blend",
     name: "CJC/Ipa Blend",
     categories: ["muscle_gain", "fat_loss", "sleep"],
+    isBlend: true,
     description:
       "The gold standard GH combo sold as a single pre-mixed vial. CJC-1295 and Ipamorelin work through different pathways to release 2-3x more growth hormone together than either alone. Cleanest GH stack available.",
     mechanism:
@@ -931,6 +935,7 @@ export const peptides: Peptide[] = [
     id: "fat_burner_blend",
     name: "Fat Burner Blend",
     categories: ["fat_loss"],
+    isBlend: true,
     description:
       "A triple-action fat loss blend. AOD-9604 burns fat directly, MOTS-c boosts your metabolism like exercise, and Tesamorelin targets stubborn belly fat through growth hormone. Attacks fat from three different angles.",
     mechanism:
@@ -955,6 +960,7 @@ export const peptides: Peptide[] = [
     id: "cognitive_blend",
     name: "Cognitive Blend (Semax + Selank)",
     categories: ["cognitive"],
+    isBlend: true,
     description:
       "The brain-boosting duo in one vial. Semax sharpens focus, memory, and motivation. Selank kills anxiety without drowsiness. Together they give you a calm, clear, focused mind — no needles needed if you use the nasal version.",
     mechanism:
@@ -979,6 +985,7 @@ export const peptides: Peptide[] = [
     id: "sleep_blend",
     name: "Sleep Blend",
     categories: ["sleep", "recovery"],
+    isBlend: true,
     description:
       "A pre-mixed sleep and overnight recovery blend. DSIP gives you deeper sleep, CJC-1295 boosts your natural nighttime GH spike, and BPC-157 repairs tissue while you rest. Take before bed and wake up recovered.",
     mechanism:
@@ -1003,6 +1010,7 @@ export const peptides: Peptide[] = [
     id: "triple_gh_blend",
     name: "Triple GH Blend",
     categories: ["muscle_gain", "fat_loss"],
+    isBlend: true,
     description:
       "The most powerful GH-boosting blend available. Three growth hormone secretagogues in one vial — Tesamorelin, CJC-1295, and Ipamorelin. For serious users who want maximum GH output and fat loss.",
     mechanism:

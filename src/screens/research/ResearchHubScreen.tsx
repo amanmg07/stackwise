@@ -16,6 +16,8 @@ const CATEGORIES: { key: PeptideCategory | "all"; label: string }[] = [
   { key: "sleep", label: "Sleep" },
   { key: "cognitive", label: "Cognitive" },
   { key: "immune", label: "Immune" },
+  { key: "sexual_health", label: "Sexual Health" },
+  { key: "hormone", label: "Hormone" },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -26,6 +28,16 @@ const CATEGORY_COLORS: Record<string, string> = {
   cognitive: "#facc15",
   sleep: "#818cf8",
   immune: "#2dd4bf",
+  sexual_health: "#f472b6",
+  hormone: "#fb923c",
+};
+
+const ROUTE_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
+  subcutaneous: { icon: "medical-outline", label: "Injection" },
+  intramuscular: { icon: "medical-outline", label: "IM Injection" },
+  oral: { icon: "tablet-portrait-outline", label: "Oral" },
+  topical: { icon: "hand-left-outline", label: "Topical" },
+  nasal: { icon: "water-outline", label: "Nasal" },
 };
 
 export default function ResearchHubScreen({ navigation, embedded }: any) {
@@ -83,6 +95,11 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         </ScrollView>
       </View>
 
+      {/* Result count */}
+      <Text style={styles.resultCount}>
+        {filtered.length} {filtered.length === 1 ? "result" : "results"}
+      </Text>
+
       {/* Peptide list */}
       <FlatList
         data={filtered}
@@ -94,7 +111,13 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
             onPress={() => navigation.navigate("PeptideDetail", { peptideId: item.id })}
           >
             <View style={styles.cardHeader}>
-              <Text style={styles.cardName}>{item.name}</Text>
+              <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
+              {item.isBlend && (
+                <View style={styles.blendBadge}>
+                  <Ionicons name="layers-outline" size={10} color={colors.accent} />
+                  <Text style={styles.blendBadgeText}>Blend</Text>
+                </View>
+              )}
               {item.abbreviation && item.abbreviation !== item.name && (
                 <Text style={styles.cardAbbr}>{item.abbreviation}</Text>
               )}
@@ -110,10 +133,15 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
             </View>
             <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
             <View style={styles.cardMeta}>
-              <Text style={styles.metaText}>
-                {item.routes.map((r) => r.charAt(0).toUpperCase() + r.slice(0, 2)).join(" · ")}
-              </Text>
-              <Text style={styles.metaText}>t½ {item.halfLife}</Text>
+              {item.routes.map((r) => {
+                const info = ROUTE_ICONS[r] || { icon: "ellipse-outline" as const, label: r };
+                return (
+                  <View key={r} style={styles.routePill}>
+                    <Ionicons name={info.icon} size={12} color={colors.textSecondary} />
+                    <Text style={styles.routeText}>{info.label}</Text>
+                  </View>
+                );
+              })}
             </View>
           </TouchableOpacity>
         )}
@@ -145,7 +173,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   searchInput: { flex: 1, fontSize: 15, color: colors.text },
-  chipsWrapper: { height: 44, marginBottom: spacing.sm },
+  chipsWrapper: { height: 44, marginBottom: 4 },
   chipsContent: { paddingHorizontal: spacing.md, alignItems: "center", height: 44 },
   chip: {
     backgroundColor: colors.surface,
@@ -160,6 +188,10 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
   chipTextActive: { color: colors.background },
+  resultCount: {
+    fontSize: 12, color: colors.textSecondary, paddingHorizontal: spacing.md,
+    marginBottom: 8,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: 14,
@@ -173,12 +205,24 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" },
   cardName: { fontSize: 17, fontWeight: "700", color: colors.text, flexShrink: 1 },
   cardAbbr: { fontSize: 13, color: colors.textSecondary, fontWeight: "500", flexShrink: 1 },
+  blendBadge: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: colors.accent + "15", borderRadius: 6,
+    paddingHorizontal: 7, paddingVertical: 2,
+    borderWidth: 1, borderColor: colors.accent + "30",
+  },
+  blendBadgeText: { fontSize: 10, fontWeight: "700", color: colors.accent, textTransform: "uppercase" },
   tags: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 8 },
   tag: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   tagText: { fontSize: 11, fontWeight: "700", textTransform: "capitalize" },
   cardDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: 8 },
-  cardMeta: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
-  metaText: { fontSize: 12, color: colors.textSecondary, flexShrink: 1 },
+  cardMeta: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  routePill: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: colors.background, borderRadius: 6,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  routeText: { fontSize: 11, color: colors.textSecondary },
   empty: { alignItems: "center", paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 15, color: colors.textSecondary },
 });

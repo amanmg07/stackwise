@@ -4,10 +4,24 @@ import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
 
+const CATEGORY_COLORS: Record<string, string> = {
+  recovery: "#4ade80",
+  fat_loss: "#f87171",
+  muscle_gain: "#60a5fa",
+  anti_aging: "#c084fc",
+  cognitive: "#facc15",
+  sleep: "#818cf8",
+  immune: "#2dd4bf",
+  sexual_health: "#f472b6",
+  hormone: "#fb923c",
+};
+
 export default function PeptideDetailScreen({ route, navigation }: any) {
   const { peptideId } = route.params;
   const peptide = peptides.find((p) => p.id === peptideId);
   const [expandedProtocol, setExpandedProtocol] = useState<number | null>(0);
+  const [showStorage, setShowStorage] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
 
   if (!peptide) {
     return (
@@ -23,16 +37,37 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.name}>{peptide.name}</Text>
-        {peptide.abbreviation && peptide.abbreviation !== peptide.name && (
-          <Text style={styles.abbr}>{peptide.abbreviation}</Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>{peptide.name}</Text>
+          {peptide.abbreviation && peptide.abbreviation !== peptide.name && (
+            <Text style={styles.abbr}>{peptide.abbreviation}</Text>
+          )}
+        </View>
+        {peptide.isBlend && (
+          <View style={styles.blendBadge}>
+            <Ionicons name="layers-outline" size={12} color={colors.accent} />
+            <Text style={styles.blendBadgeText}>Pre-Mixed Blend</Text>
+          </View>
         )}
       </View>
+
+      {/* Category tags */}
+      {peptide.categories.length > 0 && (
+        <View style={styles.categoryRow}>
+          {peptide.categories.map((cat) => (
+            <View key={cat} style={[styles.categoryTag, { backgroundColor: (CATEGORY_COLORS[cat] || "#888") + "20" }]}>
+              <Text style={[styles.categoryTagText, { color: CATEGORY_COLORS[cat] || "#888" }]}>
+                {cat.replace("_", " ")}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View style={styles.metaRow}>
         <View style={styles.metaPill}>
           <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-          <Text style={styles.metaText}>t½ {peptide.halfLife}</Text>
+          <Text style={styles.metaText} numberOfLines={2}>t½ {peptide.halfLife}</Text>
         </View>
         {peptide.routes.map((r) => (
           <View key={r} style={styles.metaPill}>
@@ -120,19 +155,51 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
         </>
       )}
 
-      {/* Storage */}
-      <Text style={styles.sectionTitle}>Storage</Text>
-      <View style={styles.card}>
-        <Text style={styles.cardBody}>{peptide.storage}</Text>
-      </View>
+      {/* Storage — collapsible */}
+      <TouchableOpacity
+        style={styles.collapsibleHeader}
+        onPress={() => setShowStorage(!showStorage)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.collapsibleLeft}>
+          <Ionicons name="snow-outline" size={16} color={colors.textSecondary} />
+          <Text style={styles.collapsibleTitle}>Storage</Text>
+        </View>
+        <Ionicons
+          name={showStorage ? "chevron-up" : "chevron-down"}
+          size={18}
+          color={colors.textSecondary}
+        />
+      </TouchableOpacity>
+      {showStorage && (
+        <View style={styles.collapsibleBody}>
+          <Text style={styles.cardBody}>{peptide.storage}</Text>
+        </View>
+      )}
 
-      {/* Notes */}
+      {/* Notes — collapsible */}
       {peptide.notes && (
         <>
-          <Text style={styles.sectionTitle}>Notes</Text>
-          <View style={styles.card}>
-            <Text style={styles.cardBody}>{peptide.notes}</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.collapsibleHeader}
+            onPress={() => setShowNotes(!showNotes)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.collapsibleLeft}>
+              <Ionicons name="document-text-outline" size={16} color={colors.textSecondary} />
+              <Text style={styles.collapsibleTitle}>Notes</Text>
+            </View>
+            <Ionicons
+              name={showNotes ? "chevron-up" : "chevron-down"}
+              size={18}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
+          {showNotes && (
+            <View style={styles.collapsibleBody}>
+              <Text style={styles.cardBody}>{peptide.notes}</Text>
+            </View>
+          )}
         </>
       )}
     </ScrollView>
@@ -142,9 +209,20 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   errorText: { color: colors.error, fontSize: 16, textAlign: "center", marginTop: 40 },
-  header: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" },
+  header: { marginBottom: 10 },
+  nameRow: { flexDirection: "row", alignItems: "baseline", gap: 10, flexWrap: "wrap" },
   name: { fontSize: 28, fontWeight: "800", color: colors.text, flexShrink: 1 },
   abbr: { fontSize: 16, color: colors.textSecondary },
+  blendBadge: {
+    flexDirection: "row", alignItems: "center", gap: 5, alignSelf: "flex-start",
+    backgroundColor: colors.accent + "15", borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 4, marginTop: 6,
+    borderWidth: 1, borderColor: colors.accent + "30",
+  },
+  blendBadgeText: { fontSize: 11, fontWeight: "700", color: colors.accent, textTransform: "uppercase" },
+  categoryRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 10 },
+  categoryTag: { borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  categoryTagText: { fontSize: 12, fontWeight: "700", textTransform: "capitalize" },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
   metaPill: {
     flexDirection: "row", alignItems: "center", gap: 4,
@@ -165,7 +243,7 @@ const styles = StyleSheet.create({
   },
   cardBody: { fontSize: 14, color: colors.text, lineHeight: 22 },
   protoHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  protoPurpose: { fontSize: 15, fontWeight: "600", color: colors.accent },
+  protoPurpose: { fontSize: 15, fontWeight: "600", color: colors.accent, flexShrink: 1 },
   protoDetails: { marginTop: 12 },
   protoRow: {
     flexDirection: "row", justifyContent: "space-between", paddingVertical: 8,
@@ -183,4 +261,19 @@ const styles = StyleSheet.create({
   },
   stackName: { fontSize: 15, fontWeight: "700", color: colors.accent, marginBottom: 4 },
   stackDesc: { fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
+  collapsibleHeader: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border, marginBottom: 2, marginTop: 8,
+  },
+  collapsibleLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+  collapsibleTitle: {
+    fontSize: 13, fontWeight: "700", color: colors.textSecondary,
+    textTransform: "uppercase", letterSpacing: 1,
+  },
+  collapsibleBody: {
+    backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border, borderTopWidth: 0,
+    borderTopLeftRadius: 0, borderTopRightRadius: 0, marginBottom: 12,
+  },
 });
