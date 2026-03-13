@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function ChatView({ navigation }: Props) {
-  const { cycles, journal, settings, updateSettings } = useApp();
+  const { cycles, journal } = useApp();
   const activeCycle = cycles.find((c) => c.isActive) || null;
   const recentJournal = [...journal].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
 
@@ -34,10 +34,8 @@ export default function ChatView({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  const hasKey = !!settings.groqApiKey;
-
   const send = async (text: string) => {
-    if (!text.trim() || loading || !settings.groqApiKey) return;
+    if (!text.trim() || loading) return;
 
     const userMsg: ChatMessage = {
       id: generateId(),
@@ -55,7 +53,6 @@ export default function ChatView({ navigation }: Props) {
       const { content, peptideRefs } = await sendChatMessage(
         updated,
         { activeCycle, recentJournal },
-        settings.groqApiKey
       );
 
       const assistantMsg: ChatMessage = {
@@ -114,46 +111,6 @@ export default function ChatView({ navigation }: Props) {
       </View>
     );
   };
-
-  const [apiKeyInput, setApiKeyInput] = useState("");
-
-  const saveApiKey = () => {
-    if (!apiKeyInput.trim()) return;
-    updateSettings({ groqApiKey: apiKeyInput.trim() });
-    setApiKeyInput("");
-  };
-
-  if (!hasKey) {
-    return (
-      <View style={styles.noKey}>
-        <View style={styles.noKeyIcon}>
-          <Ionicons name="chatbubbles-outline" size={36} color={colors.accent} />
-        </View>
-        <Text style={styles.noKeyTitle}>Set Up AI Chat</Text>
-        <Text style={styles.noKeyDesc}>
-          Enter your free Groq API key to chat with StackWise AI.{"\n"}
-          Get one at console.groq.com → API Keys
-        </Text>
-        <TextInput
-          style={styles.noKeyInput}
-          value={apiKeyInput}
-          onChangeText={setApiKeyInput}
-          placeholder="Paste your Groq API key here"
-          placeholderTextColor={colors.textSecondary}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TouchableOpacity
-          style={[styles.noKeyBtn, !apiKeyInput.trim() && { opacity: 0.4 }]}
-          disabled={!apiKeyInput.trim()}
-          onPress={saveApiKey}
-        >
-          <Ionicons name="checkmark" size={18} color={colors.background} />
-          <Text style={styles.noKeyBtnText}>Save & Start Chatting</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView
@@ -221,23 +178,6 @@ export default function ChatView({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  noKey: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.xl },
-  noKeyIcon: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center", marginBottom: 16,
-  },
-  noKeyTitle: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 8 },
-  noKeyDesc: { fontSize: 14, color: colors.textSecondary, textAlign: "center", marginBottom: 24, lineHeight: 20 },
-  noKeyInput: {
-    width: "100%", backgroundColor: colors.surface, borderRadius: 12,
-    padding: 14, fontSize: 14, color: colors.text, marginBottom: 12,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  noKeyBtn: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: colors.accent, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 14,
-  },
-  noKeyBtnText: { fontSize: 15, fontWeight: "700", color: colors.background },
   starterContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.lg },
   starterIcon: {
     width: 80, height: 80, borderRadius: 40,

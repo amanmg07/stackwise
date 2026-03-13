@@ -113,7 +113,6 @@ export interface UserSettings {
   weightUnit: "lbs" | "kg";
   notificationsEnabled: boolean;
   reminderTimes: string[];
-  groqApiKey?: string;
 }
 
 export interface ChatMessage {

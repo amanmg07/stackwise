@@ -1,6 +1,8 @@
 import { peptides } from "../data/peptides";
 import { Cycle, JournalEntry, ChatMessage } from "../types";
 
+const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
+
 function buildSystemPrompt(activeCycle: Cycle | null, recentJournal: JournalEntry[]): string {
   const peptideContext = peptides.map((p) => ({
     id: p.id,
@@ -67,11 +69,9 @@ function extractPeptideRefs(text: string): string[] {
 export async function sendChatMessage(
   messages: ChatMessage[],
   context: { activeCycle: Cycle | null; recentJournal: JournalEntry[] },
-  apiKey: string
 ): Promise<{ content: string; peptideRefs: string[] }> {
   const systemPrompt = buildSystemPrompt(context.activeCycle, context.recentJournal);
 
-  // Build OpenAI-compatible messages for Groq
   const groqMessages = [
     { role: "system" as const, content: systemPrompt },
     ...messages.map((m) => ({
@@ -80,32 +80,25 @@ export async function sendChatMessage(
     })),
   ];
 
-  const response = await fetch(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: groqMessages,
-        max_tokens: 1024,
-        temperature: 0.7,
-      }),
-    }
-  );
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: groqMessages,
+      max_tokens: 1024,
+      temperature: 0.7,
+    }),
+  });
 
   if (!response.ok) {
-    const error = await response.text();
-    if (response.status === 401) {
-      throw new Error("Invalid API key. Check your key in Profile settings.");
-    }
     if (response.status === 429) {
       throw new Error("Rate limit reached. Wait a moment and try again.");
     }
-    throw new Error(`API error: ${response.status}`);
+    throw new Error(`AI service error: ${response.status}`);
   }
 
   const data = await response.json();
