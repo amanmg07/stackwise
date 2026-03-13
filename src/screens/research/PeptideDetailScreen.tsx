@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
-import { getSourcesForPeptide } from "../../data/peptideSources";
 import { colors, spacing } from "../../theme";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -205,44 +204,41 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
       )}
 
       {/* Where to Find */}
-      {(() => {
-        const sources = getSourcesForPeptide(peptide.id);
-        return (
-          <>
-            <Text style={styles.sectionTitle}>Where to Find</Text>
-            <View style={styles.card}>
-              {sources.map((src, i) => (
-                <TouchableOpacity
-                  key={i}
-                  style={[styles.sourceRow, i === sources.length - 1 && { borderBottomWidth: 0 }]}
-                  onPress={() => src.url ? Linking.openURL(src.url) : null}
-                  disabled={!src.url}
-                  activeOpacity={src.url ? 0.6 : 1}
-                >
-                  <View style={styles.sourceLeft}>
-                    <Ionicons
-                      name={src.url ? "storefront-outline" : "medical-outline"}
-                      size={16}
-                      color={src.url ? colors.accent : colors.textSecondary}
-                    />
-                    <Text style={[styles.sourceName, !src.url && { color: colors.textSecondary }]}>
-                      {src.name}
-                    </Text>
-                  </View>
-                  {src.url ? (
-                    <Ionicons name="open-outline" size={16} color={colors.accent} />
-                  ) : (
-                    <Text style={styles.sourceRx}>Rx</Text>
-                  )}
-                </TouchableOpacity>
-              ))}
-              <Text style={styles.sourceDisclaimer}>
-                Sold as research chemicals. Not medical advice — consult a healthcare provider.
-              </Text>
-            </View>
-          </>
-        );
-      })()}
+      {peptide.sources && peptide.sources.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Where to Find</Text>
+          <View style={styles.card}>
+            {peptide.sources.map((src, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.sourceRow, i === peptide.sources!.length - 1 && { borderBottomWidth: 0 }]}
+                onPress={() => src.url ? Linking.openURL(src.url) : null}
+                disabled={!src.url}
+                activeOpacity={src.url ? 0.6 : 1}
+              >
+                <View style={styles.sourceLeft}>
+                  <Ionicons
+                    name={src.url ? "storefront-outline" : "medical-outline"}
+                    size={16}
+                    color={src.url ? colors.accent : colors.textSecondary}
+                  />
+                  <Text style={[styles.sourceName, !src.url && { color: colors.textSecondary }]}>
+                    {src.name}
+                  </Text>
+                </View>
+                {src.url ? (
+                  <Ionicons name="open-outline" size={16} color={colors.accent} />
+                ) : (
+                  <Text style={styles.sourceRx}>Rx</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+            <Text style={styles.sourceDisclaimer}>
+              Sold as research chemicals. Not medical advice — consult a healthcare provider.
+            </Text>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
