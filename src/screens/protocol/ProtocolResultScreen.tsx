@@ -13,22 +13,21 @@ const DIFFICULTY_COLORS = {
 };
 
 export default function ProtocolResultScreen({ route, navigation }: any) {
-  const { goals, level } = route.params as { goals: Goal[]; level: string };
+  const { goals } = route.params as { goals: Goal[] };
 
   const scored = protocolTemplates
     .map((t) => {
       const goalMatch = t.goals.filter((g) => goals.includes(g)).length;
-      const levelMatch = t.difficulty === level ? 2 : 1;
-      return { template: t, score: goalMatch * 3 + levelMatch };
+      return { template: t, score: goalMatch };
     })
-    .filter((s) => s.score > 1)
+    .filter((s) => s.score > 0)
     .sort((a, b) => b.score - a.score);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <Text style={styles.title}>Recommended Protocols</Text>
       <Text style={styles.subtitle}>
-        Based on your goals and {level} experience level
+        Based on your selected goals
       </Text>
 
       {scored.length === 0 && (
