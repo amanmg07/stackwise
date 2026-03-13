@@ -117,11 +117,11 @@ export default function ProfileScreen({ navigation }: any) {
 
 function ApiKeyInput({ settings, updateSettings }: any) {
   const [editing, setEditing] = useState(false);
-  const [key, setKey] = useState(settings.geminiApiKey || "");
-  const hasKey = !!settings.geminiApiKey;
+  const [key, setKey] = useState(settings.groqApiKey || "");
+  const hasKey = !!settings.groqApiKey;
 
   const saveKey = () => {
-    updateSettings({ geminiApiKey: key.trim() || undefined });
+    updateSettings({ groqApiKey: key.trim() || undefined });
     setEditing(false);
   };
 
@@ -132,7 +132,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         text: "Remove",
         style: "destructive",
         onPress: () => {
-          updateSettings({ geminiApiKey: undefined });
+          updateSettings({ groqApiKey: undefined });
           setKey("");
         },
       },
@@ -145,8 +145,8 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         <View style={styles.settingLeft}>
           <Ionicons name="key-outline" size={20} color={colors.success} />
           <View>
-            <Text style={styles.settingLabel}>Gemini API Key</Text>
-            <Text style={styles.apiKeyMask}>AIza•••••{settings.geminiApiKey.slice(-4)}</Text>
+            <Text style={styles.settingLabel}>Groq API Key</Text>
+            <Text style={styles.apiKeyMask}>gsk_•••••{settings.groqApiKey.slice(-4)}</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 8 }}>
@@ -167,7 +167,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
         <View style={styles.settingLeft}>
           <Ionicons name="key-outline" size={20} color={colors.text} />
           <View>
-            <Text style={styles.settingLabel}>Gemini API Key</Text>
+            <Text style={styles.settingLabel}>Groq API Key</Text>
             <Text style={styles.apiKeyHint}>Required for AI chat</Text>
           </View>
         </View>
@@ -178,12 +178,12 @@ function ApiKeyInput({ settings, updateSettings }: any) {
 
   return (
     <View style={styles.apiKeyEdit}>
-      <Text style={styles.apiKeyEditLabel}>Enter your Claude API key</Text>
+      <Text style={styles.apiKeyEditLabel}>Enter your Groq API key</Text>
       <TextInput
         style={styles.apiKeyInput}
         value={key}
         onChangeText={setKey}
-        placeholder="AIza..."
+        placeholder="gsk_..."
         placeholderTextColor={colors.textSecondary}
         autoCapitalize="none"
         autoCorrect={false}
@@ -192,7 +192,7 @@ function ApiKeyInput({ settings, updateSettings }: any) {
       <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
         <TouchableOpacity
           style={styles.apiKeyCancel}
-          onPress={() => { setEditing(false); setKey(settings.geminiApiKey || ""); }}
+          onPress={() => { setEditing(false); setKey(settings.groqApiKey || ""); }}
         >
           <Text style={styles.apiKeyCancelText}>Cancel</Text>
         </TouchableOpacity>

@@ -71,32 +71,35 @@ export async function sendChatMessage(
 ): Promise<{ content: string; peptideRefs: string[] }> {
   const systemPrompt = buildSystemPrompt(context.activeCycle, context.recentJournal);
 
-  // Build Gemini conversation format
-  // System instruction goes separately, then alternating user/model turns
-  const geminiContents = messages.map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
+  // Build OpenAI-compatible messages for Groq
+  const groqMessages = [
+    { role: "system" as const, content: systemPrompt },
+    ...messages.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    })),
+  ];
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    "https://api.groq.com/openai/v1/chat/completions",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: geminiContents,
-        generationConfig: {
-          maxOutputTokens: 1024,
-          temperature: 0.7,
-        },
+        model: "llama-3.3-70b-versatile",
+        messages: groqMessages,
+        max_tokens: 1024,
+        temperature: 0.7,
       }),
     }
   );
 
   if (!response.ok) {
     const error = await response.text();
-    if (response.status === 400 && error.includes("API_KEY_INVALID")) {
+    if (response.status === 401) {
       throw new Error("Invalid API key. Check your key in Profile settings.");
     }
     if (response.status === 429) {
@@ -107,7 +110,7 @@ export async function sendChatMessage(
 
   const data = await response.json();
   const content =
-    data.candidates?.[0]?.content?.parts?.[0]?.text ||
+    data.choices?.[0]?.message?.content ||
     "I couldn't generate a response. Please try again.";
   const peptideRefs = extractPeptideRefs(content);
 

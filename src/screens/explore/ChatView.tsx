@@ -34,10 +34,10 @@ export default function ChatView({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  const hasKey = !!settings.geminiApiKey;
+  const hasKey = !!settings.groqApiKey;
 
   const send = async (text: string) => {
-    if (!text.trim() || loading || !settings.geminiApiKey) return;
+    if (!text.trim() || loading || !settings.groqApiKey) return;
 
     const userMsg: ChatMessage = {
       id: generateId(),
@@ -55,7 +55,7 @@ export default function ChatView({ navigation }: Props) {
       const { content, peptideRefs } = await sendChatMessage(
         updated,
         { activeCycle, recentJournal },
-        settings.geminiApiKey
+        settings.groqApiKey
       );
 
       const assistantMsg: ChatMessage = {
@@ -119,7 +119,7 @@ export default function ChatView({ navigation }: Props) {
 
   const saveApiKey = () => {
     if (!apiKeyInput.trim()) return;
-    updateSettings({ geminiApiKey: apiKeyInput.trim() });
+    updateSettings({ groqApiKey: apiKeyInput.trim() });
     setApiKeyInput("");
   };
 
@@ -131,14 +131,14 @@ export default function ChatView({ navigation }: Props) {
         </View>
         <Text style={styles.noKeyTitle}>Set Up AI Chat</Text>
         <Text style={styles.noKeyDesc}>
-          Enter your free Gemini API key to chat with StackWise AI.{"\n"}
-          Get one at aistudio.google.com → Get API Key
+          Enter your free Groq API key to chat with StackWise AI.{"\n"}
+          Get one at console.groq.com → API Keys
         </Text>
         <TextInput
           style={styles.noKeyInput}
           value={apiKeyInput}
           onChangeText={setApiKeyInput}
-          placeholder="Paste your Gemini API key here"
+          placeholder="Paste your Groq API key here"
           placeholderTextColor={colors.textSecondary}
           autoCapitalize="none"
           autoCorrect={false}
