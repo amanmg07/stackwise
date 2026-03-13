@@ -39,7 +39,6 @@ export interface Peptide {
   storage: string;
   notes: string;
   isBlend?: boolean;
-  sources?: PeptideSource[];
 }
 
 export interface CyclePeptide {
