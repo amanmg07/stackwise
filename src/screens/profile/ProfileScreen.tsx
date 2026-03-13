@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform } from "react-native";
+import { View, Text, TouchableOpacity, Switch, StyleSheet, ScrollView, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing } from "../../theme";
@@ -61,22 +61,18 @@ export default function ProfileScreen({ navigation }: any) {
         <Text style={styles.settingValue}>{settings.weightUnit}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.settingRow}
-        onPress={() =>
-          updateSettings({ notificationsEnabled: !settings.notificationsEnabled })
-        }
-      >
+      <View style={styles.settingRow}>
         <View style={styles.settingLeft}>
           <Ionicons name="notifications-outline" size={20} color={colors.text} />
           <Text style={styles.settingLabel}>Reminders</Text>
         </View>
-        <Ionicons
-          name={settings.notificationsEnabled ? "toggle" : "toggle-outline"}
-          size={28}
-          color={settings.notificationsEnabled ? colors.accent : colors.textSecondary}
+        <Switch
+          value={settings.notificationsEnabled}
+          onValueChange={(val) => updateSettings({ notificationsEnabled: val })}
+          trackColor={{ false: colors.border, true: colors.accent + "60" }}
+          thumbColor={settings.notificationsEnabled ? colors.accent : colors.textSecondary}
         />
-      </TouchableOpacity>
+      </View>
 
       <Text style={styles.sectionTitle}>Cycle History</Text>
 

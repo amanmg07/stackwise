@@ -134,29 +134,30 @@ export default function ChatView({ navigation }: Props) {
   const keyboardOpen = keyboardHeight > 0;
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
       {messages.length === 0 ? (
-        <View style={styles.starterContainer}>
-          {!keyboardOpen && (
-            <>
-              <View style={styles.starterIcon}>
-                <Ionicons name="chatbubbles-outline" size={40} color={colors.accent} />
-              </View>
-              <Text style={styles.starterTitle}>Ask StackWise AI</Text>
-              <Text style={styles.starterDesc}>
-                Get personalized advice about peptides, dosing, stacking, and your cycle.
-              </Text>
-              <View style={styles.starterChips}>
-                {STARTERS.map((q) => (
-                  <TouchableOpacity key={q} style={styles.starterChip} onPress={() => send(q)}>
-                    <Text style={styles.starterChipText}>{q}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
-          )}
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={styles.starterContainer}>
+            {!keyboardOpen && (
+              <>
+                <View style={styles.starterIcon}>
+                  <Ionicons name="chatbubbles-outline" size={40} color={colors.accent} />
+                </View>
+                <Text style={styles.starterTitle}>Ask StackWise AI</Text>
+                <Text style={styles.starterDesc}>
+                  Get personalized advice about peptides, dosing, stacking, and your cycle.
+                </Text>
+                <View style={styles.starterChips}>
+                  {STARTERS.map((q) => (
+                    <TouchableOpacity key={q} style={styles.starterChip} onPress={() => send(q)}>
+                      <Text style={styles.starterChipText}>{q}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
+        </TouchableWithoutFeedback>
       ) : (
         <FlatList
           ref={listRef}
@@ -167,6 +168,7 @@ export default function ChatView({ navigation }: Props) {
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
           onLayout={() => listRef.current?.scrollToEnd({ animated: false })}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         />
       )}
 
@@ -197,7 +199,6 @@ export default function ChatView({ navigation }: Props) {
         </TouchableOpacity>
       </View>
     </View>
-    </TouchableWithoutFeedback>
   );
 }
 
