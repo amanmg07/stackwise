@@ -1,7 +1,7 @@
 import { peptides } from "../data/peptides";
 import { Cycle, JournalEntry, ChatMessage } from "../types";
 
-const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
+import { GROQ_API_KEY } from "../config.local";
 
 function findMentionedPeptides(messages: ChatMessage[]): string[] {
   const text = messages.map((m) => m.content).join(" ").toLowerCase();
