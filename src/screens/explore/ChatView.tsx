@@ -130,13 +130,13 @@ export default function ChatView({ navigation }: Props) {
     );
   };
 
-  // Account for tab bar (~85px) so keyboard padding doesn't over-push
-  const bottomPadding = keyboardHeight > 0 ? keyboardHeight - 85 : 0;
+  // Only apply keyboard padding when there are messages (active chat)
+  const bottomPadding = keyboardHeight > 0 && messages.length > 0 ? keyboardHeight - 85 : 0;
 
   return (
     <View style={styles.container}>
       {messages.length === 0 ? (
-        <View style={styles.starterContainer}>
+        <View style={styles.starterContainer} onTouchStart={Keyboard.dismiss}>
           <View style={styles.starterIcon}>
             <Ionicons name="chatbubbles-outline" size={40} color={colors.accent} />
           </View>
