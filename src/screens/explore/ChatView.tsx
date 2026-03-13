@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList,
-  Platform, ActivityIndicator, Keyboard,
+  View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback,
+  StyleSheet, FlatList, Platform, ActivityIndicator, Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
@@ -130,27 +130,32 @@ export default function ChatView({ navigation }: Props) {
     );
   };
 
-  // Only apply keyboard padding when there are messages (active chat)
-  const bottomPadding = keyboardHeight > 0 && messages.length > 0 ? keyboardHeight - 85 : 0;
+  const bottomPadding = keyboardHeight > 0 ? keyboardHeight - 85 : 0;
+  const keyboardOpen = keyboardHeight > 0;
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
       {messages.length === 0 ? (
-        <View style={styles.starterContainer} onTouchStart={Keyboard.dismiss}>
-          <View style={styles.starterIcon}>
-            <Ionicons name="chatbubbles-outline" size={40} color={colors.accent} />
-          </View>
-          <Text style={styles.starterTitle}>Ask StackWise AI</Text>
-          <Text style={styles.starterDesc}>
-            Get personalized advice about peptides, dosing, stacking, and your cycle.
-          </Text>
-          <View style={styles.starterChips}>
-            {STARTERS.map((q) => (
-              <TouchableOpacity key={q} style={styles.starterChip} onPress={() => send(q)}>
-                <Text style={styles.starterChipText}>{q}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+        <View style={styles.starterContainer}>
+          {!keyboardOpen && (
+            <>
+              <View style={styles.starterIcon}>
+                <Ionicons name="chatbubbles-outline" size={40} color={colors.accent} />
+              </View>
+              <Text style={styles.starterTitle}>Ask StackWise AI</Text>
+              <Text style={styles.starterDesc}>
+                Get personalized advice about peptides, dosing, stacking, and your cycle.
+              </Text>
+              <View style={styles.starterChips}>
+                {STARTERS.map((q) => (
+                  <TouchableOpacity key={q} style={styles.starterChip} onPress={() => send(q)}>
+                    <Text style={styles.starterChipText}>{q}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
         </View>
       ) : (
         <FlatList
@@ -192,6 +197,7 @@ export default function ChatView({ navigation }: Props) {
         </TouchableOpacity>
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 
