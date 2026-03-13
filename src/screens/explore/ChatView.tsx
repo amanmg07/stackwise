@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  Platform, ActivityIndicator, Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
@@ -32,7 +32,25 @@ export default function ChatView({ navigation }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const listRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -112,12 +130,11 @@ export default function ChatView({ navigation }: Props) {
     );
   };
 
+  // Account for tab bar (~85px) so keyboard padding doesn't over-push
+  const bottomPadding = keyboardHeight > 0 ? keyboardHeight - 85 : 0;
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 140 : 0}
-    >
+    <View style={styles.container}>
       {messages.length === 0 ? (
         <View style={styles.starterContainer}>
           <View style={styles.starterIcon}>
@@ -143,6 +160,8 @@ export default function ChatView({ navigation }: Props) {
           renderItem={renderMessage}
           contentContainerStyle={{ padding: spacing.md, paddingBottom: 8 }}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+          onLayout={() => listRef.current?.scrollToEnd({ animated: false })}
+          keyboardShouldPersistTaps="handled"
         />
       )}
 
@@ -153,7 +172,7 @@ export default function ChatView({ navigation }: Props) {
         </View>
       )}
 
-      <View style={styles.inputRow}>
+      <View style={[styles.inputRow, { paddingBottom: Math.max(bottomPadding, Platform.OS === "ios" ? 8 : spacing.md) }]}>
         <TextInput
           style={styles.input}
           value={input}
@@ -172,7 +191,7 @@ export default function ChatView({ navigation }: Props) {
           <Ionicons name="send" size={18} color={colors.background} />
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -212,8 +231,9 @@ const styles = StyleSheet.create({
   typingText: { fontSize: 13, color: colors.textSecondary },
   inputRow: {
     flexDirection: "row", alignItems: "flex-end", gap: 8,
-    padding: spacing.md, paddingBottom: Platform.OS === "ios" ? 8 : spacing.md,
+    padding: spacing.md,
     borderTopWidth: 1, borderTopColor: colors.border,
+    backgroundColor: colors.background,
   },
   input: {
     flex: 1, backgroundColor: colors.surface, borderRadius: 20,
