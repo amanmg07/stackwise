@@ -3,51 +3,76 @@ import { Cycle, JournalEntry, ChatMessage } from "../types";
 
 const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
 
-function buildSystemPrompt(activeCycle: Cycle | null, recentJournal: JournalEntry[]): string {
-  const peptideContext = peptides.map((p) => ({
-    id: p.id,
-    name: p.name,
-    categories: p.categories,
-    description: p.description,
-    routes: p.routes,
-    dosingProtocols: p.dosingProtocols,
-    sideEffects: p.sideEffects,
-    stacksWith: p.stacksWith,
-    halfLife: p.halfLife,
-    notes: p.notes,
-  }));
+function findMentionedPeptides(messages: ChatMessage[]): string[] {
+  const text = messages.map((m) => m.content).join(" ").toLowerCase();
+  const mentioned: string[] = [];
+  for (const p of peptides) {
+    const names = [p.name, p.abbreviation].filter(Boolean) as string[];
+    if (names.some((n) => text.includes(n.toLowerCase()))) {
+      mentioned.push(p.id);
+    }
+  }
+  return mentioned;
+}
+
+function buildSystemPrompt(
+  activeCycle: Cycle | null,
+  recentJournal: JournalEntry[],
+  mentionedIds: string[]
+): string {
+  // Compact index: just name + categories for all peptides
+  const index = peptides.map((p) =>
+    `${p.name}${p.abbreviation && p.abbreviation !== p.name ? ` (${p.abbreviation})` : ""}: ${p.categories.join(", ")}`
+  ).join("\n");
+
+  // Full details only for mentioned peptides
+  const detailed = peptides
+    .filter((p) => mentionedIds.includes(p.id))
+    .map((p) => ({
+      name: p.name,
+      categories: p.categories,
+      description: p.description,
+      mechanism: p.mechanism,
+      routes: p.routes,
+      dosingProtocols: p.dosingProtocols,
+      sideEffects: p.sideEffects,
+      stacksWith: p.stacksWith,
+      halfLife: p.halfLife,
+      notes: p.notes,
+    }));
 
   let prompt = `You are StackWise AI, a knowledgeable peptide advisor built into the StackWise app. You help users understand peptides, dosing protocols, stacking strategies, side effects, and cycle planning.
 
-IMPORTANT RULES:
-- Always provide evidence-based information
-- Include dosing ranges and administration routes when discussing specific peptides
-- Warn about potential side effects and contraindications
-- Recommend consulting a healthcare provider for medical decisions
-- Reference specific peptides by their exact name from the database
-- Keep responses concise but thorough — aim for 2-4 paragraphs max
-- Use a friendly, knowledgeable tone
+RULES:
+- Provide evidence-based information with dosing ranges and routes
+- Warn about side effects and contraindications
+- Recommend consulting a healthcare provider
+- Keep responses concise — 2-4 paragraphs max
+- Friendly, knowledgeable tone
 
-PEPTIDE DATABASE:
-${JSON.stringify(peptideContext, null, 0)}
+PEPTIDE INDEX (name: categories):
+${index}
 `;
 
+  if (detailed.length > 0) {
+    prompt += `\nDETAILED INFO FOR REFERENCED PEPTIDES:\n${JSON.stringify(detailed, null, 0)}\n`;
+  }
+
   if (activeCycle) {
-    prompt += `\n\nUSER'S ACTIVE CYCLE:
+    prompt += `\nUSER'S ACTIVE CYCLE:
 Name: ${activeCycle.name}
 Period: ${activeCycle.startDate} to ${activeCycle.endDate}
 Peptides: ${activeCycle.peptides.map((p) => {
       const pep = peptides.find((db) => db.id === p.peptideId);
       return `${pep?.name || p.peptideId} (${p.doseAmount} ${p.doseUnit}, ${p.frequency}, ${p.route})`;
-    }).join("; ")}
-Notes: ${activeCycle.notes || "None"}`;
+    }).join("; ")}`;
   }
 
   if (recentJournal.length > 0) {
     const entries = recentJournal.slice(0, 5).map((e) =>
-      `${e.date}: energy=${e.energyLevel}/5, sleep=${e.sleepQuality}/5, recovery=${e.recoveryScore}/5, mood=${e.mood}/5, soreness=${e.soreness}/5${e.notes ? `, notes: "${e.notes}"` : ""}`
+      `${e.date}: energy=${e.energyLevel}/5, sleep=${e.sleepQuality}/5, recovery=${e.recoveryScore}/5, mood=${e.mood}/5`
     );
-    prompt += `\n\nUSER'S RECENT JOURNAL (last ${entries.length} entries):\n${entries.join("\n")}`;
+    prompt += `\nRECENT JOURNAL:\n${entries.join("\n")}`;
   }
 
   return prompt;
@@ -70,7 +95,8 @@ export async function sendChatMessage(
   messages: ChatMessage[],
   context: { activeCycle: Cycle | null; recentJournal: JournalEntry[] },
 ): Promise<{ content: string; peptideRefs: string[] }> {
-  const systemPrompt = buildSystemPrompt(context.activeCycle, context.recentJournal);
+  const mentionedIds = findMentionedPeptides(messages);
+  const systemPrompt = buildSystemPrompt(context.activeCycle, context.recentJournal, mentionedIds);
 
   const groqMessages = [
     { role: "system" as const, content: systemPrompt },
