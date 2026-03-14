@@ -16,11 +16,36 @@ export default function LogDoseScreen({ route, navigation }: any) {
   const cyclePeptide = cycle?.peptides.find((p) => p.peptideId === initPeptideId);
   const peptide = peptideDB.find((p) => p.id === initPeptideId);
 
-  const [amount, setAmount] = useState(String(cyclePeptide?.doseAmount || 250));
-  const [unit, setUnit] = useState<"mcg" | "mg" | "IU">(cyclePeptide?.doseUnit || "mcg");
+  // Convert initial dose to mg as default
+  const initUnit = cyclePeptide?.doseUnit || "mg";
+  const initAmount = cyclePeptide?.doseAmount || 0.25;
+  const initMg = initUnit === "mcg" ? initAmount / 1000 : initUnit === "mg" ? initAmount : initAmount;
+
+  const [amount, setAmount] = useState(String(initUnit === "mcg" ? initMg : initAmount));
+  const [unit, setUnit] = useState<"mcg" | "mg" | "IU">(initUnit === "IU" ? "IU" : "mg");
   const [route_, setRoute] = useState<AdministrationRoute>(cyclePeptide?.route || "subcutaneous");
   const [site, setSite] = useState("");
   const [notes, setNotes] = useState("");
+
+  const switchUnit = (newUnit: "mcg" | "mg" | "IU") => {
+    const current = parseFloat(amount) || 0;
+    if (newUnit === unit) return;
+
+    let converted = current;
+    // Convert current → mg first
+    const inMg = unit === "mcg" ? current / 1000 : unit === "mg" ? current : current;
+    // Then mg → target
+    if (newUnit === "mcg") converted = inMg * 1000;
+    else if (newUnit === "mg") converted = inMg;
+    else converted = current; // IU has no direct conversion, keep as-is
+
+    // Don't convert to/from IU since it's not a weight unit
+    if (unit === "IU" || newUnit === "IU") converted = current;
+
+    const rounded = parseFloat(converted.toPrecision(4));
+    setAmount(String(rounded));
+    setUnit(newUnit);
+  };
 
   const save = () => {
     addDoseLog({
@@ -54,7 +79,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
             <TouchableOpacity
               key={u}
               style={[styles.unitBtn, unit === u && styles.unitBtnActive]}
-              onPress={() => setUnit(u)}
+              onPress={() => switchUnit(u)}
             >
               <Text style={[styles.unitText, unit === u && styles.unitTextActive]}>{u}</Text>
             </TouchableOpacity>
