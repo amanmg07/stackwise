@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   starterChipText: { fontSize: 13, color: colors.accent, fontWeight: "500", lineHeight: 18 },
   msgRow: { marginBottom: 12 },
   msgRowUser: { alignItems: "flex-end" },
-  bubble: { maxWidth: "85%", borderRadius: 16, padding: 14 },
+  bubble: { maxWidth: "75%", borderRadius: 16, padding: 12 },
   bubbleUser: { backgroundColor: colors.accent, borderBottomRightRadius: 4 },
   bubbleAssistant: { backgroundColor: colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: colors.border },
   bubbleText: { fontSize: 15, color: colors.text, lineHeight: 22, flex: 1 },
