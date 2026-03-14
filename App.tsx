@@ -1,5 +1,6 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { AppProvider } from "./src/context/AppContext";
 import RootNavigator from "./src/navigation/RootNavigator";
@@ -25,11 +26,13 @@ const navTheme = {
 
 export default function App() {
   return (
-    <AppProvider>
-      <NavigationContainer theme={navTheme}>
-        <StatusBar style="light" />
-        <RootNavigator />
-      </NavigationContainer>
-    </AppProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppProvider>
+        <NavigationContainer theme={navTheme}>
+          <StatusBar style="light" />
+          <RootNavigator />
+        </NavigationContainer>
+      </AppProvider>
+    </GestureHandlerRootView>
   );
 }

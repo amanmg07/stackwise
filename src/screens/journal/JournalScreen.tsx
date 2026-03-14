@@ -1,5 +1,6 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Alert } from "react-native";
+import React, { useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Alert, Animated } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -233,38 +234,58 @@ export default function JournalScreen({ navigation }: any) {
           </View>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate("NewEntry", { entryId: item.id })}
-            onLongPress={() => {
-              Alert.alert("Delete Entry", `Delete entry from ${format(parseISO(item.date), "MMM d")}?`, [
-                { text: "Cancel", style: "cancel" },
-                { text: "Delete", style: "destructive", onPress: () => deleteJournalEntry(item.id) },
-              ]);
+          <Swipeable
+            renderRightActions={(progress, dragX) => {
+              const scale = dragX.interpolate({
+                inputRange: [-80, 0],
+                outputRange: [1, 0.5],
+                extrapolate: "clamp",
+              });
+              return (
+                <TouchableOpacity
+                  style={styles.deleteBtn}
+                  onPress={() => {
+                    Alert.alert("Delete Entry", `Delete entry from ${format(parseISO(item.date), "MMM d")}?`, [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Delete", style: "destructive", onPress: () => deleteJournalEntry(item.id) },
+                    ]);
+                  }}
+                >
+                  <Animated.View style={{ transform: [{ scale }], alignItems: "center" }}>
+                    <Ionicons name="trash-outline" size={22} color="#fff" />
+                    <Text style={styles.deleteBtnText}>Delete</Text>
+                  </Animated.View>
+                </TouchableOpacity>
+              );
             }}
-            activeOpacity={0.7}
           >
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardDate}>
-                {format(parseISO(item.date), "EEE, MMM d")}
-              </Text>
-              {item.weight && (
-                <Text style={styles.cardWeight}>
-                  {item.weight} {settings.weightUnit}
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("NewEntry", { entryId: item.id })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardDate}>
+                  {format(parseISO(item.date), "EEE, MMM d")}
                 </Text>
-              )}
-            </View>
-            <View style={styles.metrics}>
-              <MetricBadge label="Energy" value={item.energyLevel} />
-              <MetricBadge label="Sleep" value={item.sleepQuality} />
-              <MetricBadge label="Recovery" value={item.recoveryScore} />
-              <MetricBadge label="Mood" value={item.mood} />
-              <MetricBadge label="Soreness" value={item.soreness} inverted />
-            </View>
-            {item.notes ? (
-              <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
-            ) : null}
-          </TouchableOpacity>
+                {item.weight && (
+                  <Text style={styles.cardWeight}>
+                    {item.weight} {settings.weightUnit}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.metrics}>
+                <MetricBadge label="Energy" value={item.energyLevel} />
+                <MetricBadge label="Sleep" value={item.sleepQuality} />
+                <MetricBadge label="Recovery" value={item.recoveryScore} />
+                <MetricBadge label="Mood" value={item.mood} />
+                <MetricBadge label="Soreness" value={item.soreness} inverted />
+              </View>
+              {item.notes ? (
+                <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
+              ) : null}
+            </TouchableOpacity>
+          </Swipeable>
         )}
       />
 
@@ -350,6 +371,11 @@ const styles = StyleSheet.create({
   badgeLabel: { fontSize: 9, color: colors.textSecondary, marginBottom: 2 },
   badgeValue: { fontSize: 14, fontWeight: "700" },
   notes: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
+  deleteBtn: {
+    backgroundColor: colors.error, justifyContent: "center", alignItems: "center",
+    width: 80, borderRadius: 14, marginTop: 12, marginRight: spacing.md,
+  },
+  deleteBtnText: { color: "#fff", fontSize: 11, fontWeight: "600", marginTop: 4 },
   simBtn: {
     position: "absolute", bottom: 28, left: 24,
     flexDirection: "row", alignItems: "center", gap: 6,
