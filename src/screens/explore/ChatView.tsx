@@ -116,14 +116,58 @@ export default function ChatView({ navigation }: Props) {
     );
   };
 
+  const formatContent = (text: string, isUser: boolean) => {
+    if (isUser) return <Text style={[styles.bubbleText, styles.bubbleTextUser]}>{text}</Text>;
+
+    const paragraphs = text.split(/\n\n+/);
+    return paragraphs.map((para, pi) => {
+      const lines = para.split("\n");
+      return (
+        <View key={pi} style={pi > 0 ? { marginTop: 10 } : undefined}>
+          {lines.map((line, li) => {
+            const bulletMatch = line.match(/^[\-\•\*]\s+(.+)/);
+            const numberedMatch = line.match(/^(\d+)[\.\)]\s+(.+)/);
+
+            if (bulletMatch) {
+              return (
+                <View key={li} style={styles.bulletRow}>
+                  <Text style={styles.bulletDot}>•</Text>
+                  <Text style={styles.bubbleText}>{renderInline(bulletMatch[1])}</Text>
+                </View>
+              );
+            }
+            if (numberedMatch) {
+              return (
+                <View key={li} style={styles.bulletRow}>
+                  <Text style={styles.numberedNum}>{numberedMatch[1]}.</Text>
+                  <Text style={styles.bubbleText}>{renderInline(numberedMatch[2])}</Text>
+                </View>
+              );
+            }
+            return <Text key={li} style={styles.bubbleText}>{renderInline(line)}</Text>;
+          })}
+        </View>
+      );
+    });
+  };
+
+  const renderInline = (text: string) => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      const boldMatch = part.match(/^\*\*(.+)\*\*$/);
+      if (boldMatch) {
+        return <Text key={i} style={styles.boldText}>{boldMatch[1]}</Text>;
+      }
+      return <React.Fragment key={i}>{part}</React.Fragment>;
+    });
+  };
+
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === "user";
     return (
       <View style={[styles.msgRow, isUser && styles.msgRowUser]}>
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
-          <Text style={[styles.bubbleText, isUser && styles.bubbleTextUser]}>
-            {item.content}
-          </Text>
+          {formatContent(item.content, isUser)}
         </View>
         {!isUser && item.peptideRefs && item.peptideRefs.length > 0 && renderPeptideChips(item.peptideRefs)}
       </View>
@@ -222,8 +266,12 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: "85%", borderRadius: 16, padding: 14 },
   bubbleUser: { backgroundColor: colors.accent, borderBottomRightRadius: 4 },
   bubbleAssistant: { backgroundColor: colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: colors.border },
-  bubbleText: { fontSize: 15, color: colors.text, lineHeight: 22 },
+  bubbleText: { fontSize: 15, color: colors.text, lineHeight: 22, flex: 1 },
   bubbleTextUser: { color: colors.background },
+  boldText: { fontWeight: "700" },
+  bulletRow: { flexDirection: "row", gap: 6, marginTop: 4 },
+  bulletDot: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
+  numberedNum: { fontSize: 15, color: colors.textSecondary, lineHeight: 22, fontWeight: "600", minWidth: 18 },
   refRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8, paddingLeft: 4 },
   refChip: {
     flexDirection: "row", alignItems: "center", gap: 4,
