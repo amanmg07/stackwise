@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from "r
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
 import { getSourcesForPeptide } from "../../data/peptideSources";
+import { useApp } from "../../context/AppContext";
 import { colors, spacing } from "../../theme";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -20,9 +21,18 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function PeptideDetailScreen({ route, navigation }: any) {
   const { peptideId } = route.params;
   const peptide = peptides.find((p) => p.id === peptideId);
+  const { settings, updateSettings } = useApp();
   const [expandedProtocol, setExpandedProtocol] = useState<number | null>(0);
   const [showStorage, setShowStorage] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+
+  const isSaved = settings.savedPeptides?.includes(peptideId);
+  const toggleSave = () => {
+    const saved = settings.savedPeptides || [];
+    updateSettings({
+      savedPeptides: isSaved ? saved.filter((id) => id !== peptideId) : [...saved, peptideId],
+    });
+  };
 
   if (!peptide) {
     return (
@@ -43,6 +53,13 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
           {peptide.abbreviation && peptide.abbreviation !== peptide.name && (
             <Text style={styles.abbr}>{peptide.abbreviation}</Text>
           )}
+          <TouchableOpacity onPress={toggleSave} style={styles.saveBtn}>
+            <Ionicons
+              name={isSaved ? "bookmark" : "bookmark-outline"}
+              size={22}
+              color={isSaved ? colors.accent : colors.textSecondary}
+            />
+          </TouchableOpacity>
         </View>
         {peptide.isBlend && (
           <View style={styles.blendBadge}>
@@ -251,7 +268,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   errorText: { color: colors.error, fontSize: 16, textAlign: "center", marginTop: 40 },
   header: { marginBottom: 10 },
-  nameRow: { flexDirection: "row", alignItems: "baseline", gap: 10, flexWrap: "wrap" },
+  nameRow: { flexDirection: "row", alignItems: "baseline", gap: 10, flexWrap: "wrap", flex: 1 },
+  saveBtn: { marginLeft: "auto", padding: 4 },
   name: { fontSize: 28, fontWeight: "800", color: colors.text, flexShrink: 1 },
   abbr: { fontSize: 16, color: colors.textSecondary },
   blendBadge: {

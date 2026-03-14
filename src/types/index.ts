@@ -112,6 +112,7 @@ export interface UserSettings {
   weightUnit: "lbs" | "kg";
   notificationsEnabled: boolean;
   reminderTimes: string[];
+  savedPeptides: string[];
 }
 
 export interface ChatMessage {
