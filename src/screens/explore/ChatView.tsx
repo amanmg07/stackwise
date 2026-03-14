@@ -132,7 +132,7 @@ export default function ChatView({ navigation }: Props) {
               return (
                 <View key={li} style={styles.bulletRow}>
                   <Text style={styles.bulletDot}>•</Text>
-                  <Text style={styles.bubbleText}>{renderInline(bulletMatch[1])}</Text>
+                  <Text style={[styles.bubbleText, { flex: 1 }]}>{renderInline(bulletMatch[1])}</Text>
                 </View>
               );
             }
@@ -140,7 +140,7 @@ export default function ChatView({ navigation }: Props) {
               return (
                 <View key={li} style={styles.bulletRow}>
                   <Text style={styles.numberedNum}>{numberedMatch[1]}.</Text>
-                  <Text style={styles.bubbleText}>{renderInline(numberedMatch[2])}</Text>
+                  <Text style={[styles.bubbleText, { flex: 1 }]}>{renderInline(numberedMatch[2])}</Text>
                 </View>
               );
             }
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: "75%", borderRadius: 16, padding: 12 },
   bubbleUser: { backgroundColor: colors.accent, borderBottomRightRadius: 4 },
   bubbleAssistant: { backgroundColor: colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: colors.border },
-  bubbleText: { fontSize: 15, color: colors.text, lineHeight: 22, flex: 1 },
+  bubbleText: { fontSize: 15, color: colors.text, lineHeight: 22 },
   bubbleTextUser: { color: colors.background },
   boldText: { fontWeight: "700" },
   bulletRow: { flexDirection: "row", gap: 6, marginTop: 4 },
