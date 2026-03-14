@@ -221,7 +221,14 @@ export default function JournalScreen({ navigation }: any) {
         data={sorted}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
-        ListHeaderComponent={header}
+        ListHeaderComponent={<>
+          {header()}
+          {sorted.length > 0 && (
+            <Text style={styles.swipeHint}>
+              <Ionicons name="arrow-back" size={11} color={colors.textSecondary} /> Swipe left to delete
+            </Text>
+          )}
+        </>}
         ListEmptyComponent={
           <View style={styles.empty}>
             <View style={styles.emptyIcon}>
@@ -376,6 +383,10 @@ const styles = StyleSheet.create({
     width: 80, borderRadius: 14, marginTop: 12, marginRight: spacing.md,
   },
   deleteBtnText: { color: "#fff", fontSize: 11, fontWeight: "600", marginTop: 4 },
+  swipeHint: {
+    fontSize: 11, color: colors.textSecondary, textAlign: "right",
+    paddingHorizontal: spacing.md, marginBottom: 4,
+  },
   simBtn: {
     position: "absolute", bottom: 28, left: 24,
     flexDirection: "row", alignItems: "center", gap: 6,
