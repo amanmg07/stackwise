@@ -143,36 +143,8 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   return insights;
 }
 
-function generateSimulatedEntries(): JournalEntry[] {
-  const entries: JournalEntry[] = [];
-  // 10 entries over the past 14 days with declining sleep/energy to trigger recommendations
-  const patterns = [
-    { daysAgo: 1,  sleep: 2, energy: 2, recovery: 3, mood: 3, soreness: 3 },
-    { daysAgo: 2,  sleep: 2, energy: 2, recovery: 2, mood: 2, soreness: 4 },
-    { daysAgo: 3,  sleep: 3, energy: 3, recovery: 3, mood: 3, soreness: 3 },
-    { daysAgo: 5,  sleep: 2, energy: 2, recovery: 2, mood: 3, soreness: 4 },
-    { daysAgo: 6,  sleep: 3, energy: 3, recovery: 3, mood: 2, soreness: 3 },
-    { daysAgo: 7,  sleep: 3, energy: 3, recovery: 3, mood: 3, soreness: 2 },
-    { daysAgo: 9,  sleep: 4, energy: 4, recovery: 4, mood: 4, soreness: 2 },
-    { daysAgo: 10, sleep: 4, energy: 3, recovery: 4, mood: 4, soreness: 2 },
-    { daysAgo: 12, sleep: 4, energy: 4, recovery: 4, mood: 3, soreness: 2 },
-    { daysAgo: 14, sleep: 4, energy: 4, recovery: 4, mood: 4, soreness: 1 },
-  ];
-  for (const p of patterns) {
-    const date = format(subDays(new Date(), p.daysAgo), "yyyy-MM-dd");
-    entries.push({
-      id: generateId(),
-      date,
-      sleepQuality: p.sleep,
-      energyLevel: p.energy,
-      recoveryScore: p.recovery,
-      mood: p.mood,
-      soreness: p.soreness,
-      notes: "",
-      createdAt: new Date().toISOString(),
-    });
-  }
-  return entries;
+function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export default function JournalScreen({ navigation }: any) {
@@ -180,11 +152,23 @@ export default function JournalScreen({ navigation }: any) {
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal);
 
-  const simulateDays = () => {
-    const entries = generateSimulatedEntries();
-    for (const entry of entries) {
-      addJournalEntry(entry);
-    }
+  const simulateOneDay = () => {
+    // Find the earliest existing date and go one day before, or start at yesterday
+    const nextDate = journal.length === 0
+      ? subDays(new Date(), 1)
+      : subDays(parseISO([...journal].sort((a, b) => a.date.localeCompare(b.date))[0].date), 1);
+
+    addJournalEntry({
+      id: generateId(),
+      date: format(nextDate, "yyyy-MM-dd"),
+      sleepQuality: randomInt(1, 5),
+      energyLevel: randomInt(1, 5),
+      recoveryScore: randomInt(1, 5),
+      mood: randomInt(1, 5),
+      soreness: randomInt(1, 5),
+      notes: "",
+      createdAt: new Date().toISOString(),
+    });
   };
 
   const header = () => {
@@ -278,10 +262,10 @@ export default function JournalScreen({ navigation }: any) {
 
       <TouchableOpacity
         style={styles.simBtn}
-        onPress={simulateDays}
+        onPress={simulateOneDay}
       >
         <Ionicons name="time-outline" size={18} color={colors.accent} />
-        <Text style={styles.simBtnText}>Simulate 14 Days</Text>
+        <Text style={styles.simBtnText}>+ 1 Day</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
