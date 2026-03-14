@@ -4,8 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, subDays } from "date-fns";
 import { JournalEntry } from "../../types";
+import { generateId } from "../../utils/id";
 
 const RATING_LABELS = ["", "Poor", "Low", "Average", "Good", "Excellent"];
 
@@ -142,10 +143,49 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   return insights;
 }
 
+function generateSimulatedEntries(): JournalEntry[] {
+  const entries: JournalEntry[] = [];
+  // 10 entries over the past 14 days with declining sleep/energy to trigger recommendations
+  const patterns = [
+    { daysAgo: 1,  sleep: 2, energy: 2, recovery: 3, mood: 3, soreness: 3 },
+    { daysAgo: 2,  sleep: 2, energy: 2, recovery: 2, mood: 2, soreness: 4 },
+    { daysAgo: 3,  sleep: 3, energy: 3, recovery: 3, mood: 3, soreness: 3 },
+    { daysAgo: 5,  sleep: 2, energy: 2, recovery: 2, mood: 3, soreness: 4 },
+    { daysAgo: 6,  sleep: 3, energy: 3, recovery: 3, mood: 2, soreness: 3 },
+    { daysAgo: 7,  sleep: 3, energy: 3, recovery: 3, mood: 3, soreness: 2 },
+    { daysAgo: 9,  sleep: 4, energy: 4, recovery: 4, mood: 4, soreness: 2 },
+    { daysAgo: 10, sleep: 4, energy: 3, recovery: 4, mood: 4, soreness: 2 },
+    { daysAgo: 12, sleep: 4, energy: 4, recovery: 4, mood: 3, soreness: 2 },
+    { daysAgo: 14, sleep: 4, energy: 4, recovery: 4, mood: 4, soreness: 1 },
+  ];
+  for (const p of patterns) {
+    const date = format(subDays(new Date(), p.daysAgo), "yyyy-MM-dd");
+    entries.push({
+      id: generateId(),
+      date,
+      sleepQuality: p.sleep,
+      energyLevel: p.energy,
+      recoveryScore: p.recovery,
+      mood: p.mood,
+      soreness: p.soreness,
+      notes: "",
+      createdAt: new Date().toISOString(),
+    });
+  }
+  return entries;
+}
+
 export default function JournalScreen({ navigation }: any) {
-  const { journal, settings } = useApp();
+  const { journal, settings, addJournalEntry } = useApp();
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal);
+
+  const simulateDays = () => {
+    const entries = generateSimulatedEntries();
+    for (const entry of entries) {
+      addJournalEntry(entry);
+    }
+  };
 
   const header = () => {
     if (insights.length === 0) return null;
@@ -237,6 +277,14 @@ export default function JournalScreen({ navigation }: any) {
       />
 
       <TouchableOpacity
+        style={styles.simBtn}
+        onPress={simulateDays}
+      >
+        <Ionicons name="time-outline" size={18} color={colors.accent} />
+        <Text style={styles.simBtnText}>Simulate 14 Days</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate("NewEntry")}
       >
@@ -307,6 +355,16 @@ const styles = StyleSheet.create({
   badgeLabel: { fontSize: 10, color: colors.textSecondary, marginBottom: 2 },
   badgeValue: { fontSize: 14, fontWeight: "700" },
   notes: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
+  simBtn: {
+    position: "absolute", bottom: 28, left: 24,
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: colors.surface, borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderWidth: 1, borderColor: colors.accent + "40",
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4,
+    elevation: 4,
+  },
+  simBtnText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   fab: {
     position: "absolute", bottom: 24, right: 24,
     width: 56, height: 56, borderRadius: 28,
