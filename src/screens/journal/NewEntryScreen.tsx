@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { generateId } from "../../utils/id";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing } from "../../theme";
 
@@ -69,7 +69,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <Text style={styles.dateText}>
-        {existing ? format(new Date(existing.date), "EEEE, MMMM d") : format(new Date(), "EEEE, MMMM d")}
+        {existing ? format(parseISO(existing.date), "EEEE, MMMM d") : format(new Date(), "EEEE, MMMM d")}
       </Text>
 
       <View style={styles.row}>
