@@ -14,14 +14,14 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Injury healing",
-        doseRange: "250-500 mcg",
+        doseRange: "0.25-0.5 mg",
         frequency: "1-2x daily",
         cycleDuration: "4-8 weeks on, 8-10 weeks off",
         timing: "Morning and evening, ~12 hours apart. Inject near the injury for best results, or in belly fat for whole-body effect.",
       },
       {
         purpose: "Gut healing",
-        doseRange: "500 mcg",
+        doseRange: "0.5 mg",
         frequency: "2x daily",
         cycleDuration: "4-6 weeks",
         timing: "Empty stomach. Take orally for gut issues, or inject in abdomen.",
@@ -53,7 +53,7 @@ export const peptides: Peptide[] = [
       },
       {
         purpose: "Maintenance phase",
-        doseRange: "750-1000 mcg daily, or 2-2.5 mg weekly",
+        doseRange: "0.75-1 mg daily, or 2-2.5 mg weekly",
         frequency: "Daily or weekly",
         cycleDuration: "4-6 weeks after loading",
         timing: "Any time of day",
@@ -78,7 +78,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH boost / body recomp",
-        doseRange: "100 mcg per injection",
+        doseRange: "0.1 mg per injection",
         frequency: "2-3x daily",
         cycleDuration: "8-12 weeks. Some do 5 days on, 2 off.",
         timing: "Empty stomach (food blunts GH release). Best times: morning, post-workout, before bed. Wait 20 min before eating.",
@@ -88,7 +88,7 @@ export const peptides: Peptide[] = [
     stacksWith: ["ipamorelin", "bpc157", "tb500"],
     halfLife: "~30 minutes",
     storage: "Powder: freezer long-term, fridge short-term. Mixed: fridge, use within 30 days. Never freeze after mixing. Toss if cloudy.",
-        notes: "Almost always used with Ipamorelin — together they release 2-3x more GH than either alone. Going above 100 mcg doesn't help much but increases side effects. Preferred over the DAC version for natural GH pulsing.",
+        notes: "Almost always used with Ipamorelin — together they release 2-3x more GH than either alone. Going above 0.1 mg doesn't help much but increases side effects. Preferred over the DAC version for natural GH pulsing.",
   },
   {
     id: "cjc1295_dac",
@@ -126,14 +126,14 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH boost / lean muscle",
-        doseRange: "100-200 mcg per injection (when stacking with CJC-1295)",
+        doseRange: "0.1-0.2 mg per injection (when stacking with CJC-1295)",
         frequency: "2-3x daily",
         cycleDuration: "8-12 weeks, then take a break",
         timing: "Empty stomach. Morning, post-workout, before bed. Wait 20 min before eating.",
       },
       {
         purpose: "Better sleep + recovery",
-        doseRange: "200-300 mcg",
+        doseRange: "0.2-0.3 mg",
         frequency: "1x daily before bed",
         cycleDuration: "8-12 weeks",
         timing: "30 min before bed on empty stomach. Matches your body's natural nighttime GH spike.",
@@ -264,7 +264,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Better sleep",
-        doseRange: "100-300 mcg",
+        doseRange: "0.1-0.3 mg",
         frequency: "Daily or 3-5x per week",
         cycleDuration: "10-14 days, then take a break. Or 2-4 weeks and reassess.",
         timing: "30-60 minutes before bed. Inject or use nasal spray.",
@@ -313,10 +313,10 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Anxiety relief / sharper thinking",
-        doseRange: "200-500 mcg",
+        doseRange: "0.2-0.5 mg",
         frequency: "2-3x daily",
         cycleDuration: "2-4 weeks",
-        timing: "Nasal spray: 2-3 drops per nostril. Or inject 250-500 mcg. Can use anytime — it won't make you sleepy.",
+        timing: "Nasal spray: 2-3 drops per nostril. Or inject 0.25-0.5 mg. Can use anytime — it won't make you sleepy.",
       },
     ],
     sideEffects: ["Nasal irritation (spray)", "Tiredness (rare)", "Mild headache (rare)"],
@@ -337,7 +337,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Focus / cognitive boost",
-        doseRange: "100-600 mcg",
+        doseRange: "0.1-0.6 mg",
         frequency: "1-3x daily",
         cycleDuration: "2-4 weeks on, 2 weeks off. Or 5-10 day bursts when you need it.",
         timing: "Nasal spray: 1-2 drops per nostril. Use in the morning/afternoon — it's stimulating. Avoid evening use.",
@@ -362,7 +362,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Fat loss",
-        doseRange: "300 mcg",
+        doseRange: "0.3 mg",
         frequency: "1x daily",
         cycleDuration: "8-12 weeks",
         timing: "Morning on empty stomach, or before fasted cardio. Wait 20 min before eating.",
@@ -505,7 +505,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Gut inflammation / general anti-inflammatory",
-        doseRange: "200-500 mcg (injection) or 500 mcg - 1 mg (oral)",
+        doseRange: "0.2-0.5 mg (injection) or 0.5 mg - 1 mg (oral)",
         frequency: "1x daily",
         cycleDuration: "4-8 weeks",
         timing: "Empty stomach. Morning or evening.",
@@ -716,7 +716,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Immune support",
-        doseRange: "50-100 mcg",
+        doseRange: "0.05-0.1 mg",
         frequency: "Daily or 3-5x per week",
         cycleDuration: "2-4 weeks",
         timing: "Any time. Morning preferred.",
@@ -748,7 +748,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH release / recovery",
-        doseRange: "100-200 mcg",
+        doseRange: "0.1-0.2 mg",
         frequency: "1-3x daily",
         cycleDuration: "4-8 weeks (stops working as well after that)",
         timing: "Empty stomach. Before bed and/or upon waking.",
@@ -773,7 +773,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH release / muscle gain",
-        doseRange: "100-300 mcg",
+        doseRange: "0.1-0.3 mg",
         frequency: "2-3x daily",
         cycleDuration: "8-12 weeks, then break",
         timing: "Empty stomach — fasting 30+ min before and after. Food blunts the GH response.",
@@ -798,7 +798,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH release / body composition",
-        doseRange: "100-300 mcg",
+        doseRange: "0.1-0.3 mg",
         frequency: "2-3x daily",
         cycleDuration: "8-12 weeks, then 4-week break",
         timing: "Empty stomach. Before bed is ideal. Wait 20 min before eating.",
@@ -823,7 +823,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Fertility preservation during TRT",
-        doseRange: "100-200 mcg",
+        doseRange: "0.1-0.2 mg",
         frequency: "2-3x per week",
         cycleDuration: "Ongoing with TRT",
         timing: "Any consistent time of day.",
@@ -901,7 +901,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Injury healing / recovery",
-        doseRange: "0.3 mL per injection (from 10mg vial reconstituted with 3 mL bac water = ~500 mcg each peptide)",
+        doseRange: "0.3 mL per injection (from 10mg vial reconstituted with 3 mL bac water = ~0.5 mg each peptide)",
         frequency: "1x daily",
         cycleDuration: "6-8 weeks",
         timing: "Inject near the injury site for best results. Morning or evening.",
@@ -926,7 +926,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH boost / lean muscle / fat loss / better sleep",
-        doseRange: "100-300 mcg each peptide per injection (0.1-0.3 mL from 10mg vial with 3 mL bac water)",
+        doseRange: "0.1-0.3 mg each peptide per injection (0.1-0.3 mL from 10mg vial with 3 mL bac water)",
         frequency: "1x daily before bed, 5 days on / 2 days off",
         cycleDuration: "12 weeks, then 4-week break",
         timing: "Empty stomach, 30 min before bed. Don't eat for 20 min after.",
@@ -976,7 +976,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Focus + calm + mental clarity",
-        doseRange: "500-1000 mcg total daily (injectable) or 1-2 sprays per nostril (nasal)",
+        doseRange: "0.5-1 mg total daily (injectable) or 1-2 sprays per nostril (nasal)",
         frequency: "1-2x daily",
         cycleDuration: "2-4 weeks on, 2 weeks off",
         timing: "Morning/afternoon for Semax (stimulating). Selank anytime. Space nasal doses 15-30 min apart.",

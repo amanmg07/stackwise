@@ -22,8 +22,8 @@ export default function NewCycleScreen({ route, navigation }: any) {
     template
       ? template.peptides.map((tp) => ({
           peptideId: tp.peptideId,
-          doseAmount: parseInt(tp.suggestedDose) || 250,
-          doseUnit: "mcg" as const,
+          doseAmount: parseFloat(tp.suggestedDose) || 0.25,
+          doseUnit: "mg" as const,
           frequency: tp.suggestedFrequency,
           route: "subcutaneous" as AdministrationRoute,
           timeOfDay: ["morning"],
@@ -38,8 +38,8 @@ export default function NewCycleScreen({ route, navigation }: any) {
       ...cyclePeptides,
       {
         peptideId,
-        doseAmount: 250,
-        doseUnit: "mcg",
+        doseAmount: 0.25,
+        doseUnit: "mg",
         frequency: "1x daily",
         route: "subcutaneous",
         timeOfDay: ["morning"],
