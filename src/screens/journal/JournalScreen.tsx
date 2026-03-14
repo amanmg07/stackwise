@@ -328,7 +328,7 @@ const METRICS = [
 const screenWidth = Dimensions.get("window").width;
 
 function TrendChart({ entries }: { entries: JournalEntry[] }) {
-  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sleepQuality", "energyLevel", "recoveryScore"]);
+  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sleepQuality", "energyLevel", "recoveryScore", "mood", "soreness"]);
 
   const chartEntries = [...entries]
     .sort((a, b) => a.date.localeCompare(b.date))
