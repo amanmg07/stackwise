@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -148,7 +148,7 @@ function randomInt(min: number, max: number) {
 }
 
 export default function JournalScreen({ navigation }: any) {
-  const { journal, settings, addJournalEntry } = useApp();
+  const { journal, settings, addJournalEntry, deleteJournalEntry } = useApp();
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal);
 
@@ -236,6 +236,13 @@ export default function JournalScreen({ navigation }: any) {
           <TouchableOpacity
             style={styles.card}
             onPress={() => navigation.navigate("NewEntry", { entryId: item.id })}
+            onLongPress={() => {
+              Alert.alert("Delete Entry", `Delete entry from ${format(parseISO(item.date), "MMM d")}?`, [
+                { text: "Cancel", style: "cancel" },
+                { text: "Delete", style: "destructive", onPress: () => deleteJournalEntry(item.id) },
+              ]);
+            }}
+            activeOpacity={0.7}
           >
             <View style={styles.cardHeader}>
               <Text style={styles.cardDate}>
@@ -278,6 +285,7 @@ export default function JournalScreen({ navigation }: any) {
     </View>
   );
 }
+
 
 function MetricBadge({ label, value, inverted }: { label: string; value: number; inverted?: boolean }) {
   const color = inverted
