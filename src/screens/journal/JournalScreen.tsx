@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Alert, Animated } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Alert, Animated, Dimensions } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import { LineChart } from "react-native-chart-kit";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -223,6 +224,7 @@ export default function JournalScreen({ navigation }: any) {
         contentContainerStyle={{ paddingBottom: 100 }}
         ListHeaderComponent={<>
           {header()}
+          {sorted.length >= 3 && <TrendChart entries={sorted} />}
           {sorted.length > 0 && (
             <Text style={styles.swipeHint}>
               <Ionicons name="arrow-back" size={11} color={colors.textSecondary} /> Swipe left to delete
@@ -315,6 +317,94 @@ export default function JournalScreen({ navigation }: any) {
 }
 
 
+const METRICS = [
+  { key: "sleepQuality" as const, label: "Sleep", color: "#818cf8" },
+  { key: "energyLevel" as const, label: "Energy", color: "#facc15" },
+  { key: "recoveryScore" as const, label: "Recovery", color: "#4ade80" },
+  { key: "mood" as const, label: "Mood", color: "#f472b6" },
+  { key: "soreness" as const, label: "Soreness", color: "#f87171" },
+];
+
+const screenWidth = Dimensions.get("window").width;
+
+function TrendChart({ entries }: { entries: JournalEntry[] }) {
+  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sleepQuality", "energyLevel", "recoveryScore"]);
+
+  const chartEntries = [...entries]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-14);
+
+  const labels = chartEntries.map((e) => format(parseISO(e.date), "M/d"));
+  const step = Math.max(1, Math.ceil(labels.length / 6));
+  const displayLabels = labels.map((l, i) => i % step === 0 ? l : "");
+
+  const datasets = METRICS
+    .filter((m) => activeMetrics.includes(m.key))
+    .map((m) => ({
+      data: chartEntries.map((e) => e[m.key]),
+      color: () => m.color,
+      strokeWidth: 2,
+    }));
+
+  if (datasets.length === 0) {
+    datasets.push({ data: [0], color: () => "transparent", strokeWidth: 0 });
+  }
+
+  const toggleMetric = (key: string) => {
+    setActiveMetrics((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  return (
+    <View style={styles.chartSection}>
+      <Text style={styles.chartTitle}>Trends</Text>
+      <View style={styles.chartLegend}>
+        {METRICS.map((m) => {
+          const active = activeMetrics.includes(m.key);
+          return (
+            <TouchableOpacity
+              key={m.key}
+              style={[styles.legendChip, active && { backgroundColor: m.color + "20", borderColor: m.color + "50" }]}
+              onPress={() => toggleMetric(m.key)}
+            >
+              <View style={[styles.legendDot, { backgroundColor: active ? m.color : colors.border }]} />
+              <Text style={[styles.legendText, active && { color: m.color }]}>{m.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      {activeMetrics.length > 0 && (
+        <LineChart
+          data={{
+            labels: displayLabels,
+            datasets,
+          }}
+          width={screenWidth - spacing.md * 2}
+          height={180}
+          yAxisSuffix=""
+          yAxisInterval={1}
+          fromZero
+          chartConfig={{
+            backgroundColor: colors.surface,
+            backgroundGradientFrom: colors.surface,
+            backgroundGradientTo: colors.surface,
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity * 0.3})`,
+            labelColor: () => colors.textSecondary,
+            propsForDots: { r: "3", strokeWidth: "0" },
+            propsForBackgroundLines: { stroke: colors.border, strokeDasharray: "" },
+          }}
+          bezier
+          style={styles.chart}
+          withInnerLines={false}
+          segments={4}
+        />
+      )}
+    </View>
+  );
+}
+
 function MetricBadge({ label, value, inverted }: { label: string; value: number; inverted?: boolean }) {
   const color = inverted
     ? (value <= 2 ? colors.success : value <= 3 ? colors.warning : colors.error)
@@ -387,6 +477,22 @@ const styles = StyleSheet.create({
     fontSize: 11, color: colors.textSecondary, textAlign: "right",
     paddingHorizontal: spacing.md, marginBottom: 4,
   },
+  chartSection: {
+    paddingHorizontal: spacing.md, marginBottom: 12,
+  },
+  chartTitle: {
+    fontSize: 13, fontWeight: "700", color: colors.textSecondary,
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: 10,
+  },
+  chartLegend: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12 },
+  legendChip: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 11, fontWeight: "600", color: colors.textSecondary },
+  chart: { borderRadius: 12, overflow: "hidden" },
   simBtn: {
     position: "absolute", bottom: 28, left: 24,
     flexDirection: "row", alignItems: "center", gap: 6,
