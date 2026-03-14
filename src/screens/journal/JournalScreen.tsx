@@ -252,6 +252,7 @@ export default function JournalScreen({ navigation }: any) {
               <MetricBadge label="Sleep" value={item.sleepQuality} />
               <MetricBadge label="Recovery" value={item.recoveryScore} />
               <MetricBadge label="Mood" value={item.mood} />
+              <MetricBadge label="Soreness" value={item.soreness} inverted />
             </View>
             {item.notes ? (
               <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
@@ -278,8 +279,10 @@ export default function JournalScreen({ navigation }: any) {
   );
 }
 
-function MetricBadge({ label, value }: { label: string; value: number }) {
-  const color = value >= 4 ? colors.success : value >= 3 ? colors.warning : colors.error;
+function MetricBadge({ label, value, inverted }: { label: string; value: number; inverted?: boolean }) {
+  const color = inverted
+    ? (value <= 2 ? colors.success : value <= 3 ? colors.warning : colors.error)
+    : (value >= 4 ? colors.success : value >= 3 ? colors.warning : colors.error);
   return (
     <View style={styles.badge}>
       <Text style={styles.badgeLabel}>{label}</Text>
@@ -331,12 +334,12 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   cardDate: { fontSize: 16, fontWeight: "700", color: colors.text },
   cardWeight: { fontSize: 14, fontWeight: "600", color: colors.accent },
-  metrics: { flexDirection: "row", gap: 8, marginBottom: 8 },
+  metrics: { flexDirection: "row", gap: 4, marginBottom: 8 },
   badge: {
     flex: 1, backgroundColor: colors.background, borderRadius: 8,
-    padding: 8, alignItems: "center",
+    paddingVertical: 8, paddingHorizontal: 4, alignItems: "center",
   },
-  badgeLabel: { fontSize: 10, color: colors.textSecondary, marginBottom: 2 },
+  badgeLabel: { fontSize: 9, color: colors.textSecondary, marginBottom: 2 },
   badgeValue: { fontSize: 14, fontWeight: "700" },
   notes: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
   simBtn: {
