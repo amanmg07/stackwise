@@ -131,7 +131,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   // Positive affirmations for good metrics
   if (avgSleep >= 4) {
     insights.push({
-      icon: "moon",
+      icon: "moon-outline",
       color: "#818cf8",
       title: "Sleep is on point",
       detail: `Avg ${avgSleep.toFixed(1)}/5 — quality rest fuels everything. Your recovery and gains benefit hugely from this.`,
@@ -140,7 +140,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
   if (avgEnergy >= 4) {
     insights.push({
-      icon: "flash",
+      icon: "flash-outline",
       color: "#facc15",
       title: "Energy levels are strong",
       detail: `Avg ${avgEnergy.toFixed(1)}/5 — you're firing on all cylinders. Great energy means your stack and habits are working.`,
@@ -149,7 +149,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
   if (avgRecovery >= 4 && avgSoreness < 2.5) {
     insights.push({
-      icon: "fitness",
+      icon: "fitness-outline",
       color: "#4ade80",
       title: "Recovery is dialed in",
       detail: `Avg recovery ${avgRecovery.toFixed(1)}/5 with low soreness. Your body is bouncing back fast — keep pushing.`,
@@ -158,7 +158,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
   if (avgMood >= 4) {
     insights.push({
-      icon: "happy",
+      icon: "happy-outline",
       color: "#f472b6",
       title: "Mood is thriving",
       detail: `Avg ${avgMood.toFixed(1)}/5 — feeling good mentally is just as important as physical metrics. You're in a great headspace.`,
@@ -169,7 +169,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   // Improving trends
   if (sleepTrend >= 0.5) {
     insights.push({
-      icon: "trending-up",
+      icon: "trending-up-outline",
       color: "#818cf8",
       title: "Sleep is improving",
       detail: "Your sleep quality has been trending up recently. Whatever you changed is working.",
@@ -178,7 +178,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
   if (energyTrend >= 0.5) {
     insights.push({
-      icon: "trending-up",
+      icon: "trending-up-outline",
       color: "#facc15",
       title: "Energy is climbing",
       detail: "Your energy levels are on the rise. Your body is responding well.",
@@ -187,7 +187,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
   if (recoveryTrend >= 0.5) {
     insights.push({
-      icon: "trending-up",
+      icon: "trending-up-outline",
       color: "#4ade80",
       title: "Recovery is getting better",
       detail: "Recovery scores are trending up. You're adapting and bouncing back faster.",
