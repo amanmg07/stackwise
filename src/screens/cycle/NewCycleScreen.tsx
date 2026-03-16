@@ -20,28 +20,45 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const [durationWeeks, setDurationWeeks] = useState("8");
   const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(
     template
-      ? template.peptides.map((tp) => ({
-          peptideId: tp.peptideId,
-          doseAmount: parseFloat(tp.suggestedDose) || 0.25,
-          doseUnit: "mg" as const,
-          frequency: tp.suggestedFrequency,
-          route: "subcutaneous" as AdministrationRoute,
-          timeOfDay: ["morning"],
-        }))
+      ? template.peptides.map((tp) => {
+          const pep = peptideDB.find((p) => p.id === tp.peptideId);
+          const doseMatch = tp.suggestedDose.match(/([\d.]+)/);
+          return {
+            peptideId: tp.peptideId,
+            doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
+            doseUnit: "mg" as const,
+            frequency: tp.suggestedFrequency,
+            route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
+            timeOfDay: ["morning"],
+          };
+        })
       : []
   );
   const [showPicker, setShowPicker] = useState(false);
 
   const addPeptide = (peptideId: string) => {
     if (cyclePeptides.some((p) => p.peptideId === peptideId)) return;
+    const pep = peptideDB.find((p) => p.id === peptideId);
+    const proto = pep?.dosingProtocols?.[0];
+
+    // Parse dose from first protocol's doseRange (e.g. "0.25-0.5 mg" → 0.25)
+    const doseMatch = proto?.doseRange?.match(/([\d.]+)/);
+    const doseAmount = doseMatch ? parseFloat(doseMatch[1]) : 0.25;
+
+    // Parse frequency
+    const freq = proto?.frequency || "1x daily";
+
+    // Use peptide's first route or default to subcutaneous
+    const route = pep?.routes?.[0] || "subcutaneous";
+
     setCyclePeptides([
       ...cyclePeptides,
       {
         peptideId,
-        doseAmount: 0.25,
+        doseAmount,
         doseUnit: "mg",
-        frequency: "1x daily",
-        route: "subcutaneous",
+        frequency: freq,
+        route,
         timeOfDay: ["morning"],
       },
     ]);
