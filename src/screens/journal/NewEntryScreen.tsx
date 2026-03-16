@@ -32,7 +32,6 @@ export default function NewEntryScreen({ route, navigation }: any) {
   const activeCycle = cycles.find((c) => c.isActive);
 
   const [weight, setWeight] = useState(existing?.weight?.toString() || "");
-  const [bodyFat, setBodyFat] = useState(existing?.bodyFat?.toString() || "");
   const [sleepHours, setSleepHours] = useState(existing?.sleepHours?.toString() || "");
   const [sleepQuality, setSleepQuality] = useState(existing?.sleepQuality || 3);
   const [energyLevel, setEnergyLevel] = useState(existing?.energyLevel || 3);
@@ -47,7 +46,6 @@ export default function NewEntryScreen({ route, navigation }: any) {
       cycleId: activeCycle?.id,
       date: existing?.date || format(new Date(), "yyyy-MM-dd"),
       weight: weight ? parseFloat(weight) : undefined,
-      bodyFat: bodyFat ? parseFloat(bodyFat) : undefined,
       sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
       sleepQuality,
       energyLevel,
@@ -72,30 +70,15 @@ export default function NewEntryScreen({ route, navigation }: any) {
         {existing ? format(parseISO(existing.date), "EEEE, MMMM d") : format(new Date(), "EEEE, MMMM d")}
       </Text>
 
-      <View style={styles.row}>
-        <View style={styles.half}>
-          <Text style={styles.label}>Weight ({settings.weightUnit})</Text>
-          <TextInput
-            style={styles.input}
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="decimal-pad"
-            placeholder="—"
-            placeholderTextColor={colors.textSecondary}
-          />
-        </View>
-        <View style={styles.half}>
-          <Text style={styles.label}>Body Fat %</Text>
-          <TextInput
-            style={styles.input}
-            value={bodyFat}
-            onChangeText={setBodyFat}
-            keyboardType="decimal-pad"
-            placeholder="—"
-            placeholderTextColor={colors.textSecondary}
-          />
-        </View>
-      </View>
+      <Text style={styles.label}>Weight ({settings.weightUnit})</Text>
+      <TextInput
+        style={styles.input}
+        value={weight}
+        onChangeText={setWeight}
+        keyboardType="decimal-pad"
+        placeholder="—"
+        placeholderTextColor={colors.textSecondary}
+      />
 
       <Text style={styles.label}>Sleep (hours)</Text>
       <TextInput
