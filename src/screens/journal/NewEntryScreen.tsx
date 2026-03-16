@@ -6,7 +6,7 @@ import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing } from "../../theme";
 
-function RatingInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
   return (
     <View style={styles.ratingContainer}>
       <Text style={styles.ratingLabel}>{label}</Text>
@@ -20,6 +20,10 @@ function RatingInput({ label, value, onChange }: { label: string; value: number;
             <Text style={[styles.ratingText, value >= n && styles.ratingTextActive]}>{n}</Text>
           </TouchableOpacity>
         ))}
+      </View>
+      <View style={styles.ratingHints}>
+        <Text style={styles.ratingHint}>{lowLabel}</Text>
+        <Text style={styles.ratingHint}>{highLabel}</Text>
       </View>
     </View>
   );
@@ -91,11 +95,11 @@ export default function NewEntryScreen({ route, navigation }: any) {
       />
 
       <Text style={styles.sectionTitle}>Ratings</Text>
-      <RatingInput label="Sleep Quality" value={sleepQuality} onChange={setSleepQuality} />
-      <RatingInput label="Energy Level" value={energyLevel} onChange={setEnergyLevel} />
-      <RatingInput label="Recovery" value={recoveryScore} onChange={setRecoveryScore} />
-      <RatingInput label="Mood" value={mood} onChange={setMood} />
-      <RatingInput label="Soreness" value={soreness} onChange={setSoreness} />
+      <RatingInput label="Sleep Quality" value={sleepQuality} onChange={setSleepQuality} lowLabel="Terrible" highLabel="Best sleep" />
+      <RatingInput label="Energy Level" value={energyLevel} onChange={setEnergyLevel} lowLabel="Exhausted" highLabel="Fully charged" />
+      <RatingInput label="Recovery" value={recoveryScore} onChange={setRecoveryScore} lowLabel="Very sore" highLabel="Fully recovered" />
+      <RatingInput label="Mood" value={mood} onChange={setMood} lowLabel="Low" highLabel="Great" />
+      <RatingInput label="Soreness" value={soreness} onChange={setSoreness} lowLabel="No pain" highLabel="Very sore" />
 
       <Text style={styles.label}>Notes</Text>
       <TextInput
@@ -135,6 +139,8 @@ const styles = StyleSheet.create({
   ratingContainer: { marginBottom: 14 },
   ratingLabel: { fontSize: 14, color: colors.text, marginBottom: 8 },
   ratingRow: { flexDirection: "row", gap: 8 },
+  ratingHints: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 },
+  ratingHint: { fontSize: 10, color: colors.textSecondary },
   ratingBtn: {
     flex: 1, backgroundColor: colors.surface, borderRadius: 10,
     paddingVertical: 12, alignItems: "center",
