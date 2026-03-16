@@ -52,8 +52,18 @@ const INJECTION_STEPS = [
 
 export default function ResearchHubScreen({ navigation, embedded }: any) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<PeptideCategory | "all">("all");
+  const [selectedCats, setSelectedCats] = useState<PeptideCategory[]>([]);
   const [showGuide, setShowGuide] = useState(false);
+
+  const toggleCat = (key: PeptideCategory | "all") => {
+    if (key === "all") {
+      setSelectedCats([]);
+    } else {
+      setSelectedCats((prev) =>
+        prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
+      );
+    }
+  };
 
   const filtered = useMemo(() => {
     return peptides.filter((p) => {
@@ -61,10 +71,10 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         !search ||
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         (p.abbreviation?.toLowerCase().includes(search.toLowerCase()));
-      const matchCat = category === "all" || p.categories.includes(category);
+      const matchCat = selectedCats.length === 0 || selectedCats.some((c) => p.categories.includes(c));
       return matchSearch && matchCat;
     });
-  }, [search, category]);
+  }, [search, selectedCats]);
 
   return (
     <View style={[styles.container, embedded && styles.containerEmbedded]}>
@@ -92,17 +102,19 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.chipsContent}
         >
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.map((cat) => {
+            const active = cat.key === "all" ? selectedCats.length === 0 : selectedCats.includes(cat.key as PeptideCategory);
+            return (
             <TouchableOpacity
               key={cat.key}
-              style={[styles.chip, category === cat.key && styles.chipActive]}
-              onPress={() => setCategory(cat.key)}
+              style={[styles.chip, active && styles.chipActive]}
+              onPress={() => toggleCat(cat.key)}
             >
-              <Text style={[styles.chipText, category === cat.key && styles.chipTextActive]}>
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {cat.label}
               </Text>
             </TouchableOpacity>
-          ))}
+          );})}
         </ScrollView>
       </View>
 
