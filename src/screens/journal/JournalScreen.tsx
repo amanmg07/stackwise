@@ -223,6 +223,8 @@ export default function JournalScreen({ navigation }: any) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         ListHeaderComponent={<>
+          <Text style={styles.journalTitle}>Journal</Text>
+          <Text style={styles.journalSubtitle}>Log how you feel daily — StackWise will spot trends and recommend peptides based on your metrics.</Text>
           {header()}
           {sorted.length >= 3 && <TrendChart entries={sorted} />}
           {sorted.length > 0 && (
@@ -238,7 +240,7 @@ export default function JournalScreen({ navigation }: any) {
             </View>
             <Text style={styles.emptyTitle}>No Entries Yet</Text>
             <Text style={styles.emptySubtext}>
-              Track your progress by logging daily metrics
+              Start logging your daily metrics — after a few entries, StackWise will analyze your trends and recommend peptides tailored to what your body needs.
             </Text>
           </View>
         }
@@ -419,6 +421,8 @@ function MetricBadge({ label, value, inverted }: { label: string; value: number;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === "ios" ? 60 : 0 },
+  journalTitle: { fontSize: 28, fontWeight: "800", color: colors.text, paddingHorizontal: spacing.md, marginBottom: 4 },
+  journalSubtitle: { fontSize: 13, color: colors.textSecondary, paddingHorizontal: spacing.md, marginBottom: 16, lineHeight: 18 },
   // Insights
   insightsSection: { paddingHorizontal: spacing.md, paddingTop: 4, marginBottom: 8 },
   insightsTitle: {
