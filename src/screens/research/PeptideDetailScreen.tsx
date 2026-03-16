@@ -97,6 +97,15 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
         ))}
       </View>
 
+      {/* Calculate dose button */}
+      <TouchableOpacity
+        style={styles.calcBtn}
+        onPress={() => navigation.navigate("ReconCalculator", { peptideId: peptide.id })}
+      >
+        <Ionicons name="calculator-outline" size={16} color={colors.accent} />
+        <Text style={styles.calcBtnText}>Calculate Dose</Text>
+      </TouchableOpacity>
+
       {/* Description */}
       <Text style={styles.desc}>{peptide.description}</Text>
 
@@ -294,6 +303,12 @@ const styles = StyleSheet.create({
     flexShrink: 1, maxWidth: "100%",
   },
   metaText: { fontSize: 12, color: colors.textSecondary, textTransform: "capitalize", flexShrink: 1 },
+  calcBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    backgroundColor: colors.accent + "15", borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: 16,
+  },
+  calcBtnText: { fontSize: 14, fontWeight: "600", color: colors.accent },
   desc: { fontSize: 15, color: colors.text, lineHeight: 23, marginBottom: 24 },
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,

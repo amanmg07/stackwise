@@ -14,6 +14,7 @@ import NewEntryScreen from "../screens/journal/NewEntryScreen";
 import ProtocolBuilderScreen from "../screens/protocol/ProtocolBuilderScreen";
 import ProtocolResultScreen from "../screens/protocol/ProtocolResultScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
+import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,6 +31,7 @@ function ExploreNavigator() {
     <ExploreStack.Navigator screenOptions={screenOptions}>
       <ExploreStack.Screen name="ExploreHub" component={ExploreScreen} options={{ headerShown: false }} />
       <ExploreStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
+      <ExploreStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />
     </ExploreStack.Navigator>
   );
 }
@@ -65,6 +67,7 @@ function ProtocolNavigator() {
       <ProtocolStack.Screen name="ProtocolBuilder" component={ProtocolBuilderScreen} options={{ headerShown: false }} />
       <ProtocolStack.Screen name="ProtocolResult" component={ProtocolResultScreen} options={{ title: "Results" }} />
       <ProtocolStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
+      <ProtocolStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />
     </ProtocolStack.Navigator>
   );
 }

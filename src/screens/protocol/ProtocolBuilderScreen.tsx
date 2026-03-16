@@ -106,6 +106,17 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.linkRow}
+        onPress={() => navigation.navigate("ReconCalculator")}
+      >
+        <Ionicons name="calculator-outline" size={20} color={colors.accent} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.linkTitle}>Dosing Calculator</Text>
+          <Text style={styles.linkDesc}>Calculate exactly how much to draw on your syringe</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+      </TouchableOpacity>
     </ScrollView>
   );
 }
