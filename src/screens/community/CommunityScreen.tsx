@@ -39,7 +39,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs1",
     author: "PeptidePro",
     title: "The Wolverine Recovery Stack",
-    description: "The gold standard healing combo. BPC + TB-500 for full-body recovery with GHK-Cu for tissue remodeling. Run this after injuries or hard training blocks.",
+    description: "Been running this for 4 weeks after a torn rotator cuff. Pain is almost gone and my physio is shocked at how fast I'm healing. BPC near the injury + TB systemically is the way.",
     goals: ["recovery"],
     peptides: [
       { peptideId: "bpc157", dose: "0.25 mg", frequency: "2x daily" },
@@ -54,7 +54,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs2",
     author: "GHMaxx",
     title: "Clean GH Blast",
-    description: "CJC + Ipamorelin is the classic GH stack. Natural pulsatile release, minimal side effects. Great for body recomp, better sleep, and anti-aging.",
+    description: "3 months in — sleep is deeper, body comp noticeably better, and my skin looks 5 years younger. This combo just works. Inject on empty stomach before bed for best results.",
     goals: ["muscle_gain", "anti_aging", "fat_loss"],
     peptides: [
       { peptideId: "cjc1295_nodac", dose: "0.1 mg", frequency: "3x daily" },
@@ -68,7 +68,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs3",
     author: "LeanKing",
     title: "Ultimate Recomp Stack",
-    description: "Tesamorelin targets visceral fat while CJC/Ipa handles overall GH optimization. Add BPC for recovery from intense training.",
+    description: "Down 14 lbs in 10 weeks while gaining strength. Tesamorelin melted the belly fat and the CJC/Ipa keeps energy and recovery high. Best recomp I've ever done.",
     goals: ["fat_loss", "muscle_gain"],
     peptides: [
       { peptideId: "tesamorelin", dose: "1 mg", frequency: "1x daily" },
@@ -83,7 +83,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs4",
     author: "BrainStack",
     title: "Cognitive Enhancement Protocol",
-    description: "Selank for anxiety reduction + Semax for focus and mental clarity. A clean nootropic stack with no crash or dependency.",
+    description: "This replaced my morning coffee. Selank kills my anxiety and Semax gives me laser focus for 4-5 hours. No crash, no jitters. Nasal spray is the move.",
     goals: ["cognitive"],
     peptides: [
       { peptideId: "selank", dose: "0.25 mg", frequency: "1x daily" },
@@ -97,7 +97,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs5",
     author: "SleepDoc",
     title: "Deep Sleep Protocol",
-    description: "DSIP for deep sleep architecture + Ipamorelin for nighttime GH pulse. Wake up feeling genuinely recovered.",
+    description: "I was averaging 5 hours of broken sleep. Two weeks on this and I'm getting 7-8 hours of deep sleep. DSIP before bed knocked me out in the best way. Game changer.",
     goals: ["sleep", "recovery"],
     peptides: [
       { peptideId: "dsip", dose: "0.1 mg", frequency: "1x before bed" },
@@ -111,7 +111,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs6",
     author: "LongevityLab",
     title: "Anti-Aging Longevity Stack",
-    description: "Epithalon for telomere support, GHK-Cu for skin and tissue renewal, MOTS-c for mitochondrial function. The longevity trifecta.",
+    description: "Running this twice a year. Bloodwork shows IGF-1 optimized, inflammation markers way down. My doctor asked what I changed. Skin is visibly tighter too. Worth the investment.",
     goals: ["anti_aging"],
     peptides: [
       { peptideId: "epithalon", dose: "5 mg", frequency: "1x daily for 10 days" },
@@ -126,7 +126,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs7",
     author: "ShredMode",
     title: "Fat Burner Express",
-    description: "AOD-9604 targets fat cells directly without the side effects of full GH. Pair with Tesamorelin to hit visceral fat from two angles.",
+    description: "Lost 2 inches off my waist in 6 weeks without changing diet. AOD handles stubborn fat areas and Tesamorelin hits the visceral stuff. No hunger sides at all.",
     goals: ["fat_loss"],
     peptides: [
       { peptideId: "aod9604", dose: "0.3 mg", frequency: "1x daily" },
@@ -140,7 +140,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     id: "cs8",
     author: "ImmuneBoost",
     title: "Immune Defense Protocol",
-    description: "Thymosin Alpha-1 for deep immune modulation + KPV for gut inflammation. Great during cold/flu season or after illness.",
+    description: "Started this after getting sick 3 times in 2 months. Haven't been sick once since. Also fixed my gut issues I'd been dealing with for years. TA1 is underrated.",
     goals: ["immune"],
     peptides: [
       { peptideId: "thymosin_a1", dose: "1.5 mg", frequency: "2x weekly" },

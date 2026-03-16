@@ -135,12 +135,12 @@ export default function NewPostScreen({ route, navigation }: any) {
         placeholderTextColor={colors.textSecondary}
       />
 
-      <Text style={styles.label}>Description</Text>
+      <Text style={styles.label}>What's your experience?</Text>
       <TextInput
         style={[styles.input, { minHeight: 80, textAlignVertical: "top" }]}
         value={description}
         onChangeText={setDescription}
-        placeholder="Share your experience, results, or why you chose this stack..."
+        placeholder="Tell people what you noticed, how it worked, tips, results..."
         placeholderTextColor={colors.textSecondary}
         multiline
       />
