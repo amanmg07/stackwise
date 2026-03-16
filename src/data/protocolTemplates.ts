@@ -179,6 +179,21 @@ export const protocolTemplates: ProtocolTemplate[] = [
     notes: "Tesamorelin (GHRH) + GHRP-2 (ghrelin mimetic) work through different pathways for synergistic GH release. Take GHRP-2 on empty stomach. Watch for appetite increase and monitor blood sugar. Not for beginners.",
   },
   {
+    id: "muscle_anti_aging",
+    name: "Muscle + Longevity",
+    goals: ["muscle_gain", "anti_aging"],
+    description: "Build lean muscle while fighting aging at the cellular level. GH peptides drive muscle growth and recovery, while GHK-Cu and Epithalon repair and protect your body from the inside out.",
+    peptides: [
+      { peptideId: "cjc1295_nodac", role: "Primary", suggestedDose: "0.1 mg", suggestedFrequency: "2-3x daily", suggestedDuration: "8-12 weeks" },
+      { peptideId: "ipamorelin", role: "Primary", suggestedDose: "0.2-0.3 mg", suggestedFrequency: "2-3x daily", suggestedDuration: "8-12 weeks" },
+      { peptideId: "ghkcu", role: "Support", suggestedDose: "1-2 mg", suggestedFrequency: "1x daily", suggestedDuration: "4-6 weeks" },
+      { peptideId: "epithalon", role: "Support", suggestedDose: "5-10 mg", suggestedFrequency: "1x daily", suggestedDuration: "10-20 day burst" },
+    ],
+    cycleDuration: "8-12 weeks",
+    difficulty: "intermediate",
+    notes: "CJC/Ipa combo boosts GH for muscle growth — GH itself is one of the strongest anti-aging hormones. GHK-Cu rebuilds collagen and skin while Epithalon protects your telomeres. Run Epithalon as a 10-20 day burst within the cycle.",
+  },
+  {
     id: "sexual_wellness",
     name: "Sexual Wellness",
     goals: ["sexual_health"],
