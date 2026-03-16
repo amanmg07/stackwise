@@ -16,25 +16,43 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const { addCycle } = useApp();
   const templateId = route.params?.templateId;
   const template = templateId ? protocolTemplates.find((t) => t.id === templateId) : null;
+  const communityStack = route.params?.communityStack;
 
-  const [name, setName] = useState(template?.name || "");
+  const buildInitialPeptides = (): CyclePeptide[] => {
+    if (template) {
+      return template.peptides.map((tp) => {
+        const pep = peptideDB.find((p) => p.id === tp.peptideId);
+        const doseMatch = tp.suggestedDose.match(/([\d.]+)/);
+        return {
+          peptideId: tp.peptideId,
+          doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
+          doseUnit: "mg" as const,
+          frequency: tp.suggestedFrequency,
+          route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
+          timeOfDay: ["morning"],
+        };
+      });
+    }
+    if (communityStack) {
+      return communityStack.peptides.map((cp: any) => {
+        const pep = peptideDB.find((p) => p.id === cp.peptideId);
+        const doseMatch = cp.dose?.match(/([\d.]+)/);
+        return {
+          peptideId: cp.peptideId,
+          doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
+          doseUnit: "mg" as const,
+          frequency: cp.frequency || "1x daily",
+          route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
+          timeOfDay: ["morning"],
+        };
+      });
+    }
+    return [];
+  };
+
+  const [name, setName] = useState(template?.name || communityStack?.name || "");
   const [durationWeeks, setDurationWeeks] = useState("8");
-  const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(
-    template
-      ? template.peptides.map((tp) => {
-          const pep = peptideDB.find((p) => p.id === tp.peptideId);
-          const doseMatch = tp.suggestedDose.match(/([\d.]+)/);
-          return {
-            peptideId: tp.peptideId,
-            doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
-            doseUnit: "mg" as const,
-            frequency: tp.suggestedFrequency,
-            route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
-            timeOfDay: ["morning"],
-          };
-        })
-      : []
-  );
+  const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(buildInitialPeptides());
   const [showPicker, setShowPicker] = useState(false);
 
   const interactions = useMemo(

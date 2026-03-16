@@ -17,6 +17,7 @@ import ProfileScreen from "../screens/profile/ProfileScreen";
 import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
 import InteractionCheckerScreen from "../screens/research/InteractionCheckerScreen";
 import CompareScreen from "../screens/research/CompareScreen";
+import CommunityScreen from "../screens/community/CommunityScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -63,7 +64,7 @@ function JournalNavigator() {
   );
 }
 
-// Protocol/Home Stack
+// Protocol/Home Stack (includes Profile)
 const ProtocolStack = createNativeStackNavigator();
 function ProtocolNavigator() {
   return (
@@ -74,17 +75,18 @@ function ProtocolNavigator() {
       <ProtocolStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />
       <ProtocolStack.Screen name="InteractionChecker" component={InteractionCheckerScreen} options={{ title: "Interaction Checker" }} />
       <ProtocolStack.Screen name="Compare" component={CompareScreen} options={{ title: "Compare" }} />
+      <ProtocolStack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
     </ProtocolStack.Navigator>
   );
 }
 
-// Profile Stack
-const ProfileStackNav = createNativeStackNavigator();
-function ProfileNavigator() {
+// Community Stack
+const CommunityStack = createNativeStackNavigator();
+function CommunityNavigator() {
   return (
-    <ProfileStackNav.Navigator screenOptions={screenOptions}>
-      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
-    </ProfileStackNav.Navigator>
+    <CommunityStack.Navigator screenOptions={screenOptions}>
+      <CommunityStack.Screen name="CommunityFeed" component={CommunityScreen} options={{ headerShown: false }} />
+    </CommunityStack.Navigator>
   );
 }
 
@@ -95,7 +97,7 @@ const TAB_ICONS: Record<string, { focused: TabIconName; default: TabIconName }> 
   CycleTab: { focused: "repeat", default: "repeat-outline" },
   ExploreTab: { focused: "compass", default: "compass-outline" },
   JournalTab: { focused: "book", default: "book-outline" },
-  ProfileTab: { focused: "person", default: "person-outline" },
+  CommunityTab: { focused: "people", default: "people-outline" },
 };
 
 export default function RootNavigator() {
@@ -124,7 +126,7 @@ export default function RootNavigator() {
       <Tab.Screen name="CycleTab" component={CycleNavigator} options={{ title: "Cycle" }} />
       <Tab.Screen name="ExploreTab" component={ExploreNavigator} options={{ title: "Explore" }} />
       <Tab.Screen name="JournalTab" component={JournalNavigator} options={{ title: "Journal" }} />
-      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: "Profile" }} />
+      <Tab.Screen name="CommunityTab" component={CommunityNavigator} options={{ title: "Community" }} />
     </Tab.Navigator>
   );
 }

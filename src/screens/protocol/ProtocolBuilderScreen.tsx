@@ -30,8 +30,18 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Welcome header */}
-      <Text style={styles.welcome}>StackWise</Text>
-      <Text style={styles.motto}>Stop Guessing, Start StackWising.</Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.welcome}>StackWise</Text>
+          <Text style={styles.motto}>Stop Guessing, Start StackWising.</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.profileBtn}
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <Ionicons name="person-circle-outline" size={32} color={colors.accent} />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.tagline}>Your peptide journey starts here</Text>
 
       {/* Active cycle quick card */}
@@ -123,7 +133,9 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: Platform.OS === "ios" ? 60 : spacing.md },
-  welcome: { fontSize: 36, fontWeight: "900", color: colors.accent, marginTop: 8, letterSpacing: -0.5 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 8 },
+  profileBtn: { padding: 4 },
+  welcome: { fontSize: 36, fontWeight: "900", color: colors.accent, letterSpacing: -0.5 },
   motto: { fontSize: 18, fontWeight: "700", color: colors.text, marginTop: 4 },
   tagline: { fontSize: 14, color: colors.textSecondary, marginTop: 4, marginBottom: 24 },
   activeCycleCard: {

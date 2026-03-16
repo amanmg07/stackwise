@@ -139,7 +139,7 @@ export default function ProfileScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: Platform.OS === "ios" ? 60 : spacing.md },
+  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   title: { fontSize: 28, fontWeight: "800", color: colors.text, marginBottom: 20 },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 24 },
   statBox: {

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
@@ -55,10 +55,29 @@ export default function CycleTrackerScreen({ navigation }: any) {
       ListHeaderComponent={
         <>
           {/* Cycle header */}
-          <Text style={styles.cycleName}>{activeCycle.name}</Text>
-          <Text style={styles.dateRange}>
-            {format(start, "MMM d")} — {format(end, "MMM d, yyyy")}
-          </Text>
+          <View style={styles.cycleHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cycleName}>{activeCycle.name}</Text>
+              <Text style={styles.dateRange}>
+                {format(start, "MMM d")} — {format(end, "MMM d, yyyy")}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.shareBtn}
+              onPress={async () => {
+                const pepList = activeCycle.peptides
+                  .map((cp) => {
+                    const pep = peptides.find((p) => p.id === cp.peptideId);
+                    return `  ${pep?.name || cp.peptideId} — ${cp.doseAmount} ${cp.doseUnit}, ${cp.frequency}`;
+                  })
+                  .join("\n");
+                const msg = `My Stack: ${activeCycle.name}\n\nPeptides:\n${pepList}\n\nDay ${elapsed} of ${totalDays}\n\nShared from StackWise`;
+                try { await Share.share({ message: msg }); } catch {}
+              }}
+            >
+              <Ionicons name="share-outline" size={20} color={colors.accent} />
+            </TouchableOpacity>
+          </View>
 
           {/* Progress bar */}
           <View style={styles.progressContainer}>
@@ -155,8 +174,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent, borderRadius: 14, padding: 18, paddingHorizontal: 32,
   },
   startBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
+  cycleHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 16 },
+  shareBtn: {
+    padding: 10, backgroundColor: colors.accent + "15", borderRadius: 10,
+    borderWidth: 1, borderColor: colors.accent + "30",
+  },
   cycleName: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 4 },
-  dateRange: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
+  dateRange: { fontSize: 14, color: colors.textSecondary },
   progressContainer: { marginBottom: 24 },
   progressBar: {
     height: 8, backgroundColor: colors.surface, borderRadius: 4, overflow: "hidden",
