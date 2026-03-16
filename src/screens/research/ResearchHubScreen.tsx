@@ -118,6 +118,24 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         </ScrollView>
       </View>
 
+      {/* Tools row */}
+      <View style={styles.toolsRow}>
+        <TouchableOpacity
+          style={styles.toolBtn}
+          onPress={() => navigation.navigate("InteractionChecker")}
+        >
+          <Ionicons name="git-compare-outline" size={16} color={colors.accent} />
+          <Text style={styles.toolBtnText}>Interactions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.toolBtn}
+          onPress={() => navigation.navigate("Compare")}
+        >
+          <Ionicons name="swap-horizontal-outline" size={16} color={colors.accent} />
+          <Text style={styles.toolBtnText}>Compare</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Result count */}
       <Text style={styles.resultCount}>
         {filtered.length} {filtered.length === 1 ? "result" : "results"}
@@ -256,6 +274,15 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
   chipTextActive: { color: colors.background },
+  toolsRow: {
+    flexDirection: "row", gap: 8, paddingHorizontal: spacing.md, marginBottom: 10,
+  },
+  toolBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    backgroundColor: colors.accent + "12", borderRadius: 10, paddingVertical: 10,
+    borderWidth: 1, borderColor: colors.accent + "25",
+  },
+  toolBtnText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   resultCount: {
     fontSize: 12, color: colors.textSecondary, paddingHorizontal: spacing.md,
     marginBottom: 8,

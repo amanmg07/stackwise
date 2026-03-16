@@ -128,6 +128,73 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     });
   }
 
+  // Positive affirmations for good metrics
+  if (avgSleep >= 4) {
+    insights.push({
+      icon: "moon",
+      color: "#818cf8",
+      title: "Sleep is on point",
+      detail: `Avg ${avgSleep.toFixed(1)}/5 — quality rest fuels everything. Your recovery and gains benefit hugely from this.`,
+      peptideIds: [],
+    });
+  }
+  if (avgEnergy >= 4) {
+    insights.push({
+      icon: "flash",
+      color: "#facc15",
+      title: "Energy levels are strong",
+      detail: `Avg ${avgEnergy.toFixed(1)}/5 — you're firing on all cylinders. Great energy means your stack and habits are working.`,
+      peptideIds: [],
+    });
+  }
+  if (avgRecovery >= 4 && avgSoreness < 2.5) {
+    insights.push({
+      icon: "fitness",
+      color: "#4ade80",
+      title: "Recovery is dialed in",
+      detail: `Avg recovery ${avgRecovery.toFixed(1)}/5 with low soreness. Your body is bouncing back fast — keep pushing.`,
+      peptideIds: [],
+    });
+  }
+  if (avgMood >= 4) {
+    insights.push({
+      icon: "happy",
+      color: "#f472b6",
+      title: "Mood is thriving",
+      detail: `Avg ${avgMood.toFixed(1)}/5 — feeling good mentally is just as important as physical metrics. You're in a great headspace.`,
+      peptideIds: [],
+    });
+  }
+
+  // Improving trends
+  if (sleepTrend >= 0.5) {
+    insights.push({
+      icon: "trending-up",
+      color: "#818cf8",
+      title: "Sleep is improving",
+      detail: "Your sleep quality has been trending up recently. Whatever you changed is working.",
+      peptideIds: [],
+    });
+  }
+  if (energyTrend >= 0.5) {
+    insights.push({
+      icon: "trending-up",
+      color: "#facc15",
+      title: "Energy is climbing",
+      detail: "Your energy levels are on the rise. Your body is responding well.",
+      peptideIds: [],
+    });
+  }
+  if (recoveryTrend >= 0.5) {
+    insights.push({
+      icon: "trending-up",
+      color: "#4ade80",
+      title: "Recovery is getting better",
+      detail: "Recovery scores are trending up. You're adapting and bouncing back faster.",
+      peptideIds: [],
+    });
+  }
+
   // Everything is great
   if (insights.length === 0 && recent.length >= 5) {
     const allGood = avgSleep >= 3.5 && avgEnergy >= 3.5 && avgRecovery >= 3.5 && avgMood >= 3.5 && avgSoreness < 3;
