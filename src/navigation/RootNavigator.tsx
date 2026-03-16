@@ -119,7 +119,8 @@ export default function RootNavigator() {
           const iconName = focused ? icons.focused : icons.default;
           return <Ionicons name={iconName} size={22} color={color} />;
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
+        tabBarItemStyle: { paddingHorizontal: 2 },
       })}
     >
       <Tab.Screen name="HomeTab" component={ProtocolNavigator} options={{ title: "Home" }} />
