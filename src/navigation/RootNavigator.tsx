@@ -18,6 +18,7 @@ import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
 import InteractionCheckerScreen from "../screens/research/InteractionCheckerScreen";
 import CompareScreen from "../screens/research/CompareScreen";
 import CommunityScreen from "../screens/community/CommunityScreen";
+import NewPostScreen from "../screens/community/NewPostScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -86,6 +87,7 @@ function CommunityNavigator() {
   return (
     <CommunityStack.Navigator screenOptions={screenOptions}>
       <CommunityStack.Screen name="CommunityFeed" component={CommunityScreen} options={{ headerShown: false }} />
+      <CommunityStack.Screen name="NewPost" component={NewPostScreen} options={{ title: "Share Your Stack" }} />
     </CommunityStack.Navigator>
   );
 }
@@ -119,15 +121,14 @@ export default function RootNavigator() {
           const iconName = focused ? icons.focused : icons.default;
           return <Ionicons name={iconName} size={22} color={color} />;
         },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
-        tabBarItemStyle: { paddingHorizontal: 2 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
       })}
     >
       <Tab.Screen name="HomeTab" component={ProtocolNavigator} options={{ title: "Home" }} />
       <Tab.Screen name="CycleTab" component={CycleNavigator} options={{ title: "Cycle" }} />
       <Tab.Screen name="ExploreTab" component={ExploreNavigator} options={{ title: "Explore" }} />
       <Tab.Screen name="JournalTab" component={JournalNavigator} options={{ title: "Journal" }} />
-      <Tab.Screen name="CommunityTab" component={CommunityNavigator} options={{ title: "Community" }} />
+      <Tab.Screen name="CommunityTab" component={CommunityNavigator} options={{ title: "Feed" }} />
     </Tab.Navigator>
   );
 }

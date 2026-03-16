@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share,
+  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
 import { useToast } from "../../context/ToastContext";
+import { useApp } from "../../context/AppContext";
+import { CommunityPost } from "../../types";
 
 interface CommunityStack {
   id: string;
@@ -17,6 +19,7 @@ interface CommunityStack {
   difficulty: "beginner" | "intermediate" | "advanced";
   likes: number;
   duration: string;
+  isUserPost?: boolean;
 }
 
 const GOAL_COLORS: Record<string, string> = {
@@ -151,7 +154,16 @@ const POPULAR_STACKS: CommunityStack[] = [
 
 export default function CommunityScreen({ navigation }: any) {
   const { showToast } = useToast();
+  const { communityPosts, deleteCommunityPost } = useApp();
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
+
+  const allStacks = useMemo(() => {
+    const userStacks: CommunityStack[] = communityPosts.map((p) => ({
+      ...p,
+      isUserPost: true,
+    }));
+    return [...userStacks, ...POPULAR_STACKS];
+  }, [communityPosts]);
 
   const toggleLike = (id: string) => {
     setLikedStacks((prev) =>
@@ -187,15 +199,25 @@ export default function CommunityScreen({ navigation }: any) {
     showToast("Stack copied — customize and start your cycle!");
   };
 
+  const confirmDelete = (id: string) => {
+    Alert.alert("Delete Post", "Remove this post from the feed?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => {
+        deleteCommunityPost(id);
+        showToast("Post deleted");
+      }},
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={POPULAR_STACKS}
+        data={allStacks}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         ListHeaderComponent={
           <>
-            <Text style={styles.title}>Community</Text>
+            <Text style={styles.title}>Feed</Text>
             <Text style={styles.subtitle}>Popular stacks from the peptide community</Text>
           </>
         }
@@ -207,35 +229,51 @@ export default function CommunityScreen({ navigation }: any) {
               {/* Author + difficulty */}
               <View style={styles.cardTop}>
                 <View style={styles.authorRow}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{item.author[0]}</Text>
+                  <View style={[styles.avatar, item.isUserPost && { backgroundColor: colors.success + "20" }]}>
+                    <Text style={[styles.avatarText, item.isUserPost && { color: colors.success }]}>{item.author[0]}</Text>
                   </View>
                   <View>
-                    <Text style={styles.authorName}>{item.author}</Text>
+                    <View style={styles.authorNameRow}>
+                      <Text style={styles.authorName}>{item.author}</Text>
+                      {item.isUserPost && (
+                        <View style={styles.youBadge}>
+                          <Text style={styles.youBadgeText}>You</Text>
+                        </View>
+                      )}
+                    </View>
                     <Text style={styles.durationText}>{item.duration}</Text>
                   </View>
                 </View>
-                <View style={[styles.diffBadge, { backgroundColor: DIFFICULTY_COLORS[item.difficulty] + "20" }]}>
-                  <Text style={[styles.diffText, { color: DIFFICULTY_COLORS[item.difficulty] }]}>
-                    {item.difficulty}
-                  </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <View style={[styles.diffBadge, { backgroundColor: DIFFICULTY_COLORS[item.difficulty] + "20" }]}>
+                    <Text style={[styles.diffText, { color: DIFFICULTY_COLORS[item.difficulty] }]}>
+                      {item.difficulty}
+                    </Text>
+                  </View>
+                  {item.isUserPost && (
+                    <TouchableOpacity onPress={() => confirmDelete(item.id)}>
+                      <Ionicons name="trash-outline" size={18} color={colors.error} />
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
 
               {/* Title + description */}
               <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardDesc}>{item.description}</Text>
+              {item.description ? <Text style={styles.cardDesc}>{item.description}</Text> : null}
 
               {/* Goals */}
-              <View style={styles.goalRow}>
-                {item.goals.map((g) => (
-                  <View key={g} style={[styles.goalTag, { backgroundColor: (GOAL_COLORS[g] || "#888") + "20" }]}>
-                    <Text style={[styles.goalTagText, { color: GOAL_COLORS[g] || "#888" }]}>
-                      {g.replace("_", " ")}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+              {item.goals.length > 0 && (
+                <View style={styles.goalRow}>
+                  {item.goals.map((g) => (
+                    <View key={g} style={[styles.goalTag, { backgroundColor: (GOAL_COLORS[g] || "#888") + "20" }]}>
+                      <Text style={[styles.goalTagText, { color: GOAL_COLORS[g] || "#888" }]}>
+                        {g.replace("_", " ")}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
 
               {/* Peptides */}
               <View style={styles.pepSection}>
@@ -273,6 +311,14 @@ export default function CommunityScreen({ navigation }: any) {
           );
         }}
       />
+
+      {/* FAB to create new post */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate("NewPost")}
+      >
+        <Ionicons name="add" size={28} color={colors.background} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -293,7 +339,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent + "20", alignItems: "center", justifyContent: "center",
   },
   avatarText: { fontSize: 15, fontWeight: "700", color: colors.accent },
+  authorNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   authorName: { fontSize: 13, fontWeight: "600", color: colors.text },
+  youBadge: {
+    backgroundColor: colors.success + "20", borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 1,
+  },
+  youBadgeText: { fontSize: 10, fontWeight: "700", color: colors.success },
   durationText: { fontSize: 11, color: colors.textSecondary, marginTop: 1 },
   diffBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   diffText: { fontSize: 11, fontWeight: "700", textTransform: "capitalize" },
@@ -323,4 +375,11 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.accent + "30",
   },
   copyBtnText: { fontSize: 13, fontWeight: "600", color: colors.accent },
+  fab: {
+    position: "absolute", bottom: 24, right: 24,
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: colors.accent, alignItems: "center", justifyContent: "center",
+    shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
+    elevation: 8,
+  },
 });

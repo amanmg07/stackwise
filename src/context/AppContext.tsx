@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Cycle, DoseLog, JournalEntry, UserSettings } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, CommunityPost } from "../types";
 import { appStorage } from "../utils/storage";
 
 interface AppState {
@@ -7,6 +7,7 @@ interface AppState {
   doseLogs: DoseLog[];
   journal: JournalEntry[];
   settings: UserSettings;
+  communityPosts: CommunityPost[];
   loading: boolean;
   // Cycles
   addCycle: (cycle: Cycle) => void;
@@ -19,6 +20,9 @@ interface AppState {
   addJournalEntry: (entry: JournalEntry) => void;
   updateJournalEntry: (entry: JournalEntry) => void;
   deleteJournalEntry: (id: string) => void;
+  // Community
+  addCommunityPost: (post: CommunityPost) => void;
+  deleteCommunityPost: (id: string) => void;
   // Settings
   updateSettings: (settings: Partial<UserSettings>) => void;
   // Data
@@ -38,20 +42,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     savedPeptides: [],
     onboardingDone: false,
   });
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [c, d, j, s] = await Promise.all([
+      const [c, d, j, s, cp] = await Promise.all([
         appStorage.loadCycles(),
         appStorage.loadDoseLogs(),
         appStorage.loadJournal(),
         appStorage.loadSettings(),
+        appStorage.loadCommunityPosts(),
       ]);
       setCycles(c);
       setDoseLogs(d);
       setJournal(j);
       setSettings(s);
+      setCommunityPosts(cp);
       setLoading(false);
     })();
   }, []);
@@ -61,12 +68,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const persistLogs = useCallback((l: DoseLog[]) => { setDoseLogs(l); appStorage.saveDoseLogs(l); }, []);
   const persistJournal = useCallback((j: JournalEntry[]) => { setJournal(j); appStorage.saveJournal(j); }, []);
   const persistSettings = useCallback((s: UserSettings) => { setSettings(s); appStorage.saveSettings(s); }, []);
+  const persistCommunityPosts = useCallback((p: CommunityPost[]) => { setCommunityPosts(p); appStorage.saveCommunityPosts(p); }, []);
 
   const value: AppState = {
     cycles,
     doseLogs,
     journal,
     settings,
+    communityPosts,
     loading,
 
     addCycle: (cycle) => persistCycles([cycle, ...cycles]),
@@ -79,6 +88,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addJournalEntry: (entry) => persistJournal([entry, ...journal]),
     updateJournalEntry: (entry) => persistJournal(journal.map((e) => (e.id === entry.id ? entry : e))),
     deleteJournalEntry: (id) => persistJournal(journal.filter((e) => e.id !== id)),
+
+    addCommunityPost: (post) => persistCommunityPosts([post, ...communityPosts]),
+    deleteCommunityPost: (id) => persistCommunityPosts(communityPosts.filter((p) => p.id !== id)),
 
     updateSettings: (partial) => persistSettings({ ...settings, ...partial }),
 

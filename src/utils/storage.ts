@@ -1,11 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Cycle, DoseLog, JournalEntry, UserSettings } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, CommunityPost } from "../types";
 
 const KEYS = {
   cycles: "@stackwise/cycles",
   doseLogs: "@stackwise/dose_logs",
   journal: "@stackwise/journal",
   settings: "@stackwise/settings",
+  communityPosts: "@stackwise/community_posts",
 };
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -50,6 +51,13 @@ export const appStorage = {
   },
   async saveSettings(settings: UserSettings): Promise<void> {
     return save(KEYS.settings, settings);
+  },
+
+  async loadCommunityPosts(): Promise<CommunityPost[]> {
+    return load(KEYS.communityPosts, []);
+  },
+  async saveCommunityPosts(posts: CommunityPost[]): Promise<void> {
+    return save(KEYS.communityPosts, posts);
   },
 
   async clearAll(): Promise<void> {
