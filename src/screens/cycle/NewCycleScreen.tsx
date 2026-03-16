@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 } from "react-native";
@@ -8,6 +8,7 @@ import { format, addWeeks } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { protocolTemplates } from "../../data/protocolTemplates";
+import { getInteractions } from "../../data/interactions";
 import { colors, spacing } from "../../theme";
 import { CyclePeptide, AdministrationRoute } from "../../types";
 
@@ -35,6 +36,11 @@ export default function NewCycleScreen({ route, navigation }: any) {
       : []
   );
   const [showPicker, setShowPicker] = useState(false);
+
+  const interactions = useMemo(
+    () => getInteractions(cyclePeptides.map((cp) => cp.peptideId)),
+    [cyclePeptides]
+  );
 
   const addPeptide = (peptideId: string) => {
     if (cyclePeptides.some((p) => p.peptideId === peptideId)) return;
@@ -188,6 +194,39 @@ export default function NewCycleScreen({ route, navigation }: any) {
         );
       })}
 
+      {/* Interaction warnings */}
+      {interactions.length > 0 && (
+        <View style={styles.interactionsSection}>
+          {interactions.map((interaction, i) => {
+            const isWarning = interaction.severity === "warning";
+            const isCaution = interaction.severity === "caution";
+            const iconColor = isWarning ? colors.error : isCaution ? colors.warning : colors.success;
+            const bgColor = isWarning ? colors.error + "12" : isCaution ? colors.warning + "12" : colors.success + "12";
+            const borderColor = isWarning ? colors.error + "30" : isCaution ? colors.warning + "30" : colors.success + "30";
+            const pep1 = peptideDB.find((p) => p.id === interaction.peptideIds[0]);
+            const pep2 = peptideDB.find((p) => p.id === interaction.peptideIds[1]);
+            return (
+              <View key={i} style={[styles.interactionBanner, { backgroundColor: bgColor, borderColor }]}>
+                <Ionicons
+                  name={isWarning ? "warning-outline" : isCaution ? "alert-circle-outline" : "checkmark-circle-outline"}
+                  size={18}
+                  color={iconColor}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.interactionTitle, { color: iconColor }]}>
+                    {interaction.title}
+                  </Text>
+                  <Text style={styles.interactionPeptides}>
+                    {pep1?.name} + {pep2?.name}
+                  </Text>
+                  <Text style={styles.interactionDetail}>{interaction.detail}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
       {showPicker ? (
         <View style={styles.pickerCard}>
           <Text style={styles.pickerTitle}>Select Peptide</Text>
@@ -260,6 +299,15 @@ const styles = StyleSheet.create({
   unitBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   unitText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
   unitTextActive: { color: colors.background },
+  interactionsSection: { marginTop: 4, marginBottom: 4 },
+  interactionBanner: {
+    flexDirection: "row", alignItems: "flex-start", gap: 10,
+    borderRadius: 12, padding: 12,
+    borderWidth: 1, marginBottom: 8,
+  },
+  interactionTitle: { fontSize: 14, fontWeight: "700" },
+  interactionPeptides: { fontSize: 11, color: colors.textSecondary, marginTop: 1 },
+  interactionDetail: { fontSize: 12, color: colors.text, lineHeight: 17, marginTop: 4 },
   addBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     borderWidth: 1, borderColor: colors.border, borderStyle: "dashed",
