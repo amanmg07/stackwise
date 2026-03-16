@@ -2,8 +2,10 @@ import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
-import { AppProvider } from "./src/context/AppContext";
+import { AppProvider, useApp } from "./src/context/AppContext";
+import { ToastProvider } from "./src/context/ToastContext";
 import RootNavigator from "./src/navigation/RootNavigator";
+import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
 import { colors } from "./src/theme";
 
 const navTheme = {
@@ -24,14 +26,33 @@ const navTheme = {
   },
 };
 
+function AppContent() {
+  const { settings, updateSettings, loading } = useApp();
+
+  if (loading) return null;
+
+  if (!settings.onboardingDone) {
+    return (
+      <OnboardingScreen onComplete={() => updateSettings({ onboardingDone: true })} />
+    );
+  }
+
+  return (
+    <ToastProvider>
+      <NavigationContainer theme={navTheme}>
+        <StatusBar style="light" />
+        <RootNavigator />
+      </NavigationContainer>
+    </ToastProvider>
+  );
+}
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
-        <NavigationContainer theme={navTheme}>
-          <StatusBar style="light" />
-          <RootNavigator />
-        </NavigationContainer>
+        <StatusBar style="light" />
+        <AppContent />
       </AppProvider>
     </GestureHandlerRootView>
   );

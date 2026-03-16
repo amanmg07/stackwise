@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
 import { getSourcesForPeptide } from "../../data/peptideSources";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -22,6 +23,7 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
   const { peptideId } = route.params;
   const peptide = peptides.find((p) => p.id === peptideId);
   const { settings, updateSettings } = useApp();
+  const { showToast } = useToast();
   const [expandedProtocol, setExpandedProtocol] = useState<number | null>(0);
   const [showStorage, setShowStorage] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -32,6 +34,7 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
     updateSettings({
       savedPeptides: isSaved ? saved.filter((id) => id !== peptideId) : [...saved, peptideId],
     });
+    showToast(isSaved ? "Removed from saved" : "Saved for later!");
   };
 
   if (!peptide) {

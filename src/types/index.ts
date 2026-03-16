@@ -113,6 +113,7 @@ export interface UserSettings {
   notificationsEnabled: boolean;
   reminderTimes: string[];
   savedPeptides: string[];
+  onboardingDone: boolean;
 }
 
 export interface ChatMessage {

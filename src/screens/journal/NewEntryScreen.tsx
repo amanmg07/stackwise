@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { generateId } from "../../utils/id";
 import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
 
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
@@ -31,6 +32,7 @@ function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: s
 
 export default function NewEntryScreen({ route, navigation }: any) {
   const { journal, addJournalEntry, updateJournalEntry, settings, cycles } = useApp();
+  const { showToast } = useToast();
   const entryId = route.params?.entryId;
   const existing = entryId ? journal.find((e) => e.id === entryId) : null;
   const activeCycle = cycles.find((c) => c.isActive);
@@ -62,8 +64,10 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
     if (existing) {
       updateJournalEntry(entry);
+      showToast("Entry updated!");
     } else {
       addJournalEntry(entry);
+      showToast("Entry saved!");
     }
     navigation.goBack();
   };

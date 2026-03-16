@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { generateId } from "../../utils/id";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
+import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
 import { AdministrationRoute } from "../../types";
 
@@ -12,6 +13,7 @@ const SITES = ["Left Delt", "Right Delt", "Left Abdomen", "Right Abdomen", "Left
 export default function LogDoseScreen({ route, navigation }: any) {
   const { cycleId, peptideId: initPeptideId } = route.params;
   const { cycles, addDoseLog } = useApp();
+  const { showToast } = useToast();
   const cycle = cycles.find((c) => c.id === cycleId);
   const cyclePeptide = cycle?.peptides.find((p) => p.peptideId === initPeptideId);
   const peptide = peptideDB.find((p) => p.id === initPeptideId);
@@ -59,6 +61,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
       site: site || undefined,
       notes: notes || undefined,
     });
+    showToast("Dose logged!");
     navigation.goBack();
   };
 

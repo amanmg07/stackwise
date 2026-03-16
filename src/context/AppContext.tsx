@@ -36,6 +36,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     notificationsEnabled: false,
     reminderTimes: ["08:00", "20:00"],
     savedPeptides: [],
+    onboardingDone: false,
   });
   const [loading, setLoading] = useState(true);
 
