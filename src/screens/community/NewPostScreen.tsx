@@ -7,7 +7,7 @@ import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { generateId } from "../../utils/id";
-import { supabase } from "../../utils/supabase";
+import { supabase, ensureAuth } from "../../utils/supabase";
 import { colors, spacing } from "../../theme";
 import { Goal } from "../../types";
 
@@ -92,9 +92,15 @@ export default function NewPostScreen({ route, navigation }: any) {
       return;
     }
 
+    // Ensure auth is ready so user_id is set
+    let currentUserId = userId;
+    if (!currentUserId) {
+      try { currentUserId = await ensureAuth(); } catch {}
+    }
+
     const { error } = await supabase.from("community_posts").insert({
       id: generateId(),
-      user_id: userId,
+      user_id: currentUserId,
       author: author.trim() || "Anonymous",
       title: title.trim(),
       description: description.trim(),

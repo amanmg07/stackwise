@@ -29,13 +29,16 @@ export default function ProfileScreen({ navigation }: any) {
     });
     if (!result.canceled && result.assets[0]) {
       const localUri = result.assets[0].uri;
+      // Show local preview immediately
       updateSettings({ profileImage: localUri });
       // Upload to Supabase so others can see it
       if (userId) {
         try {
           const publicUrl = await uploadAvatar(userId, localUri);
           updateSettings({ profileImage: publicUrl });
-        } catch {}
+        } catch (e) {
+          Alert.alert("Upload failed", "Photo saved locally but others won't see it yet. Try again later.");
+        }
       }
     }
   };
