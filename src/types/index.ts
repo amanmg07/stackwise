@@ -114,6 +114,8 @@ export interface UserSettings {
   reminderTimes: string[];
   savedPeptides: string[];
   onboardingDone: boolean;
+  displayName: string;
+  profileImage: string | null;
 }
 
 export interface CommunityPost {

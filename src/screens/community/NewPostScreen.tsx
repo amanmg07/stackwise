@@ -28,11 +28,11 @@ const DIFFICULTIES = [
 ];
 
 export default function NewPostScreen({ route, navigation }: any) {
-  const { cycles, addCommunityPost } = useApp();
+  const { cycles, settings, addCommunityPost } = useApp();
   const { showToast } = useToast();
   const activeCycle = cycles.find((c) => c.isActive);
 
-  const [author, setAuthor] = useState("");
+  const [author, setAuthor] = useState(settings.displayName || "");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");

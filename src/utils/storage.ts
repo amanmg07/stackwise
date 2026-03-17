@@ -13,6 +13,10 @@ const DEFAULT_SETTINGS: UserSettings = {
   weightUnit: "lbs",
   notificationsEnabled: false,
   reminderTimes: ["08:00", "20:00"],
+  savedPeptides: [],
+  onboardingDone: false,
+  displayName: "",
+  profileImage: null,
 };
 
 async function load<T>(key: string, fallback: T): Promise<T> {

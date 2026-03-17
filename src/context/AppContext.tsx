@@ -41,6 +41,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     reminderTimes: ["08:00", "20:00"],
     savedPeptides: [],
     onboardingDone: false,
+    displayName: "",
+    profileImage: null,
   });
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert,
+  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert, Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -180,7 +180,7 @@ const POPULAR_STACKS: CommunityStack[] = [
 
 export default function CommunityScreen({ navigation }: any) {
   const { showToast } = useToast();
-  const { communityPosts, deleteCommunityPost } = useApp();
+  const { communityPosts, deleteCommunityPost, settings } = useApp();
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
 
   const allStacks = useMemo(() => {
@@ -255,9 +255,13 @@ export default function CommunityScreen({ navigation }: any) {
               {/* Author + difficulty */}
               <View style={styles.cardTop}>
                 <View style={styles.authorRow}>
-                  <View style={[styles.avatar, item.isUserPost && { backgroundColor: colors.success + "20" }]}>
-                    <Text style={[styles.avatarText, item.isUserPost && { color: colors.success }]}>{item.author[0]}</Text>
-                  </View>
+                  {item.isUserPost && settings.profileImage ? (
+                    <Image source={{ uri: settings.profileImage }} style={styles.avatarImg} />
+                  ) : (
+                    <View style={[styles.avatar, item.isUserPost && { backgroundColor: colors.success + "20" }]}>
+                      <Text style={[styles.avatarText, item.isUserPost && { color: colors.success }]}>{item.author[0]}</Text>
+                    </View>
+                  )}
                   <View>
                     <View style={styles.authorNameRow}>
                       <Text style={styles.authorName}>{item.author}</Text>
@@ -379,6 +383,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent + "20", alignItems: "center", justifyContent: "center",
   },
   avatarText: { fontSize: 15, fontWeight: "700", color: colors.accent },
+  avatarImg: { width: 36, height: 36, borderRadius: 18 },
   authorNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   authorName: { fontSize: 13, fontWeight: "600", color: colors.text },
   youBadge: {

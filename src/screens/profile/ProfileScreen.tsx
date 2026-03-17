@@ -1,17 +1,42 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Switch, StyleSheet, ScrollView, Alert, Platform } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Switch, StyleSheet, ScrollView, Alert, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
 
 export default function ProfileScreen({ navigation }: any) {
   const { cycles, doseLogs, journal, settings, updateSettings, clearAllData } = useApp();
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(settings.displayName || "");
 
   const completedCycles = cycles.filter((c) => !c.isActive).length;
   const activeCycles = cycles.filter((c) => c.isActive).length;
   const totalDoses = doseLogs.length;
   const totalEntries = journal.length;
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Allow photo access to set a profile picture.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled && result.assets[0]) {
+      updateSettings({ profileImage: result.assets[0].uri });
+    }
+  };
+
+  const saveName = () => {
+    updateSettings({ displayName: nameDraft.trim() });
+    setEditingName(false);
+  };
 
   const confirmClear = () => {
     Alert.alert(
@@ -26,7 +51,48 @@ export default function ProfileScreen({ navigation }: any) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text style={styles.title}>Profile</Text>
+      {/* Profile Header */}
+      <View style={styles.profileHeader}>
+        <TouchableOpacity onPress={pickImage} style={styles.avatarWrap}>
+          {settings.profileImage ? (
+            <Image source={{ uri: settings.profileImage }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="person" size={36} color={colors.textSecondary} />
+            </View>
+          )}
+          <View style={styles.cameraBadge}>
+            <Ionicons name="camera" size={12} color="#fff" />
+          </View>
+        </TouchableOpacity>
+
+        {editingName ? (
+          <View style={styles.nameEditRow}>
+            <TextInput
+              style={styles.nameInput}
+              value={nameDraft}
+              onChangeText={setNameDraft}
+              placeholder="Your name"
+              placeholderTextColor={colors.textSecondary}
+              autoFocus
+              onSubmitEditing={saveName}
+              returnKeyType="done"
+            />
+            <TouchableOpacity onPress={saveName} style={styles.nameSaveBtn}>
+              <Ionicons name="checkmark" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity onPress={() => { setNameDraft(settings.displayName || ""); setEditingName(true); }}>
+            <Text style={styles.displayName}>
+              {settings.displayName || "Tap to set name"}
+            </Text>
+            {!settings.displayName && (
+              <Text style={styles.nameHint}>This shows on your feed posts</Text>
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
@@ -140,7 +206,33 @@ export default function ProfileScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
-  title: { fontSize: 28, fontWeight: "800", color: colors.text, marginBottom: 20 },
+  // Profile header
+  profileHeader: { alignItems: "center", paddingVertical: 20, marginBottom: 8 },
+  avatarWrap: { marginBottom: 14 },
+  avatar: { width: 88, height: 88, borderRadius: 44 },
+  avatarPlaceholder: {
+    width: 88, height: 88, borderRadius: 44,
+    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border,
+    alignItems: "center", justifyContent: "center",
+  },
+  cameraBadge: {
+    position: "absolute", bottom: 0, right: 0,
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: colors.accent, alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: colors.background,
+  },
+  displayName: { fontSize: 22, fontWeight: "800", color: colors.text, textAlign: "center" },
+  nameHint: { fontSize: 12, color: colors.textSecondary, textAlign: "center", marginTop: 2 },
+  nameEditRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  nameInput: {
+    fontSize: 18, fontWeight: "700", color: colors.text, textAlign: "center",
+    backgroundColor: colors.surface, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10,
+    borderWidth: 1, borderColor: colors.accent + "50", minWidth: 180,
+  },
+  nameSaveBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: colors.accent, alignItems: "center", justifyContent: "center",
+  },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 24 },
   statBox: {
     flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 14,
