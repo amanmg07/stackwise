@@ -213,6 +213,16 @@ export default function CommunityScreen({ navigation }: any) {
 
   useEffect(() => {
     fetchPosts();
+
+    // Real-time subscription for instant updates
+    const channel = supabase
+      .channel("community_posts_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "community_posts" }, () => {
+        fetchPosts();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [fetchPosts]);
 
   // Refresh when screen is focused
