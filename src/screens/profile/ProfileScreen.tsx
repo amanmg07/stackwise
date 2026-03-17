@@ -58,11 +58,11 @@ export default function ProfileScreen({ navigation }: any) {
             <Image source={{ uri: settings.profileImage }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person-outline" size={36} color={colors.textSecondary} />
+              <Ionicons name="person-circle-outline" size={44} color={colors.textSecondary} />
             </View>
           )}
           <View style={styles.cameraBadge}>
-            <Ionicons name="camera-outline" size={12} color="#fff" />
+            <Ionicons name="image-outline" size={14} color="#fff" />
           </View>
         </TouchableOpacity>
 
@@ -79,7 +79,7 @@ export default function ProfileScreen({ navigation }: any) {
               returnKeyType="done"
             />
             <TouchableOpacity onPress={saveName} style={styles.nameSaveBtn}>
-              <Ionicons name="checkmark-outline" size={18} color="#fff" />
+              <Ionicons name="checkmark" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
         ) : (
