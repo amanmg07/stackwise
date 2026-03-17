@@ -317,10 +317,7 @@ export default function CommunityScreen({ navigation }: any) {
                     <TouchableOpacity
                       key={p.peptideId}
                       style={styles.pepRow}
-                      onPress={() => navigation.navigate("ExploreTab", {
-                        screen: "PeptideDetail",
-                        params: { peptideId: p.peptideId },
-                      })}
+                      onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.peptideId })}
                     >
                       <Text style={styles.pepName}>{pep?.name || p.peptideId}</Text>
                       <View style={styles.pepRight}>

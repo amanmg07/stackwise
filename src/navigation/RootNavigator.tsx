@@ -88,6 +88,7 @@ function CommunityNavigator() {
     <CommunityStack.Navigator screenOptions={screenOptions}>
       <CommunityStack.Screen name="CommunityFeed" component={CommunityScreen} options={{ headerShown: false }} />
       <CommunityStack.Screen name="NewPost" component={NewPostScreen} options={{ title: "Share Your Stack" }} />
+      <CommunityStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
     </CommunityStack.Navigator>
   );
 }
