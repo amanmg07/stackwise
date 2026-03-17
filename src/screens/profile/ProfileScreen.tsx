@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Switch, StyleSheet, ScrollView, Alert, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -8,8 +8,6 @@ import { colors, spacing } from "../../theme";
 
 export default function ProfileScreen({ navigation }: any) {
   const { cycles, doseLogs, journal, settings, updateSettings, clearAllData } = useApp();
-  const [editingName, setEditingName] = useState(false);
-  const [nameDraft, setNameDraft] = useState(settings.displayName || "");
 
   const completedCycles = cycles.filter((c) => !c.isActive).length;
   const activeCycles = cycles.filter((c) => c.isActive).length;
@@ -31,11 +29,6 @@ export default function ProfileScreen({ navigation }: any) {
     if (!result.canceled && result.assets[0]) {
       updateSettings({ profileImage: result.assets[0].uri });
     }
-  };
-
-  const saveName = () => {
-    updateSettings({ displayName: nameDraft.trim() });
-    setEditingName(false);
   };
 
   const confirmClear = () => {
@@ -69,33 +62,17 @@ export default function ProfileScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
 
-        {editingName ? (
-          <View style={styles.nameEditRow}>
-            <TextInput
-              style={styles.nameInput}
-              value={nameDraft}
-              onChangeText={setNameDraft}
-              placeholder="Your name"
-              placeholderTextColor={colors.textSecondary}
-              autoFocus
-              onSubmitEditing={saveName}
-              returnKeyType="done"
-            />
-            <TouchableOpacity onPress={saveName} style={styles.nameSaveBtn}>
-              <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.nameBtn}
-            onPress={() => { setNameDraft(settings.displayName || ""); setEditingName(true); }}
-          >
-            <Ionicons name="create-outline" size={16} color={colors.accent} />
-            <Text style={styles.displayName}>
-              {settings.displayName || "Set your name"}
-            </Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.nameBtn}>
+          <Ionicons name="create-outline" size={16} color={colors.accent} />
+          <TextInput
+            style={styles.nameInput}
+            value={settings.displayName || ""}
+            onChangeText={(text) => updateSettings({ displayName: text })}
+            placeholder="Set your name"
+            placeholderTextColor={colors.textSecondary}
+            returnKeyType="done"
+          />
+        </View>
         <Text style={styles.nameHint}>This shows on your feed posts</Text>
       </View>
 
@@ -229,21 +206,12 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: colors.background,
   },
   nameBtn: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: colors.surface, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10,
-    borderWidth: 1, borderColor: colors.border, marginTop: 8,
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    marginTop: 8,
   },
-  displayName: { fontSize: 18, fontWeight: "700", color: colors.text },
   nameHint: { fontSize: 12, color: colors.textSecondary, textAlign: "center", marginTop: 6 },
-  nameEditRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   nameInput: {
     fontSize: 18, fontWeight: "700", color: colors.text, textAlign: "center",
-    backgroundColor: colors.surface, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10,
-    borderWidth: 1, borderColor: colors.accent + "50", minWidth: 180,
-  },
-  nameSaveBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.accent, alignItems: "center", justifyContent: "center",
   },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 24 },
   statBox: {
