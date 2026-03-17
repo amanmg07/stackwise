@@ -7,6 +7,7 @@ import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { generateId } from "../../utils/id";
+import { supabase } from "../../utils/supabase";
 import { colors, spacing } from "../../theme";
 import { Goal } from "../../types";
 
@@ -28,7 +29,7 @@ const DIFFICULTIES = [
 ];
 
 export default function NewPostScreen({ route, navigation }: any) {
-  const { cycles, settings, addCommunityPost } = useApp();
+  const { cycles, settings } = useApp();
   const { showToast } = useToast();
   const activeCycle = cycles.find((c) => c.isActive);
 
@@ -81,7 +82,7 @@ export default function NewPostScreen({ route, navigation }: any) {
     showToast("Imported from your active cycle!");
   };
 
-  const publish = () => {
+  const publish = async () => {
     if (!title.trim()) {
       Alert.alert("Title required", "Give your stack a name");
       return;
@@ -91,7 +92,7 @@ export default function NewPostScreen({ route, navigation }: any) {
       return;
     }
 
-    addCommunityPost({
+    const { error } = await supabase.from("community_posts").insert({
       id: generateId(),
       author: author.trim() || "Anonymous",
       title: title.trim(),
@@ -101,9 +102,12 @@ export default function NewPostScreen({ route, navigation }: any) {
       difficulty,
       likes: 0,
       duration: duration.trim() || "8 weeks",
-      createdAt: new Date().toISOString(),
-      isUserPost: true,
     });
+
+    if (error) {
+      Alert.alert("Error", "Could not post. Check your connection and try again.");
+      return;
+    }
 
     showToast("Stack posted to the feed!");
     navigation.goBack();

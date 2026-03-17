@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert, Image,
+  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert, Image, ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
 import { useToast } from "../../context/ToastContext";
 import { useApp } from "../../context/AppContext";
+import { supabase } from "../../utils/supabase";
 import { CommunityPost } from "../../types";
 
 interface CommunityStack {
@@ -180,16 +181,49 @@ const POPULAR_STACKS: CommunityStack[] = [
 
 export default function CommunityScreen({ navigation }: any) {
   const { showToast } = useToast();
-  const { communityPosts, deleteCommunityPost, settings } = useApp();
+  const { settings } = useApp();
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
+  const [remotePosts, setRemotePosts] = useState<CommunityStack[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPosts = useCallback(async () => {
+    const { data } = await supabase
+      .from("community_posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) {
+      setRemotePosts(
+        data.map((row: any) => ({
+          id: row.id,
+          author: row.author,
+          title: row.title,
+          description: row.description || "",
+          goals: row.goals || [],
+          peptides: row.peptides || [],
+          difficulty: row.difficulty || "beginner",
+          likes: row.likes || 0,
+          duration: row.duration || "8 weeks",
+          createdAt: row.created_at,
+          isUserPost: true,
+        }))
+      );
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  // Refresh when screen is focused
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", fetchPosts);
+    return unsubscribe;
+  }, [navigation, fetchPosts]);
 
   const allStacks = useMemo(() => {
-    const userStacks: CommunityStack[] = communityPosts.map((p) => ({
-      ...p,
-      isUserPost: true,
-    }));
-    return [...userStacks, ...POPULAR_STACKS];
-  }, [communityPosts]);
+    return [...remotePosts, ...POPULAR_STACKS];
+  }, [remotePosts]);
 
   const toggleLike = (id: string) => {
     setLikedStacks((prev) =>
@@ -228,8 +262,9 @@ export default function CommunityScreen({ navigation }: any) {
   const confirmDelete = (id: string) => {
     Alert.alert("Delete Post", "Remove this post from the feed?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => {
-        deleteCommunityPost(id);
+      { text: "Delete", style: "destructive", onPress: async () => {
+        await supabase.from("community_posts").delete().eq("id", id);
+        setRemotePosts((prev) => prev.filter((p) => p.id !== id));
         showToast("Post deleted");
       }},
     ]);
