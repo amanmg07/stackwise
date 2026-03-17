@@ -19,6 +19,7 @@ interface CommunityStack {
   difficulty: "beginner" | "intermediate" | "advanced";
   likes: number;
   duration: string;
+  createdAt?: string;
   isUserPost?: boolean;
 }
 
@@ -33,6 +34,23 @@ const DIFFICULTY_COLORS = {
   intermediate: colors.warning,
   advanced: colors.error,
 };
+
+function timeAgo(dateStr?: string): string {
+  if (!dateStr) return "";
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const seconds = Math.floor((now - then) / 1000);
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+}
 
 const POPULAR_STACKS: CommunityStack[] = [
   {
@@ -49,6 +67,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "beginner",
     likes: 342,
     duration: "6 weeks",
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs2",
@@ -63,6 +82,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "intermediate",
     likes: 289,
     duration: "8-12 weeks",
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs3",
@@ -78,6 +98,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "intermediate",
     likes: 256,
     duration: "10 weeks",
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs4",
@@ -92,6 +113,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "beginner",
     likes: 198,
     duration: "4-6 weeks",
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs5",
@@ -106,6 +128,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "beginner",
     likes: 215,
     duration: "4 weeks",
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs6",
@@ -121,6 +144,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "advanced",
     likes: 178,
     duration: "8 weeks",
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs7",
@@ -135,6 +159,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "beginner",
     likes: 231,
     duration: "8 weeks",
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "cs8",
@@ -149,6 +174,7 @@ const POPULAR_STACKS: CommunityStack[] = [
     difficulty: "beginner",
     likes: 145,
     duration: "6 weeks",
+    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
@@ -241,7 +267,7 @@ export default function CommunityScreen({ navigation }: any) {
                         </View>
                       )}
                     </View>
-                    <Text style={styles.durationText}>{item.duration}</Text>
+                    <Text style={styles.durationText}>{timeAgo(item.createdAt)}</Text>
                   </View>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -277,6 +303,10 @@ export default function CommunityScreen({ navigation }: any) {
 
               {/* Peptides */}
               <View style={styles.pepSection}>
+                <View style={styles.pepDurationRow}>
+                  <Ionicons name="time-outline" size={13} color={colors.textSecondary} />
+                  <Text style={styles.pepDurationText}>{item.duration}</Text>
+                </View>
                 {item.peptides.map((p) => {
                   const pep = peptideDB.find((pp) => pp.id === p.peptideId);
                   return (
@@ -368,6 +398,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background, borderRadius: 10, padding: 10,
     marginBottom: 12,
   },
+  pepDurationRow: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingBottom: 6, marginBottom: 2,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  pepDurationText: { fontSize: 12, color: colors.textSecondary, fontWeight: "600" },
   pepRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border,
