@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert, Image, ActivityIndicator,
+  View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert, Image, RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -184,7 +184,7 @@ export default function CommunityScreen({ navigation }: any) {
   const { settings } = useApp();
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
   const [remotePosts, setRemotePosts] = useState<CommunityStack[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     const { data } = await supabase
@@ -208,7 +208,7 @@ export default function CommunityScreen({ navigation }: any) {
         }))
       );
     }
-    setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useEffect(() => {
@@ -287,6 +287,13 @@ export default function CommunityScreen({ navigation }: any) {
         data={allStacks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => { setRefreshing(true); fetchPosts(); }}
+            tintColor={colors.accent}
+          />
+        }
         ListHeaderComponent={
           <>
             <Text style={styles.title}>Feed</Text>
