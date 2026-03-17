@@ -29,7 +29,7 @@ const DIFFICULTIES = [
 ];
 
 export default function NewPostScreen({ route, navigation }: any) {
-  const { cycles, settings } = useApp();
+  const { cycles, settings, userId } = useApp();
   const { showToast } = useToast();
   const activeCycle = cycles.find((c) => c.isActive);
 
@@ -94,6 +94,7 @@ export default function NewPostScreen({ route, navigation }: any) {
 
     const { error } = await supabase.from("community_posts").insert({
       id: generateId(),
+      user_id: userId,
       author: author.trim() || "Anonymous",
       title: title.trim(),
       description: description.trim(),
@@ -102,6 +103,7 @@ export default function NewPostScreen({ route, navigation }: any) {
       difficulty,
       likes: 0,
       duration: duration.trim() || "8 weeks",
+      avatar_url: settings.profileImage || null,
     });
 
     if (error) {

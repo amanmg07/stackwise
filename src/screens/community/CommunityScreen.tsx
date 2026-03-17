@@ -22,6 +22,8 @@ interface CommunityStack {
   duration: string;
   createdAt?: string;
   isUserPost?: boolean;
+  userId?: string;
+  avatarUrl?: string | null;
 }
 
 const GOAL_COLORS: Record<string, string> = {
@@ -181,7 +183,7 @@ const POPULAR_STACKS: CommunityStack[] = [
 
 export default function CommunityScreen({ navigation }: any) {
   const { showToast } = useToast();
-  const { settings } = useApp();
+  const { settings, userId } = useApp();
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
   const [remotePosts, setRemotePosts] = useState<CommunityStack[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -205,6 +207,8 @@ export default function CommunityScreen({ navigation }: any) {
           duration: row.duration || "8 weeks",
           createdAt: row.created_at,
           isUserPost: true,
+          userId: row.user_id || null,
+          avatarUrl: row.avatar_url || null,
         }))
       );
     }
@@ -312,23 +316,24 @@ export default function CommunityScreen({ navigation }: any) {
         }
         renderItem={({ item }) => {
           const liked = likedStacks.includes(item.id);
+          const isOwnPost = item.userId != null && item.userId === userId;
           const displayLikes = item.isUserPost ? item.likes : (liked ? item.likes + 1 : item.likes);
           return (
             <View style={styles.card}>
               {/* Author + difficulty */}
               <View style={styles.cardTop}>
                 <View style={styles.authorRow}>
-                  {item.isUserPost && settings.profileImage ? (
-                    <Image source={{ uri: settings.profileImage }} style={styles.avatarImg} />
+                  {item.avatarUrl ? (
+                    <Image source={{ uri: item.avatarUrl }} style={styles.avatarImg} />
                   ) : (
-                    <View style={[styles.avatar, item.isUserPost && { backgroundColor: colors.success + "20" }]}>
-                      <Text style={[styles.avatarText, item.isUserPost && { color: colors.success }]}>{item.author[0]}</Text>
+                    <View style={[styles.avatar, isOwnPost && { backgroundColor: colors.success + "20" }]}>
+                      <Text style={[styles.avatarText, isOwnPost && { color: colors.success }]}>{item.author[0]}</Text>
                     </View>
                   )}
                   <View>
                     <View style={styles.authorNameRow}>
                       <Text style={styles.authorName}>{item.author}</Text>
-                      {item.isUserPost && (
+                      {isOwnPost && (
                         <View style={styles.youBadge}>
                           <Text style={styles.youBadgeText}>You</Text>
                         </View>
@@ -343,7 +348,7 @@ export default function CommunityScreen({ navigation }: any) {
                       {item.difficulty}
                     </Text>
                   </View>
-                  {item.isUserPost && (
+                  {isOwnPost && (
                     <TouchableOpacity onPress={() => confirmDelete(item.id)}>
                       <Ionicons name="trash-outline" size={18} color={colors.error} />
                     </TouchableOpacity>

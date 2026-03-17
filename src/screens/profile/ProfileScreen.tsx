@@ -3,11 +3,12 @@ import { View, Text, TextInput, TouchableOpacity, Switch, StyleSheet, ScrollView
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useApp } from "../../context/AppContext";
+import { uploadAvatar } from "../../utils/supabase";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
 
 export default function ProfileScreen({ navigation }: any) {
-  const { cycles, doseLogs, journal, settings, updateSettings, clearAllData } = useApp();
+  const { cycles, doseLogs, journal, settings, updateSettings, clearAllData, userId } = useApp();
 
   const completedCycles = cycles.filter((c) => !c.isActive).length;
   const activeCycles = cycles.filter((c) => c.isActive).length;
@@ -27,7 +28,15 @@ export default function ProfileScreen({ navigation }: any) {
       quality: 0.5,
     });
     if (!result.canceled && result.assets[0]) {
-      updateSettings({ profileImage: result.assets[0].uri });
+      const localUri = result.assets[0].uri;
+      updateSettings({ profileImage: localUri });
+      // Upload to Supabase so others can see it
+      if (userId) {
+        try {
+          const publicUrl = await uploadAvatar(userId, localUri);
+          updateSettings({ profileImage: publicUrl });
+        } catch {}
+      }
     }
   };
 

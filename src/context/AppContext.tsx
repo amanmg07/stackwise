@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Cycle, DoseLog, JournalEntry, UserSettings, CommunityPost } from "../types";
 import { appStorage } from "../utils/storage";
+import { ensureAuth } from "../utils/supabase";
 
 interface AppState {
   cycles: Cycle[];
@@ -9,6 +10,7 @@ interface AppState {
   settings: UserSettings;
   communityPosts: CommunityPost[];
   loading: boolean;
+  userId: string | null;
   // Cycles
   addCycle: (cycle: Cycle) => void;
   updateCycle: (cycle: Cycle) => void;
@@ -46,6 +48,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -61,6 +64,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setJournal(j);
       setSettings(s);
       setCommunityPosts(cp);
+      // Sign in anonymously
+      try {
+        const uid = await ensureAuth();
+        setUserId(uid);
+      } catch {}
       setLoading(false);
     })();
   }, []);
@@ -79,6 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     settings,
     communityPosts,
     loading,
+    userId,
 
     addCycle: (cycle) => persistCycles([cycle, ...cycles]),
     updateCycle: (cycle) => persistCycles(cycles.map((c) => (c.id === cycle.id ? cycle : c))),
