@@ -225,10 +225,21 @@ export default function CommunityScreen({ navigation }: any) {
     return [...remotePosts, ...POPULAR_STACKS];
   }, [remotePosts]);
 
-  const toggleLike = (id: string) => {
+  const toggleLike = async (id: string) => {
+    const alreadyLiked = likedStacks.includes(id);
     setLikedStacks((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+      alreadyLiked ? prev.filter((s) => s !== id) : [...prev, id]
     );
+
+    // Update likes in Supabase for remote posts
+    const post = remotePosts.find((p) => p.id === id);
+    if (post) {
+      const newLikes = alreadyLiked ? Math.max(0, post.likes - 1) : post.likes + 1;
+      setRemotePosts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, likes: newLikes } : p))
+      );
+      await supabase.from("community_posts").update({ likes: newLikes }).eq("id", id);
+    }
   };
 
   const shareStack = async (stack: CommunityStack) => {
@@ -284,7 +295,7 @@ export default function CommunityScreen({ navigation }: any) {
         }
         renderItem={({ item }) => {
           const liked = likedStacks.includes(item.id);
-          const displayLikes = liked ? item.likes + 1 : item.likes;
+          const displayLikes = item.isUserPost ? item.likes : (liked ? item.likes + 1 : item.likes);
           return (
             <View style={styles.card}>
               {/* Author + difficulty */}
