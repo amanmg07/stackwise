@@ -55,15 +55,18 @@ export default function ProfileScreen({ navigation }: any) {
       <View style={styles.profileHeader}>
         <TouchableOpacity onPress={pickImage} style={styles.avatarWrap}>
           {settings.profileImage ? (
-            <Image source={{ uri: settings.profileImage }} style={styles.avatar} />
+            <>
+              <Image source={{ uri: settings.profileImage }} style={styles.avatar} />
+              <View style={styles.editPhotoBadge}>
+                <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
+              </View>
+            </>
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person-circle-outline" size={44} color={colors.textSecondary} />
+              <Ionicons name="add-circle-outline" size={32} color={colors.accent} />
+              <Text style={styles.addPhotoText}>Add Photo</Text>
             </View>
           )}
-          <View style={styles.cameraBadge}>
-            <Ionicons name="image-outline" size={14} color="#fff" />
-          </View>
         </TouchableOpacity>
 
         {editingName ? (
@@ -79,19 +82,21 @@ export default function ProfileScreen({ navigation }: any) {
               returnKeyType="done"
             />
             <TouchableOpacity onPress={saveName} style={styles.nameSaveBtn}>
-              <Ionicons name="checkmark" size={18} color="#fff" />
+              <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity onPress={() => { setNameDraft(settings.displayName || ""); setEditingName(true); }}>
+          <TouchableOpacity
+            style={styles.nameBtn}
+            onPress={() => { setNameDraft(settings.displayName || ""); setEditingName(true); }}
+          >
+            <Ionicons name="create-outline" size={16} color={colors.accent} />
             <Text style={styles.displayName}>
-              {settings.displayName || "Tap to set name"}
+              {settings.displayName || "Set your name"}
             </Text>
-            {!settings.displayName && (
-              <Text style={styles.nameHint}>This shows on your feed posts</Text>
-            )}
           </TouchableOpacity>
         )}
+        <Text style={styles.nameHint}>This shows on your feed posts</Text>
       </View>
 
       <View style={styles.statsRow}>
@@ -212,17 +217,24 @@ const styles = StyleSheet.create({
   avatar: { width: 88, height: 88, borderRadius: 44 },
   avatarPlaceholder: {
     width: 88, height: 88, borderRadius: 44,
-    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border,
+    backgroundColor: colors.accent + "10", borderWidth: 2, borderColor: colors.accent + "40",
+    borderStyle: "dashed",
     alignItems: "center", justifyContent: "center",
   },
-  cameraBadge: {
-    position: "absolute", bottom: 0, right: 0,
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: colors.accent, alignItems: "center", justifyContent: "center",
+  addPhotoText: { fontSize: 11, fontWeight: "600", color: colors.textSecondary, marginTop: 4 },
+  editPhotoBadge: {
+    position: "absolute", bottom: 0, right: -4,
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
     borderWidth: 2, borderColor: colors.background,
   },
-  displayName: { fontSize: 22, fontWeight: "800", color: colors.text, textAlign: "center" },
-  nameHint: { fontSize: 12, color: colors.textSecondary, textAlign: "center", marginTop: 2 },
+  nameBtn: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: colors.surface, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10,
+    borderWidth: 1, borderColor: colors.border, marginTop: 8,
+  },
+  displayName: { fontSize: 18, fontWeight: "700", color: colors.text },
+  nameHint: { fontSize: 12, color: colors.textSecondary, textAlign: "center", marginTop: 6 },
   nameEditRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   nameInput: {
     fontSize: 18, fontWeight: "700", color: colors.text, textAlign: "center",
