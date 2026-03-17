@@ -280,10 +280,20 @@ export default function CommunityScreen({ navigation }: any) {
                 {item.peptides.map((p) => {
                   const pep = peptideDB.find((pp) => pp.id === p.peptideId);
                   return (
-                    <View key={p.peptideId} style={styles.pepRow}>
+                    <TouchableOpacity
+                      key={p.peptideId}
+                      style={styles.pepRow}
+                      onPress={() => navigation.navigate("ExploreTab", {
+                        screen: "PeptideDetail",
+                        params: { peptideId: p.peptideId },
+                      })}
+                    >
                       <Text style={styles.pepName}>{pep?.name || p.peptideId}</Text>
-                      <Text style={styles.pepDose}>{p.dose} · {p.frequency}</Text>
-                    </View>
+                      <View style={styles.pepRight}>
+                        <Text style={styles.pepDose}>{p.dose} · {p.frequency}</Text>
+                        <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
+                      </View>
+                    </TouchableOpacity>
                   );
                 })}
               </View>
@@ -363,6 +373,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
   pepName: { fontSize: 13, fontWeight: "600", color: colors.text },
+  pepRight: { flexDirection: "row", alignItems: "center", gap: 4 },
   pepDose: { fontSize: 12, color: colors.textSecondary },
   actionsRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   actionBtn: { flexDirection: "row", alignItems: "center", gap: 5 },
