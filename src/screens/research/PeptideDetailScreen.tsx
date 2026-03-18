@@ -179,18 +179,20 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
       {stackPeptides.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Stacks Well With</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.stackChipRow}>
             {stackPeptides.map((sp) => (
               <TouchableOpacity
                 key={sp.id}
-                style={styles.stackCard}
+                style={styles.stackChip}
                 onPress={() => navigation.push("PeptideDetail", { peptideId: sp.id })}
+                activeOpacity={0.7}
               >
-                <Text style={styles.stackName}>{sp.name}</Text>
-                <Text style={styles.stackDesc} numberOfLines={2}>{sp.description}</Text>
+                <Ionicons name="flask-outline" size={14} color={colors.accent} />
+                <Text style={styles.stackChipText}>{sp.name}</Text>
+                <Ionicons name="chevron-forward" size={14} color={colors.accent} />
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </View>
         </>
       )}
 
@@ -346,13 +348,14 @@ const styles = StyleSheet.create({
   bulletRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 6 },
   bullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.warning, marginTop: 6 },
   bulletText: { fontSize: 14, color: colors.text, flex: 1 },
-  stackCard: {
-    backgroundColor: colors.surface, borderRadius: 12, padding: 14, width: 180,
-    marginRight: 10, borderWidth: 1, borderColor: colors.border, marginBottom: 12,
-    overflow: "hidden",
+  stackChipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
+  stackChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: colors.accent + "15", borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 8,
+    borderWidth: 1, borderColor: colors.accent + "30",
   },
-  stackName: { fontSize: 15, fontWeight: "700", color: colors.accent, marginBottom: 4 },
-  stackDesc: { fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
+  stackChipText: { fontSize: 14, fontWeight: "600", color: colors.accent },
   collapsibleHeader: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md,

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert, Image, RefreshControl,
+  TextInput, ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -187,6 +188,10 @@ export default function CommunityScreen({ navigation }: any) {
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
   const [remotePosts, setRemotePosts] = useState<CommunityStack[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<"newest" | "most_liked" | "oldest">("newest");
 
   const fetchPosts = useCallback(async () => {
     const { data } = await supabase
@@ -238,6 +243,70 @@ export default function CommunityScreen({ navigation }: any) {
   const allStacks = useMemo(() => {
     return [...remotePosts, ...POPULAR_STACKS];
   }, [remotePosts]);
+
+  const filteredStacks = useMemo(() => {
+    let result = allStacks;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter((stack) => {
+        const titleMatch = stack.title.toLowerCase().includes(q);
+        const authorMatch = stack.author.toLowerCase().includes(q);
+        const peptideMatch = stack.peptides.some((p) => {
+          const pep = peptideDB.find((pp) => pp.id === p.peptideId);
+          return (pep?.name || p.peptideId).toLowerCase().includes(q);
+        });
+        return titleMatch || authorMatch || peptideMatch;
+      });
+    }
+
+    // Goal filter
+    if (selectedGoals.length > 0) {
+      result = result.filter((stack) =>
+        selectedGoals.some((g) => stack.goals.includes(g))
+      );
+    }
+
+    // Difficulty filter
+    if (selectedDifficulties.length > 0) {
+      result = result.filter((stack) =>
+        selectedDifficulties.includes(stack.difficulty)
+      );
+    }
+
+    // Sort
+    result = [...result].sort((a, b) => {
+      if (sortBy === "most_liked") return b.likes - a.likes;
+      if (sortBy === "oldest") {
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      }
+      // newest (default)
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+
+    return result;
+  }, [allStacks, searchQuery, selectedGoals, selectedDifficulties, sortBy]);
+
+  const toggleGoalFilter = (goal: string) => {
+    setSelectedGoals((prev) =>
+      prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
+    );
+  };
+
+  const toggleDifficultyFilter = (diff: string) => {
+    setSelectedDifficulties((prev) =>
+      prev.includes(diff) ? prev.filter((d) => d !== diff) : [...prev, diff]
+    );
+  };
+
+  const GOAL_OPTIONS = ["recovery", "fat_loss", "muscle_gain", "anti_aging", "sleep", "cognitive", "immune", "sexual_health"] as const;
+  const DIFFICULTY_OPTIONS = ["beginner", "intermediate", "advanced"] as const;
+  const SORT_OPTIONS = [
+    { key: "newest" as const, label: "Newest" },
+    { key: "most_liked" as const, label: "Most Liked" },
+    { key: "oldest" as const, label: "Oldest" },
+  ];
 
   const toggleLike = async (id: string) => {
     const alreadyLiked = likedStacks.includes(id);
@@ -298,7 +367,7 @@ export default function CommunityScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={allStacks}
+        data={filteredStacks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
@@ -312,6 +381,92 @@ export default function CommunityScreen({ navigation }: any) {
           <>
             <Text style={styles.title}>Feed</Text>
             <Text style={styles.subtitle}>Popular stacks from the peptide community</Text>
+
+            {/* Search bar */}
+            <View style={styles.searchContainer}>
+              <Ionicons name="search-outline" size={18} color={colors.textSecondary} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by title, author, or peptide..."
+                placeholderTextColor={colors.textSecondary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                returnKeyType="search"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery("")} style={styles.searchClear}>
+                  <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Goal filter chips */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll} contentContainerStyle={styles.chipScrollContent}>
+              {GOAL_OPTIONS.map((goal) => {
+                const active = selectedGoals.includes(goal);
+                return (
+                  <TouchableOpacity
+                    key={goal}
+                    style={[
+                      styles.filterChip,
+                      active && { backgroundColor: (GOAL_COLORS[goal] || "#888") + "30", borderColor: GOAL_COLORS[goal] || "#888" },
+                    ]}
+                    onPress={() => toggleGoalFilter(goal)}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        active && { color: GOAL_COLORS[goal] || "#888" },
+                      ]}
+                    >
+                      {goal.replace("_", " ")}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* Difficulty filter chips */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll} contentContainerStyle={styles.chipScrollContent}>
+              {DIFFICULTY_OPTIONS.map((diff) => {
+                const active = selectedDifficulties.includes(diff);
+                const diffColor = DIFFICULTY_COLORS[diff];
+                return (
+                  <TouchableOpacity
+                    key={diff}
+                    style={[
+                      styles.filterChip,
+                      active && { backgroundColor: diffColor + "30", borderColor: diffColor },
+                    ]}
+                    onPress={() => toggleDifficultyFilter(diff)}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        active && { color: diffColor },
+                      ]}
+                    >
+                      {diff}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* Sort options */}
+            <View style={styles.sortRow}>
+              {SORT_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt.key}
+                  style={[styles.sortBtn, sortBy === opt.key && styles.sortBtnActive]}
+                  onPress={() => setSortBy(opt.key)}
+                >
+                  <Text style={[styles.sortBtnText, sortBy === opt.key && styles.sortBtnTextActive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </>
         }
         renderItem={({ item }) => {
@@ -499,4 +654,39 @@ const styles = StyleSheet.create({
     shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
     elevation: 8,
   },
+  searchContainer: {
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: colors.surface, borderRadius: 12,
+    marginHorizontal: spacing.md, marginBottom: 10,
+    paddingHorizontal: 12, borderWidth: 1, borderColor: colors.border,
+  },
+  searchIcon: { marginRight: 8 },
+  searchInput: {
+    flex: 1, fontSize: 14, color: colors.text,
+    paddingVertical: Platform.OS === "ios" ? 12 : 8,
+  },
+  searchClear: { padding: 4 },
+  chipScroll: { marginBottom: 6 },
+  chipScrollContent: { paddingHorizontal: spacing.md, gap: 8 },
+  filterChip: {
+    borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  filterChipText: {
+    fontSize: 12, fontWeight: "600", color: colors.textSecondary,
+    textTransform: "capitalize",
+  },
+  sortRow: {
+    flexDirection: "row", gap: 8,
+    paddingHorizontal: spacing.md, marginTop: 4, marginBottom: 14,
+  },
+  sortBtn: {
+    borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  sortBtnActive: {
+    backgroundColor: colors.accent + "20", borderColor: colors.accent,
+  },
+  sortBtnText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
+  sortBtnTextActive: { color: colors.accent },
 });

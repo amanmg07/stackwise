@@ -4,7 +4,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { generateId } from "../../utils/id";
-import { format, addWeeks } from "date-fns";
+import { format, addWeeks, differenceInWeeks, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { protocolTemplates } from "../../data/protocolTemplates";
@@ -13,10 +13,12 @@ import { colors, spacing } from "../../theme";
 import { CyclePeptide, AdministrationRoute } from "../../types";
 
 export default function NewCycleScreen({ route, navigation }: any) {
-  const { addCycle } = useApp();
+  const { addCycle, updateCycle, cycles } = useApp();
   const templateId = route.params?.templateId;
   const template = templateId ? protocolTemplates.find((t) => t.id === templateId) : null;
   const communityStack = route.params?.communityStack;
+  const editCycleId = route.params?.editCycleId;
+  const editCycle = editCycleId ? cycles.find((c) => c.id === editCycleId) : null;
 
   const buildInitialPeptides = (): CyclePeptide[] => {
     if (template) {
@@ -50,9 +52,18 @@ export default function NewCycleScreen({ route, navigation }: any) {
     return [];
   };
 
-  const [name, setName] = useState(template?.name || communityStack?.name || "");
-  const [durationWeeks, setDurationWeeks] = useState("8");
-  const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(buildInitialPeptides());
+  const [name, setName] = useState(
+    editCycle?.name || template?.name || communityStack?.name || ""
+  );
+  const [durationWeeks, setDurationWeeks] = useState(
+    editCycle
+      ? String(differenceInWeeks(parseISO(editCycle.endDate), parseISO(editCycle.startDate)) || 8)
+      : "8"
+  );
+  const [notes, setNotes] = useState(editCycle?.notes || "");
+  const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(
+    editCycle ? editCycle.peptides : buildInitialPeptides()
+  );
   const [showPicker, setShowPicker] = useState(false);
 
   const interactions = useMemo(
@@ -109,19 +120,33 @@ export default function NewCycleScreen({ route, navigation }: any) {
       return;
     }
 
-    const startDate = new Date().toISOString().split("T")[0];
-    const endDate = format(addWeeks(new Date(), parseInt(durationWeeks) || 8), "yyyy-MM-dd");
+    if (editCycle) {
+      const endDate = format(
+        addWeeks(parseISO(editCycle.startDate), parseInt(durationWeeks) || 8),
+        "yyyy-MM-dd"
+      );
+      updateCycle({
+        ...editCycle,
+        name: name.trim(),
+        peptides: cyclePeptides,
+        endDate,
+        notes: notes,
+      });
+    } else {
+      const startDate = new Date().toISOString().split("T")[0];
+      const endDate = format(addWeeks(new Date(), parseInt(durationWeeks) || 8), "yyyy-MM-dd");
 
-    addCycle({
-      id: generateId(),
-      name: name.trim(),
-      peptides: cyclePeptides,
-      startDate,
-      endDate,
-      isActive: true,
-      notes: template ? `Based on ${template.name} protocol` : "",
-      createdAt: new Date().toISOString(),
-    });
+      addCycle({
+        id: generateId(),
+        name: name.trim(),
+        peptides: cyclePeptides,
+        startDate,
+        endDate,
+        isActive: true,
+        notes: template ? `Based on ${template.name} protocol` : "",
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     navigation.goBack();
   };
@@ -267,8 +292,18 @@ export default function NewCycleScreen({ route, navigation }: any) {
         </TouchableOpacity>
       )}
 
+      <Text style={styles.label}>Notes</Text>
+      <TextInput
+        style={[styles.input, { minHeight: 60, textAlignVertical: "top" }]}
+        value={notes}
+        onChangeText={setNotes}
+        placeholder="Optional notes about this cycle"
+        placeholderTextColor={colors.textSecondary}
+        multiline
+      />
+
       <TouchableOpacity style={styles.saveBtn} onPress={saveCycle}>
-        <Text style={styles.saveBtnText}>Start Cycle</Text>
+        <Text style={styles.saveBtnText}>{editCycle ? "Save Changes" : "Start Cycle"}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

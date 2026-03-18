@@ -78,6 +78,12 @@ export default function CycleTrackerScreen({ navigation }: any) {
               <Ionicons name="trash-outline" size={20} color={colors.error} />
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.editBtn}
+              onPress={() => navigation.navigate("NewCycle", { editCycleId: activeCycle.id })}
+            >
+              <Ionicons name="create-outline" size={20} color={colors.accent} />
+            </TouchableOpacity>
+            <TouchableOpacity
               style={styles.shareBtn}
               onPress={async () => {
                 const pepList = activeCycle.peptides
@@ -193,6 +199,10 @@ const styles = StyleSheet.create({
   deleteBtn: {
     padding: 10, backgroundColor: colors.error + "15", borderRadius: 10,
     borderWidth: 1, borderColor: colors.error + "30",
+  },
+  editBtn: {
+    padding: 10, backgroundColor: colors.accent + "15", borderRadius: 10,
+    borderWidth: 1, borderColor: colors.accent + "30",
   },
   shareBtn: {
     padding: 10, backgroundColor: colors.accent + "15", borderRadius: 10,
