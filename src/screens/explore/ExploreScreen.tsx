@@ -40,13 +40,12 @@ export default function ExploreScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
-      <View style={styles.content}>
-        {mode === "ask" ? (
-          <ChatView navigation={navigation} />
-        ) : (
-          <ResearchHubScreen navigation={navigation} embedded />
-        )}
+      {/* Content — both stay mounted to preserve state */}
+      <View style={[styles.content, mode !== "ask" && { display: "none" }]}>
+        <ChatView navigation={navigation} />
+      </View>
+      <View style={[styles.content, mode !== "browse" && { display: "none" }]}>
+        <ResearchHubScreen navigation={navigation} embedded />
       </View>
     </View>
   );
