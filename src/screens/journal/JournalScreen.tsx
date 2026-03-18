@@ -293,9 +293,13 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
 
   const alreadySuggested = new Set(insights.flatMap((i) => i.peptideIds));
 
+  // Track which categories each peptide was suggested for
+  const peptideBenefits: Record<string, string[]> = {};
+  const matchedPatterns: typeof notePatterns = [];
+
   for (const pattern of notePatterns) {
     if (pattern.keywords.some((kw) => allNotes.includes(kw))) {
-      // Don't duplicate insights that cover the same peptides
+      matchedPatterns.push(pattern);
       const newPeptides = pattern.peptideIds.filter((id) => !alreadySuggested.has(id));
       if (newPeptides.length > 0 || insights.every((i) => i.title !== pattern.title)) {
         insights.push({
@@ -304,7 +308,46 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
         });
         pattern.peptideIds.forEach((id) => alreadySuggested.add(id));
       }
+      // Track benefits per peptide
+      for (const id of pattern.peptideIds) {
+        if (!peptideBenefits[id]) peptideBenefits[id] = [];
+        peptideBenefits[id].push(pattern.title.replace("You mentioned ", "").replace(" mentioned", "").replace(" noted", "").replace(" mentioned in notes", "").toLowerCase());
+      }
     }
+  }
+
+  // Also count metric-based insights for peptides
+  const metricLabels: Record<string, string> = {
+    dsip: "sleep", sleep_blend: "sleep", ipamorelin: "sleep & GH",
+    bpc157: "healing", tb500: "healing", wolverine_blend: "healing", ghkcu: "skin & healing",
+    cjc1295_nodac: "energy & GH", cjc_ipa_blend: "energy & GH", mk677: "GH & appetite",
+    tesamorelin: "fat loss & GH", selank: "mood & calm", semax: "focus",
+  };
+  for (const insight of insights) {
+    for (const id of insight.peptideIds) {
+      if (!peptideBenefits[id]) peptideBenefits[id] = [];
+    }
+  }
+
+  // Highlight multi-benefit peptides
+  const multiBenefit = Object.entries(peptideBenefits)
+    .filter(([_, benefits]) => benefits.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 3);
+
+  if (multiBenefit.length > 0) {
+    const lines = multiBenefit.map(([id, benefits]) => {
+      const pep = peptideDB.find((p) => p.id === id);
+      const uniqueBenefits = [...new Set(benefits)];
+      return `${pep?.name || id} — addresses ${uniqueBenefits.join(", ")}`;
+    });
+    insights.push({
+      icon: "star-outline",
+      color: colors.accent,
+      title: "Multi-benefit peptides for you",
+      detail: `These address multiple concerns from your journal:\n${lines.join("\n")}`,
+      peptideIds: multiBenefit.map(([id]) => id),
+    });
   }
 
   // Everything is great
