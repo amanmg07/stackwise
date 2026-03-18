@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
@@ -7,7 +7,7 @@ import { colors, spacing } from "../../theme";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 export default function CycleTrackerScreen({ navigation }: any) {
-  const { cycles, doseLogs } = useApp();
+  const { cycles, doseLogs, deleteCycle } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
 
   if (!activeCycle) {
@@ -62,6 +62,21 @@ export default function CycleTrackerScreen({ navigation }: any) {
                 {format(start, "MMM d")} — {format(end, "MMM d, yyyy")}
               </Text>
             </View>
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={() => {
+                Alert.alert(
+                  "Delete Cycle",
+                  `Delete "${activeCycle.name}"? This will remove the cycle and all its data. This cannot be undone.`,
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Delete", style: "destructive", onPress: () => deleteCycle(activeCycle.id) },
+                  ]
+                );
+              }}
+            >
+              <Ionicons name="trash-outline" size={20} color={colors.error} />
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.shareBtn}
               onPress={async () => {
@@ -175,6 +190,10 @@ const styles = StyleSheet.create({
   },
   startBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
   cycleHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 16 },
+  deleteBtn: {
+    padding: 10, backgroundColor: colors.error + "15", borderRadius: 10,
+    borderWidth: 1, borderColor: colors.error + "30",
+  },
   shareBtn: {
     padding: 10, backgroundColor: colors.accent + "15", borderRadius: 10,
     borderWidth: 1, borderColor: colors.accent + "30",
