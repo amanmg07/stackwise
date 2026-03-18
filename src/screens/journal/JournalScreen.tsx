@@ -195,6 +195,118 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     });
   }
 
+  // Notes-based keyword analysis
+  const allNotes = recent
+    .map((e) => (e.notes || "").toLowerCase())
+    .join(" ");
+
+  const notePatterns: { keywords: string[]; icon: keyof typeof Ionicons.glyphMap; color: string; title: string; detail: string; peptideIds: string[] }[] = [
+    {
+      keywords: ["pain", "injury", "hurt", "torn", "sprain", "strain", "tendon", "ligament", "joint", "knee", "shoulder", "back pain", "elbow", "wrist", "ankle"],
+      icon: "bandage-outline",
+      color: "#f87171",
+      title: "You mentioned pain or injury",
+      detail: "Based on your notes, healing peptides could accelerate recovery from tissue damage.",
+      peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu", "kpv"],
+    },
+    {
+      keywords: ["anxiety", "anxious", "stress", "stressed", "nervous", "panic", "overwhelm", "worry", "tense"],
+      icon: "leaf-outline",
+      color: "#c084fc",
+      title: "Stress & anxiety mentioned",
+      detail: "Your notes suggest elevated stress. Anxiolytic peptides may support mental calm.",
+      peptideIds: ["selank", "dsip", "cognitive_blend"],
+    },
+    {
+      keywords: ["brain fog", "focus", "concentration", "memory", "forgetful", "mental clarity", "foggy", "scatter", "distracted", "cognitive"],
+      icon: "bulb-outline",
+      color: "#facc15",
+      title: "Cognitive concerns noted",
+      detail: "You mentioned focus or cognitive issues. Nootropic peptides may sharpen mental performance.",
+      peptideIds: ["semax", "selank", "dihexa", "cognitive_blend"],
+    },
+    {
+      keywords: ["fat", "weight", "belly", "overweight", "lose weight", "stubborn fat", "body fat", "visceral", "cutting", "lean", "slim"],
+      icon: "flame-outline",
+      color: "#fb923c",
+      title: "Weight & fat loss goals noted",
+      detail: "Based on your notes, fat-targeting peptides could complement your efforts.",
+      peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "aod9604", "tesamorelin", "fat_burner_blend"],
+    },
+    {
+      keywords: ["appetite", "hunger", "cravings", "eating too much", "binge", "snacking", "overeating"],
+      icon: "restaurant-outline",
+      color: "#fb923c",
+      title: "Appetite concerns noted",
+      detail: "GLP-1 agonists can help regulate appetite and reduce cravings.",
+      peptideIds: ["retatrutide", "semaglutide", "tirzepatide"],
+    },
+    {
+      keywords: ["insomnia", "can't sleep", "waking up", "restless", "trouble sleeping", "sleep issues", "tossing", "turning"],
+      icon: "moon-outline",
+      color: "#818cf8",
+      title: "Sleep issues mentioned in notes",
+      detail: "Your notes describe sleep difficulties. Sleep-promoting peptides may help.",
+      peptideIds: ["dsip", "sleep_blend", "ipamorelin"],
+    },
+    {
+      keywords: ["aging", "wrinkles", "skin", "hair loss", "hair thin", "grey", "gray", "old", "longevity", "anti-aging", "telomere"],
+      icon: "sparkles-outline",
+      color: "#c084fc",
+      title: "Anti-aging goals noted",
+      detail: "Your notes mention aging concerns. Longevity peptides may help at the cellular level.",
+      peptideIds: ["epithalon", "ghkcu", "foxo4dri", "humanin", "motsc", "glow_blend"],
+    },
+    {
+      keywords: ["muscle", "gains", "bulk", "strength", "hypertrophy", "lifting", "gym", "mass", "growth hormone"],
+      icon: "barbell-outline",
+      color: "#60a5fa",
+      title: "Muscle & strength goals noted",
+      detail: "GH-boosting peptides can support lean mass and recovery from training.",
+      peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "mk677", "hexarelin", "triple_gh_blend"],
+    },
+    {
+      keywords: ["sick", "cold", "flu", "immune", "infection", "virus", "covid", "illness", "fever", "gut", "bloat", "digest", "ibs"],
+      icon: "shield-checkmark-outline",
+      color: "#2dd4bf",
+      title: "Immune or gut health mentioned",
+      detail: "Your notes suggest immune or digestive concerns. These peptides support immune function and gut healing.",
+      peptideIds: ["thymosin_a1", "kpv", "ll37", "bpc157", "klow_blend"],
+    },
+    {
+      keywords: ["libido", "sex", "erectile", "arousal", "intimacy", "desire", "performance"],
+      icon: "heart-outline",
+      color: "#f472b6",
+      title: "Sexual health mentioned",
+      detail: "Peptides targeting sexual function may help with desire and performance.",
+      peptideIds: ["pt141", "kisspeptin", "gonadorelin"],
+    },
+    {
+      keywords: ["inflammation", "inflamed", "swollen", "swelling", "redness", "chronic pain", "autoimmune", "arthritis"],
+      icon: "flame-outline",
+      color: "#f87171",
+      title: "Inflammation mentioned",
+      detail: "Anti-inflammatory peptides can help reduce systemic and localized inflammation.",
+      peptideIds: ["bpc157", "kpv", "ll37", "thymosin_a1", "ss31"],
+    },
+  ];
+
+  const alreadySuggested = new Set(insights.flatMap((i) => i.peptideIds));
+
+  for (const pattern of notePatterns) {
+    if (pattern.keywords.some((kw) => allNotes.includes(kw))) {
+      // Don't duplicate insights that cover the same peptides
+      const newPeptides = pattern.peptideIds.filter((id) => !alreadySuggested.has(id));
+      if (newPeptides.length > 0 || insights.every((i) => i.title !== pattern.title)) {
+        insights.push({
+          ...pattern,
+          peptideIds: pattern.peptideIds,
+        });
+        pattern.peptideIds.forEach((id) => alreadySuggested.add(id));
+      }
+    }
+  }
+
   // Everything is great
   if (insights.length === 0 && recent.length >= 5) {
     const allGood = avgSleep >= 3.5 && avgEnergy >= 3.5 && avgRecovery >= 3.5 && avgMood >= 3.5 && avgSoreness < 3;
