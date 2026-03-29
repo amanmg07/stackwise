@@ -7,6 +7,7 @@ const KEYS = {
   journal: "@stackwise/journal",
   settings: "@stackwise/settings",
   communityPosts: "@stackwise/community_posts",
+  likedPosts: "@stackwise/liked_posts",
 };
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -62,6 +63,13 @@ export const appStorage = {
   },
   async saveCommunityPosts(posts: CommunityPost[]): Promise<void> {
     return save(KEYS.communityPosts, posts);
+  },
+
+  async loadLikedPosts(): Promise<string[]> {
+    return load(KEYS.likedPosts, []);
+  },
+  async saveLikedPosts(ids: string[]): Promise<void> {
+    return save(KEYS.likedPosts, ids);
   },
 
   async clearAll(): Promise<void> {

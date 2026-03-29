@@ -1,4 +1,5 @@
 import React from "react";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
@@ -29,7 +30,14 @@ const navTheme = {
 function AppContent() {
   const { settings, updateSettings, loading } = useApp();
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <View style={loadingStyles.container}>
+        <Text style={loadingStyles.logo}>StackWise</Text>
+        <ActivityIndicator size="small" color={colors.accent} style={loadingStyles.spinner} />
+      </View>
+    );
+  }
 
   if (!settings.onboardingDone) {
     return (
@@ -46,6 +54,22 @@ function AppContent() {
     </ToastProvider>
   );
 }
+
+const loadingStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logo: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: colors.accent,
+    letterSpacing: 1,
+  },
+  spinner: { marginTop: 20 },
+});
 
 export default function App() {
   return (

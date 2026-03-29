@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, Switch, StyleSheet, ScrollView, Alert, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useApp } from "../../context/AppContext";
@@ -128,12 +128,7 @@ export default function ProfileScreen({ navigation }: any) {
           <Ionicons name="notifications-outline" size={20} color={colors.text} />
           <Text style={styles.settingLabel}>Reminders</Text>
         </View>
-        <Switch
-          value={settings.notificationsEnabled}
-          onValueChange={(val) => updateSettings({ notificationsEnabled: val })}
-          trackColor={{ false: colors.border, true: colors.accent + "60" }}
-          thumbColor={settings.notificationsEnabled ? colors.accent : colors.textSecondary}
-        />
+        <Text style={styles.comingSoon}>Coming Soon</Text>
       </View>
 
       {/* Saved Peptides */}
@@ -171,19 +166,30 @@ export default function ProfileScreen({ navigation }: any) {
         <Text style={styles.emptyText}>No cycles yet</Text>
       ) : (
         cycles.map((c) => (
-          <View key={c.id} style={styles.cycleRow}>
+          <TouchableOpacity
+            key={c.id}
+            style={styles.cycleRow}
+            onPress={() => navigation.navigate("CycleTab", {
+              screen: c.isActive ? "CycleTracker" : "CycleDetail",
+              params: c.isActive ? undefined : { cycleId: c.id },
+            })}
+            activeOpacity={0.7}
+          >
             <View style={styles.cycleInfo}>
               <Text style={styles.cycleName}>{c.name}</Text>
               <Text style={styles.cycleDates}>
                 {c.startDate} → {c.endDate}
               </Text>
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: c.isActive ? colors.success + "20" : colors.border }]}>
-              <Text style={[styles.statusText, { color: c.isActive ? colors.success : colors.textSecondary }]}>
-                {c.isActive ? "Active" : "Done"}
-              </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View style={[styles.statusBadge, { backgroundColor: c.isActive ? colors.success + "20" : colors.border }]}>
+                <Text style={[styles.statusText, { color: c.isActive ? colors.success : colors.textSecondary }]}>
+                  {c.isActive ? "Active" : "Done"}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             </View>
-          </View>
+          </TouchableOpacity>
         ))
       )}
 
@@ -245,6 +251,7 @@ const styles = StyleSheet.create({
   settingLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
   settingLabel: { fontSize: 15, color: colors.text },
   settingValue: { fontSize: 15, fontWeight: "600", color: colors.accent },
+  comingSoon: { fontSize: 12, fontWeight: "600", color: colors.textSecondary, backgroundColor: colors.surface, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, overflow: "hidden" },
   cycleRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,

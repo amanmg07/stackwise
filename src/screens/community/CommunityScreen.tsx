@@ -9,6 +9,7 @@ import { colors, spacing } from "../../theme";
 import { useToast } from "../../context/ToastContext";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../utils/supabase";
+import { appStorage } from "../../utils/storage";
 import { CommunityPost } from "../../types";
 
 interface CommunityStack {
@@ -186,12 +187,26 @@ export default function CommunityScreen({ navigation }: any) {
   const { showToast } = useToast();
   const { settings, userId } = useApp();
   const [likedStacks, setLikedStacks] = useState<string[]>([]);
+  const [likesLoaded, setLikesLoaded] = useState(false);
   const [remotePosts, setRemotePosts] = useState<CommunityStack[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"newest" | "most_liked" | "oldest">("newest");
+
+  // Load persisted likes on mount
+  useEffect(() => {
+    appStorage.loadLikedPosts().then((ids) => {
+      setLikedStacks(ids);
+      setLikesLoaded(true);
+    });
+  }, []);
+
+  // Persist likes whenever they change
+  useEffect(() => {
+    if (likesLoaded) appStorage.saveLikedPosts(likedStacks);
+  }, [likedStacks, likesLoaded]);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -488,6 +503,15 @@ export default function CommunityScreen({ navigation }: any) {
             </View>
           </>
         }
+        ListEmptyComponent={
+          <View style={styles.emptyFilter}>
+            <Ionicons name="search-outline" size={36} color={colors.border} />
+            <Text style={styles.emptyFilterTitle}>No stacks found</Text>
+            <Text style={styles.emptyFilterText}>
+              Try adjusting your filters or search query
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => {
           const liked = likedStacks.includes(item.id);
           const isOwnPost = item.userId != null && item.userId === userId;
@@ -708,4 +732,7 @@ const styles = StyleSheet.create({
   },
   sortBtnText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   sortBtnTextActive: { color: colors.accent },
+  emptyFilter: { alignItems: "center", paddingTop: 60, paddingHorizontal: spacing.xl },
+  emptyFilterTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginTop: 16, marginBottom: 6 },
+  emptyFilterText: { fontSize: 14, color: colors.textSecondary, textAlign: "center" },
 });
