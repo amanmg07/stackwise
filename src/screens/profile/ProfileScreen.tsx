@@ -83,6 +83,7 @@ export default function ProfileScreen({ navigation }: any) {
             placeholder="Set your name"
             placeholderTextColor={colors.textSecondary}
             returnKeyType="done"
+            maxLength={40}
           />
         </View>
         <Text style={styles.nameHint}>This shows on your feed posts</Text>

@@ -51,6 +51,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 10000); // 10s safety timeout
     (async () => {
       const [c, d, j, s, cp] = await Promise.all([
         appStorage.loadCycles(),
@@ -68,9 +69,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         const uid = await ensureAuth();
         setUserId(uid);
-      } catch {}
+      } catch (e) {
+        console.warn("Auth failed:", e);
+      }
       setLoading(false);
     })();
+    return () => clearTimeout(timeout);
   }, []);
 
   // Persist helpers
@@ -91,7 +95,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     addCycle: (cycle) => persistCycles([cycle, ...cycles]),
     updateCycle: (cycle) => persistCycles(cycles.map((c) => (c.id === cycle.id ? cycle : c))),
-    deleteCycle: (id) => persistCycles(cycles.filter((c) => c.id !== id)),
+    deleteCycle: (id) => {
+      persistCycles(cycles.filter((c) => c.id !== id));
+      persistLogs(doseLogs.filter((l) => l.cycleId !== id));
+    },
 
     addDoseLog: (log) => persistLogs([log, ...doseLogs]),
     deleteDoseLog: (id) => persistLogs(doseLogs.filter((l) => l.id !== id)),

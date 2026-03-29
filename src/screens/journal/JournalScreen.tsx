@@ -6,9 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
-import { format, parseISO, subDays } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { JournalEntry } from "../../types";
-import { generateId } from "../../utils/id";
 
 const RATING_LABELS = ["", "Poor", "Low", "Average", "Good", "Excellent"];
 
@@ -367,33 +366,10 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   return insights;
 }
 
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 export default function JournalScreen({ navigation }: any) {
-  const { journal, settings, addJournalEntry, deleteJournalEntry } = useApp();
+  const { journal, settings, deleteJournalEntry } = useApp();
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal);
-
-  const simulateOneDay = () => {
-    // Find the earliest existing date and go one day before, or start at yesterday
-    const nextDate = journal.length === 0
-      ? subDays(new Date(), 1)
-      : subDays(parseISO([...journal].sort((a, b) => a.date.localeCompare(b.date))[0].date), 1);
-
-    addJournalEntry({
-      id: generateId(),
-      date: format(nextDate, "yyyy-MM-dd"),
-      sleepQuality: randomInt(1, 5),
-      energyLevel: randomInt(1, 5),
-      recoveryScore: randomInt(1, 5),
-      mood: randomInt(1, 5),
-      soreness: randomInt(1, 5),
-      notes: "",
-      createdAt: new Date().toISOString(),
-    });
-  };
 
   const header = () => {
     if (insights.length === 0) return null;
@@ -521,14 +497,6 @@ export default function JournalScreen({ navigation }: any) {
           </Swipeable>
         )}
       />
-
-      <TouchableOpacity
-        style={styles.simBtn}
-        onPress={simulateOneDay}
-      >
-        <Ionicons name="time-outline" size={18} color={colors.accent} />
-        <Text style={styles.simBtnText}>+ 1 Day</Text>
-      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.fab}
@@ -719,16 +687,6 @@ const styles = StyleSheet.create({
   legendDot: { width: 6, height: 6, borderRadius: 3 },
   legendText: { fontSize: 10, fontWeight: "600", color: colors.textSecondary },
   chart: { borderRadius: 12, overflow: "hidden" },
-  simBtn: {
-    position: "absolute", bottom: 28, left: 24,
-    flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: colors.surface, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 12,
-    borderWidth: 1, borderColor: colors.accent + "40",
-    shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4,
-    elevation: 4,
-  },
-  simBtnText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   fab: {
     position: "absolute", bottom: 24, right: 24,
     width: 56, height: 56, borderRadius: 28,

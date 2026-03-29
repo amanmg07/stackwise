@@ -119,6 +119,11 @@ export default function NewCycleScreen({ route, navigation }: any) {
       Alert.alert("No peptides", "Add at least one peptide to your cycle");
       return;
     }
+    const weeks = parseInt(durationWeeks) || 0;
+    if (weeks < 1 || weeks > 52) {
+      Alert.alert("Invalid duration", "Cycle duration must be between 1 and 52 weeks");
+      return;
+    }
 
     if (editCycle) {
       const endDate = format(
@@ -206,8 +211,8 @@ export default function NewCycleScreen({ route, navigation }: any) {
                 <TextInput
                   style={styles.fieldInput}
                   value={String(cp.doseAmount)}
-                  onChangeText={(v) => updatePeptide(cp.peptideId, { doseAmount: parseInt(v) || 0 })}
-                  keyboardType="number-pad"
+                  onChangeText={(v) => updatePeptide(cp.peptideId, { doseAmount: parseFloat(v) || 0 })}
+                  keyboardType="decimal-pad"
                 />
               </View>
               <View style={styles.fieldHalf}>
