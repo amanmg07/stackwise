@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList, Platform } from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 import { format, parseISO, differenceInDays } from "date-fns";
 
 export default function CycleDetailScreen({ route }: any) {
@@ -113,7 +113,7 @@ export default function CycleDetailScreen({ route }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: Platform.OS === "ios" ? 10 : spacing.md },
+  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
   empty: { flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" },
   emptyText: { fontSize: 16, color: colors.textSecondary },
   cycleName: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 4 },

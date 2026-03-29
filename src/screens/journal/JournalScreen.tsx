@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Alert, Animated, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, Animated, Dimensions } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { LineChart } from "react-native-chart-kit";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 import { format, parseISO } from "date-fns";
 import { JournalEntry } from "../../types";
 
@@ -610,7 +610,7 @@ function MetricBadge({ label, value, inverted }: { label: string; value: number;
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === "ios" ? 60 : 0 },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: safeTop },
   journalTitle: { fontSize: 28, fontWeight: "800", color: colors.text, paddingHorizontal: spacing.md, marginBottom: 4 },
   journalSubtitle: { fontSize: 13, color: colors.textSecondary, paddingHorizontal: spacing.md, marginBottom: 16, lineHeight: 18 },
   // Insights

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 
 interface Props {
   onAccept: () => void;
@@ -70,7 +70,7 @@ export default function DisclaimerScreen({ onAccept }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1, backgroundColor: colors.background,
-    paddingTop: Platform.OS === "ios" ? 70 : 40,
+    paddingTop: safeTop,
   },
   scroll: {
     paddingHorizontal: spacing.xl,

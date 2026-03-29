@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 import { Goal } from "../../types";
 
 const GOALS: { key: Goal; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
@@ -132,7 +132,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: Platform.OS === "ios" ? 60 : spacing.md },
+  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 8 },
   profileBtn: { padding: 4 },
   welcome: { fontSize: 36, fontWeight: "900", color: colors.accent, letterSpacing: -0.5 },

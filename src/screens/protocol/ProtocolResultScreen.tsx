@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   notes: { fontSize: 12, color: colors.textSecondary, lineHeight: 18, fontStyle: "italic", marginTop: 4, marginBottom: 12 },
   startBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-    backgroundColor: colors.accent, borderRadius: 10, padding: 14, marginTop: 8,
+    backgroundColor: colors.accent, borderRadius: 10, padding: 18, marginTop: 8,
   },
   startBtnText: { fontSize: 14, fontWeight: "700", color: colors.background },
 });

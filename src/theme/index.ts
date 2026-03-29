@@ -13,7 +13,11 @@ export const colors = {
   info: "#60a5fa",
 };
 
+import { Platform } from "react-native";
+
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
+
+export const safeTop = Platform.OS === "ios" ? 60 : 16;
 
 export const typography = {
   h1: { fontSize: 28, fontWeight: "700" as const, color: colors.text },

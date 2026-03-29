@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 import ChatView from "./ChatView";
 import ResearchHubScreen from "../research/ResearchHubScreen";
 
@@ -52,7 +52,7 @@ export default function ExploreScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === "ios" ? 60 : 0 },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: safeTop },
   title: { fontSize: 28, fontWeight: "800", color: colors.text, paddingHorizontal: spacing.md, marginBottom: 12 },
   toggleRow: {
     flexDirection: "row", marginHorizontal: spacing.md, marginBottom: 12,

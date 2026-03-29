@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 
 const { width } = Dimensions.get("window");
 
@@ -96,7 +96,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1, backgroundColor: colors.background,
-    paddingTop: Platform.OS === "ios" ? 60 : 20,
+    paddingTop: safeTop,
   },
   slide: {
     width, alignItems: "center", justifyContent: "center",

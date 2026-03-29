@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from "react";
 import {
-  View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView, Platform,
+  View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 import { PeptideCategory } from "../../types";
 
 const CATEGORIES: { key: PeptideCategory | "all"; label: string }[] = [
@@ -77,6 +77,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
   }, [search, selectedCats]);
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
     <View style={[styles.container, embedded && styles.containerEmbedded]}>
       {/* Search */}
       <View style={styles.searchBar}>
@@ -239,11 +240,12 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         }
       />
     </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === "ios" ? 60 : 0 },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: safeTop },
   containerEmbedded: { paddingTop: 0 },
   searchBar: {
     flexDirection: "row",

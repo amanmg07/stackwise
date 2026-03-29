@@ -63,7 +63,7 @@ export default function ProfileScreen({ navigation }: any) {
             <>
               <Image source={{ uri: settings.profileImage }} style={styles.avatar} />
               <View style={styles.editPhotoBadge}>
-                <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
+                <Ionicons name="add-circle-outline" size={24} color={colors.accent} />
               </View>
             </>
           ) : (
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   addPhotoText: { fontSize: 11, fontWeight: "600", color: colors.textSecondary, marginTop: 4 },
   editPhotoBadge: {
     position: "absolute", bottom: 0, right: -4,
-    width: 30, height: 30, borderRadius: 15,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
     borderWidth: 2, borderColor: colors.background,
   },

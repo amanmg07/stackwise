@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border,
   },
   selectorText: { fontSize: 13, color: colors.textSecondary, flex: 1 },
-  removeBtn: { padding: 2 },
+  removeBtn: { padding: 8 },
   addSlotBtn: {
     width: 40, height: 40, borderRadius: 10,
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,

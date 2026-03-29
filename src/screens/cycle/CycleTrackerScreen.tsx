@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Share, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeTop } from "../../theme";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 export default function CycleTrackerScreen({ navigation }: any) {
@@ -179,10 +179,10 @@ export default function CycleTrackerScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: Platform.OS === "ios" ? 60 : spacing.md },
+  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
   empty: {
     flex: 1, backgroundColor: colors.background,
-    justifyContent: "center", alignItems: "center", padding: spacing.xl, paddingTop: Platform.OS === "ios" ? 60 : spacing.xl,
+    justifyContent: "center", alignItems: "center", padding: spacing.xl, paddingTop: safeTop,
   },
   emptyIcon: {
     width: 88, height: 88, borderRadius: 44,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   statusDotDone: { backgroundColor: colors.success, borderColor: colors.success },
   peptideName: { fontSize: 15, fontWeight: "600", color: colors.text },
   peptideDose: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-  logBtn: { padding: 4 },
+  logBtn: { paddingVertical: 12, paddingHorizontal: 16 },
   logRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     backgroundColor: colors.surface, borderRadius: 10, padding: 12,
