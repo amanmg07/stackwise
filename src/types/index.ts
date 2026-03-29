@@ -114,6 +114,7 @@ export interface UserSettings {
   reminderTimes: string[];
   savedPeptides: string[];
   onboardingDone: boolean;
+  disclaimerAccepted: boolean;
   displayName: string;
   profileImage: string | null;
 }

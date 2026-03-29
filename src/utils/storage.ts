@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   reminderTimes: ["08:00", "20:00"],
   savedPeptides: [],
   onboardingDone: false,
+  disclaimerAccepted: false,
   displayName: "",
   profileImage: null,
 };

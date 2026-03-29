@@ -191,6 +191,7 @@ export default function ChatView({ navigation }: Props) {
                 <Text style={styles.starterDesc}>
                   Get personalized advice about peptides, dosing, stacking, and your cycle.
                 </Text>
+                <Text style={styles.infoNote}>For educational purposes. Individual results vary.</Text>
                 <View style={styles.starterChips}>
                   {STARTERS.map((q) => (
                     <TouchableOpacity key={q} style={styles.starterChip} onPress={() => send(q)}>
@@ -254,7 +255,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, alignItems: "center", justifyContent: "center", marginBottom: 16,
   },
   starterTitle: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 6 },
-  starterDesc: { fontSize: 14, color: colors.textSecondary, textAlign: "center", marginBottom: 24, lineHeight: 20 },
+  starterDesc: { fontSize: 14, color: colors.textSecondary, textAlign: "center", marginBottom: 8, lineHeight: 20 },
+  infoNote: { fontSize: 11, color: colors.textSecondary, textAlign: "center", marginBottom: 24, opacity: 0.6 },
   starterChips: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8, paddingHorizontal: 4 },
   starterChip: {
     backgroundColor: colors.surface, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 12,

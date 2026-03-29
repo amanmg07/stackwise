@@ -43,6 +43,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     reminderTimes: ["08:00", "20:00"],
     savedPeptides: [],
     onboardingDone: false,
+    disclaimerAccepted: false,
     displayName: "",
     profileImage: null,
   });

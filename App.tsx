@@ -7,6 +7,7 @@ import { AppProvider, useApp } from "./src/context/AppContext";
 import { ToastProvider } from "./src/context/ToastContext";
 import RootNavigator from "./src/navigation/RootNavigator";
 import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
+import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
 import { colors } from "./src/theme";
 
 const navTheme = {
@@ -42,6 +43,12 @@ function AppContent() {
   if (!settings.onboardingDone) {
     return (
       <OnboardingScreen onComplete={() => updateSettings({ onboardingDone: true })} />
+    );
+  }
+
+  if (!settings.disclaimerAccepted) {
+    return (
+      <DisclaimerScreen onAccept={() => updateSettings({ disclaimerAccepted: true })} />
     );
   }
 
