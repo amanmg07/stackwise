@@ -166,6 +166,77 @@ export const interactions: PeptideInteraction[] = [
     title: "Fat loss + appetite control",
     detail: "AOD-9604 targets fat metabolism directly while Semaglutide reduces appetite. Complementary approach to weight management.",
   },
+  // IGF-1 interactions
+  {
+    peptideIds: ["igf1_lr3", "igf1_des"],
+    severity: "caution",
+    title: "Dual IGF-1 variants",
+    detail: "Both are IGF-1 analogs. LR3 is systemic and long-acting; DES is localized and short. Some advanced users alternate them, but combining increases hypoglycemia risk. Monitor blood sugar closely.",
+  },
+  {
+    peptideIds: ["igf1_lr3", "mk677"],
+    severity: "caution",
+    title: "IGF-1 + GH secretagogue",
+    detail: "MK-677 raises GH which raises natural IGF-1. Adding exogenous IGF-1 LR3 on top may push IGF-1 levels too high. Monitor IGF-1 labs if combining.",
+  },
+  {
+    peptideIds: ["igf1_lr3", "semaglutide"],
+    severity: "caution",
+    title: "Blood sugar concerns",
+    detail: "IGF-1 LR3 can cause hypoglycemia. Semaglutide also lowers blood sugar. Combined use increases hypoglycemia risk — monitor glucose carefully.",
+  },
+  // Melanotan II interactions
+  {
+    peptideIds: ["melanotan2", "pt141"],
+    severity: "caution",
+    title: "Overlapping melanocortin activity",
+    detail: "PT-141 was derived from Melanotan II. Both activate MC3/MC4 receptors for libido. Using together may cause excessive nausea and flushing. Pick one for sexual function.",
+  },
+  // Sermorelin interactions
+  {
+    peptideIds: ["sermorelin", "cjc1295_nodac"],
+    severity: "warning",
+    title: "Redundant GHRH analogs",
+    detail: "Both are GHRH analogs competing for the same receptor. Using both provides no benefit. CJC-1295 is more potent; Sermorelin is gentler and better for beginners.",
+  },
+  {
+    peptideIds: ["sermorelin", "cjc1295_dac"],
+    severity: "warning",
+    title: "Redundant GHRH analogs",
+    detail: "Both target GHRH receptors. Pick one — Sermorelin for natural pulsing, CJC-1295 DAC for convenience and longer action.",
+  },
+  {
+    peptideIds: ["sermorelin", "ipamorelin"],
+    severity: "info",
+    title: "Classic GH stack",
+    detail: "Sermorelin (GHRH) and Ipamorelin (GHRP) work through different receptors for synergistic GH release. A clean, well-tolerated combo commonly prescribed by clinics.",
+  },
+  // 5-Amino-1MQ interactions
+  {
+    peptideIds: ["amino1mq", "aod9604"],
+    severity: "info",
+    title: "Complementary fat loss",
+    detail: "5-Amino-1MQ blocks fat storage via NNMT inhibition while AOD-9604 directly stimulates fat breakdown. Different mechanisms for enhanced fat loss.",
+  },
+  {
+    peptideIds: ["amino1mq", "semaglutide"],
+    severity: "info",
+    title: "Metabolic + appetite approach",
+    detail: "5-Amino-1MQ boosts fat metabolism while Semaglutide reduces appetite. Works through completely different pathways — complementary combination.",
+  },
+  // Thymalin interactions
+  {
+    peptideIds: ["thymalin", "thymosin_a1"],
+    severity: "info",
+    title: "Thymus peptide synergy",
+    detail: "Both support immune function through the thymus. Thymalin restores T-cell balance; Thymosin Alpha-1 activates specific immune cells. Well-established combination in clinical research.",
+  },
+  {
+    peptideIds: ["thymalin", "epithalon"],
+    severity: "info",
+    title: "Khavinson bioregulator protocol",
+    detail: "The classic Russian longevity combo. Thymalin restores immune function while Epithalon supports telomeres. In long-term studies, this combination reduced mortality by 50%.",
+  },
 ];
 
 export function getInteractions(peptideIds: string[]): PeptideInteraction[] {

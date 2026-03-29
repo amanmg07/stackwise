@@ -78,6 +78,7 @@ export const peptides: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "GH boost / body recomp",
+
         doseRange: "0.1 mg per injection",
         frequency: "2-3x daily",
         cycleDuration: "8-12 weeks. Some do 5 days on, 2 off.",
@@ -296,7 +297,7 @@ export const peptides: Peptide[] = [
       },
     ],
     sideEffects: ["Mild injection site redness/swelling", "Occasional nausea", "Sleep pattern changes", "Temporary tiredness", "Mild headaches"],
-    stacksWith: ["ghkcu", "dsip"],
+    stacksWith: ["ghkcu", "dsip", "thymalin"],
     halfLife: "Short, but the effects on your DNA last much longer than the peptide stays in your blood.",
     storage: "Powder: freezer 3 years, fridge 2 years. Mixed: fridge, use within 2-4 weeks. Don't freeze and thaw repeatedly.",
         notes: "Run in short bursts, not continuously. A Russian study followed 266 elderly people for 6-8 years on Epithalon with no significant side effects. Often combined with GHK-Cu for a full anti-aging protocol.",
@@ -369,7 +370,7 @@ export const peptides: Peptide[] = [
       },
     ],
     sideEffects: ["Injection site irritation", "Headache (uncommon)", "Mild nausea (rare)"],
-    stacksWith: ["semaglutide", "cjc1295_nodac", "ipamorelin"],
+    stacksWith: ["semaglutide", "cjc1295_nodac", "ipamorelin", "amino1mq"],
     halfLife: "~1 hour",
     storage: "Mixed: fridge, use within 30 days. Powder: room temp or fridge.",
         notes: "Has GRAS (Generally Recognized As Safe) status in the US. Much safer than full growth hormone for fat loss — no joint pain, insulin resistance, or organ growth. Not FDA-approved as a drug. Limited clinical trial data.",
@@ -431,7 +432,7 @@ export const peptides: Peptide[] = [
       "Skin darkening with repeated use",
       "Temporary blood pressure increase",
     ],
-    stacksWith: [],
+    stacksWith: ["melanotan2", "kisspeptin"],
     halfLife: "~2.7 hours",
     storage: "Mixed: fridge, use within 30 days.",
         notes: "FDA-approved as Vyleesi. Max 8 doses per month. Start with 1 mg to test your tolerance for nausea. Don't use if you have uncontrolled high blood pressure. Talk to a doctor first.",
@@ -551,7 +552,7 @@ export const peptides: Peptide[] = [
       },
     ],
     sideEffects: ["Very well tolerated", "Occasional injection site irritation", "No significant side effects across 11,000+ study subjects"],
-    stacksWith: ["ll37", "kpv", "bpc157"],
+    stacksWith: ["ll37", "kpv", "bpc157", "thymalin"],
     halfLife: "~2 hours",
     storage: "Fridge at 2-8°C. Use mixed solution promptly.",
         notes: "Approved as Zadaxin in 35+ countries (not the US). Studied in 30+ clinical trials with 11,000+ people. One of the safest peptides known. Was studied as a COVID-19 treatment.",
@@ -834,6 +835,202 @@ export const peptides: Peptide[] = [
     halfLife: "~2-4 minutes (very short)",
     storage: "Fridge at 2-8°C.",
         notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues.",
+  },
+
+  {
+    id: "igf1_lr3",
+    name: "IGF-1 LR3",
+    abbreviation: "IGF-1 LR3",
+    categories: ["muscle_gain", "recovery", "fat_loss"],
+    description:
+      "A modified version of insulin-like growth factor 1 that lasts much longer in the body. One of the most powerful peptides for building lean muscle and accelerating recovery. Works downstream of growth hormone — GH tells your liver to make IGF-1, but this gives it to you directly.",
+    mechanism:
+      "Binds to IGF-1 receptors on muscle cells, activating the PI3K/Akt pathway which triggers muscle protein synthesis and blocks protein breakdown. The 'LR3' modification means it doesn't bind to IGF binding proteins, so it stays active 20-30x longer than natural IGF-1. Also shuttles nutrients into muscle cells and away from fat cells.",
+    routes: ["subcutaneous", "intramuscular"],
+    dosingProtocols: [
+      {
+        purpose: "Muscle growth / recovery",
+        doseRange: "0.02-0.05 mg",
+        frequency: "1x daily",
+        cycleDuration: "4-6 weeks on, 4 weeks off",
+        timing: "Post-workout on training days, morning on rest days. Can inject into specific muscle groups for localized growth. That's 20-50 mcg.",
+      },
+      {
+        purpose: "Fat loss / body recomp",
+        doseRange: "0.02-0.04 mg",
+        frequency: "1x daily",
+        cycleDuration: "4-6 weeks",
+        timing: "Morning on empty stomach, or post-workout.",
+      },
+    ],
+    sideEffects: ["Hypoglycemia (low blood sugar — eat carbs after dosing)", "Joint pain at high doses", "Gut growth at very high/prolonged doses", "Jaw/hand growth (only at abuse-level doses)", "Headaches"],
+    stacksWith: ["cjc1295_nodac", "ipamorelin", "bpc157", "mk677"],
+    halfLife: "20-30 hours (much longer than natural IGF-1's ~15 minutes)",
+    storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C, use within 30 days. Very fragile — don't shake.",
+        notes: "Not FDA-approved. One of the most potent anabolic peptides available. The hypoglycemia risk is real — always have carbs nearby. Do NOT combine with insulin. Cycle for 4-6 weeks max to avoid desensitization. Banned by WADA.",
+  },
+  {
+    id: "igf1_des",
+    name: "IGF-1 DES",
+    abbreviation: "DES(1-3) IGF-1",
+    categories: ["muscle_gain", "recovery"],
+    description:
+      "A truncated version of IGF-1 that's 5-10x more potent than regular IGF-1 but only lasts about 30 minutes. Designed for targeted, localized muscle growth — inject directly into a lagging muscle group for site-specific effects.",
+    mechanism:
+      "Missing the first 3 amino acids of IGF-1, which means it doesn't bind to IGF binding proteins at all. This makes it extremely potent but very short-lived. Activates satellite cells in muscle tissue for hyperplasia (new muscle cell creation, not just bigger existing cells).",
+    routes: ["intramuscular"],
+    dosingProtocols: [
+      {
+        purpose: "Localized muscle growth",
+        doseRange: "0.05-0.15 mg",
+        frequency: "Pre-workout or post-workout",
+        cycleDuration: "4 weeks on, 4 weeks off",
+        timing: "Inject directly into target muscle 15-20 min before training, or immediately after. Bilateral injections for symmetry.",
+      },
+    ],
+    sideEffects: ["Hypoglycemia (less systemic than LR3 but still possible)", "Localized swelling at injection site", "Pump/pain in injected muscle", "Short-term only — clears fast"],
+    stacksWith: ["igf1_lr3", "cjc1295_nodac", "ipamorelin", "bpc157"],
+    halfLife: "20-30 minutes (very short — works fast and clears fast)",
+    storage: "Powder: freezer at -20°C. Mixed: fridge, use within 2-3 weeks. Extremely fragile.",
+        notes: "Not FDA-approved. Think of DES as a 'spot treatment' and LR3 as 'whole body.' Some users alternate: DES pre-workout into target muscle, LR3 on rest days for systemic effects. Very potent — start low. Banned by WADA.",
+  },
+  {
+    id: "melanotan2",
+    name: "Melanotan II",
+    abbreviation: "MT-II",
+    categories: ["sexual_health", "fat_loss"],
+    description:
+      "Originally developed as a sunless tanning agent, Melanotan II turned out to also boost libido and reduce appetite. Works by activating melanocortin receptors throughout your body. One of the most popular peptides worldwide.",
+    mechanism:
+      "Activates MC1 receptors in skin (tanning), MC3/MC4 receptors in the brain (libido, appetite suppression, fat loss), and MC5 receptors (reduces inflammation). The tanning effect comes from stimulating melanocytes to produce more melanin without UV exposure.",
+    routes: ["subcutaneous", "nasal"],
+    dosingProtocols: [
+      {
+        purpose: "Tanning / skin darkening",
+        doseRange: "0.25-0.5 mg",
+        frequency: "1x daily during loading, then 1-2x weekly maintenance",
+        cycleDuration: "Loading: 2-3 weeks daily. Maintenance: as needed",
+        timing: "Evening preferred (nausea is common, sleep through it). Start at 0.1 mg to assess tolerance.",
+      },
+      {
+        purpose: "Libido enhancement",
+        doseRange: "0.5-1 mg",
+        frequency: "As needed, 2-4 hours before activity",
+        cycleDuration: "As needed",
+        timing: "2-4 hours before desired effect. Can combine with loading protocol.",
+      },
+    ],
+    sideEffects: ["Nausea (very common at first — fades with use)", "Facial flushing", "Spontaneous erections", "Darkening of moles and freckles", "Appetite suppression", "Fatigue", "New mole development"],
+    stacksWith: ["pt141", "bpc157"],
+    halfLife: "~1 hour in blood, but melanin effects last weeks",
+    storage: "Powder: freezer, stable for years. Mixed: fridge at 2-8°C, use within 30 days.",
+        notes: "Not FDA-approved. PT-141 (Bremelanotide) was derived from MT-II as a targeted libido drug without tanning — it IS FDA-approved. MT-II darkens ALL skin including moles, so get moles checked regularly. Start very low (0.1 mg) to assess nausea tolerance. Extremely popular in Europe and Australia.",
+  },
+  {
+    id: "sermorelin",
+    name: "Sermorelin",
+    abbreviation: "GHRH(1-29)",
+    categories: ["muscle_gain", "fat_loss", "anti_aging", "sleep"],
+    description:
+      "One of the most prescribed growth hormone peptides. A shortened version of your body's own GHRH that tells your pituitary to release GH naturally. Considered one of the safest GH boosters because it works with your body's feedback system — you can't overshoot.",
+    mechanism:
+      "Binds to GHRH receptors on your pituitary gland, triggering a natural growth hormone pulse. Unlike synthetic HGH, it preserves your body's negative feedback loop — your pituitary won't release more GH than it should. This makes it very safe for long-term use.",
+    routes: ["subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Anti-aging / general wellness",
+        doseRange: "0.1-0.3 mg",
+        frequency: "1x daily before bed",
+        cycleDuration: "3-6 months, then reassess",
+        timing: "Before bed on empty stomach. Your biggest natural GH pulse happens during deep sleep — Sermorelin amplifies it.",
+      },
+      {
+        purpose: "Fat loss / body recomp",
+        doseRange: "0.2-0.5 mg",
+        frequency: "1x daily",
+        cycleDuration: "3-6 months",
+        timing: "Before bed. Can also do morning dose for daytime energy.",
+      },
+    ],
+    sideEffects: ["Injection site irritation", "Headache", "Flushing", "Dizziness", "Drowsiness", "Generally very well tolerated"],
+    stacksWith: ["ipamorelin", "cjc1295_nodac", "ghrp2", "mk677"],
+    halfLife: "~10-20 minutes (short — but the GH pulse it triggers lasts hours)",
+    storage: "Fridge at 2-8°C. Mixed: use within 14 days.",
+        notes: "Was FDA-approved (as Geref) for GH deficiency testing but withdrawn for commercial reasons, not safety. One of the most commonly prescribed peptides by anti-aging clinics. Very safe profile because it can't override your pituitary's natural limits. Often the first GH peptide doctors prescribe.",
+  },
+  {
+    id: "thymalin",
+    name: "Thymalin",
+    categories: ["immune", "anti_aging"],
+    description:
+      "A thymus gland extract peptide developed in Russia for immune system restoration. Works alongside Thymosin Alpha-1 to rebuild immune function, especially in aging or immunocompromised individuals. Also studied for anti-aging and cancer prevention.",
+    mechanism:
+      "Restores the balance between T-helper and T-suppressor cells, which naturally declines with age as the thymus shrinks. Normalizes immune function — boosts it when it's low, calms it when it's overactive. Also shown to influence telomere maintenance and reduce mortality in long-term studies.",
+    routes: ["intramuscular"],
+    dosingProtocols: [
+      {
+        purpose: "Immune restoration / anti-aging",
+        doseRange: "10-20 mg",
+        frequency: "1x daily",
+        cycleDuration: "10 days on, then repeat 2-3x per year",
+        timing: "Morning. Short course protocol — not continuous use.",
+      },
+    ],
+    sideEffects: ["Very well tolerated", "Rare injection site soreness", "Possible mild flu-like symptoms as immune system activates"],
+    stacksWith: ["thymosin_a1", "epithalon", "kpv"],
+    halfLife: "Short (hours). Effects build over the 10-day course.",
+    storage: "Fridge at 2-8°C.",
+        notes: "Developed by Dr. Khavinson in Russia. In a landmark 15-year study, Thymalin + Epithalon reduced cardiovascular mortality by 50% in elderly patients. Used in Russian military and clinical medicine since the 1970s. Often paired with Epithalon in 10-day 'bioregulator' protocols.",
+  },
+  {
+    id: "amino1mq",
+    name: "5-Amino-1MQ",
+    abbreviation: "5-A-1MQ",
+    categories: ["fat_loss"],
+    description:
+      "A small molecule (technically not a peptide, but widely sold alongside them) that blocks an enzyme called NNMT which tells your fat cells to store more fat. By blocking NNMT, your fat cells shrink and your metabolism speeds up. One of the newest and most popular fat loss compounds.",
+    mechanism:
+      "Inhibits nicotinamide N-methyltransferase (NNMT), an enzyme that's overexpressed in fat tissue of obese individuals. When NNMT is blocked, fat cells lose their ability to store fat efficiently, NAD+ levels increase (boosting metabolism), and SAM levels normalize. Essentially reprograms fat cells to burn instead of store.",
+    routes: ["oral"],
+    dosingProtocols: [
+      {
+        purpose: "Fat loss / metabolic boost",
+        doseRange: "50-150 mg",
+        frequency: "1-2x daily",
+        cycleDuration: "8-12 weeks",
+        timing: "Morning with or without food. Some split dose AM/PM.",
+      },
+    ],
+    sideEffects: ["Generally well tolerated", "Mild GI discomfort", "Headache (rare)", "Limited long-term human data"],
+    stacksWith: ["aod9604", "tesamorelin", "semaglutide", "retatrutide"],
+    halfLife: "~12 hours (oral bioavailability is good)",
+    storage: "Room temperature, sealed container. Keep dry.",
+        notes: "Oral dosing is a huge advantage — no injections. Research is still early but promising. In mouse studies, it reduced body weight by 7% in 11 days without diet changes. Works through a completely different mechanism than GLP-1 drugs, so they can be combined. Rapidly growing in popularity.",
+  },
+  {
+    id: "pe2228",
+    name: "PE-22-28",
+    abbreviation: "PE-22-28",
+    categories: ["anti_aging"],
+    description:
+      "A peptide fragment derived from pigment epithelium-derived factor (PEDF) that's gaining popularity for hair regrowth. Promotes hair follicle growth by extending the anagen (growth) phase and stimulating dermal papilla cells. One of the most promising non-hormonal hair loss treatments.",
+    mechanism:
+      "Activates dermal papilla cells (the base of hair follicles) to proliferate and extend the hair growth phase. Works through the Wnt/β-catenin signaling pathway — the same pathway that naturally controls hair cycling. Doesn't affect hormones like DHT, so no sexual side effects.",
+    routes: ["topical", "subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Hair regrowth / hair loss prevention",
+        doseRange: "0.1-0.5 mg topically or 0.1 mg subcutaneous",
+        frequency: "1x daily (topical) or 3-5x weekly (injection)",
+        cycleDuration: "3-6 months minimum to see results",
+        timing: "Apply to scalp at night (topical). Inject into scalp near thinning areas (subcutaneous).",
+      },
+    ],
+    sideEffects: ["Scalp irritation (topical)", "Injection site discomfort", "Limited human data — most evidence is preclinical", "No hormonal side effects"],
+    stacksWith: ["ghkcu", "bpc157"],
+    halfLife: "Short (topical effects are local and sustained)",
+    storage: "Fridge at 2-8°C. Mixed solutions: use within 30 days.",
+        notes: "Not FDA-approved. Early research is promising — showed significant hair density increase in mouse models. Non-hormonal mechanism is the key advantage over finasteride. Often combined with GHK-Cu for synergistic hair/skin effects. Topical application preferred for hair — avoids systemic exposure.",
   },
 
   // ── Pre-Mixed Blends (sold as single vials) ──
