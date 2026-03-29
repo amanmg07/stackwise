@@ -194,28 +194,33 @@ export default function CommunityScreen({ navigation }: any) {
   const [sortBy, setSortBy] = useState<"newest" | "most_liked" | "oldest">("newest");
 
   const fetchPosts = useCallback(async () => {
-    const { data } = await supabase
-      .from("community_posts")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) {
-      setRemotePosts(
-        data.map((row: any) => ({
-          id: row.id,
-          author: row.author,
-          title: row.title,
-          description: row.description || "",
-          goals: row.goals || [],
-          peptides: row.peptides || [],
-          difficulty: row.difficulty || "beginner",
-          likes: row.likes || 0,
-          duration: row.duration || "8 weeks",
-          createdAt: row.created_at,
-          isUserPost: true,
-          userId: row.user_id || null,
-          avatarUrl: row.avatar_url || null,
-        }))
-      );
+    try {
+      const { data, error } = await supabase
+        .from("community_posts")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      if (data) {
+        setRemotePosts(
+          data.map((row: any) => ({
+            id: row.id,
+            author: row.author,
+            title: row.title,
+            description: row.description || "",
+            goals: row.goals || [],
+            peptides: row.peptides || [],
+            difficulty: row.difficulty || "beginner",
+            likes: row.likes || 0,
+            duration: row.duration || "8 weeks",
+            createdAt: row.created_at,
+            isUserPost: true,
+            userId: row.user_id || null,
+            avatarUrl: row.avatar_url || null,
+          }))
+        );
+      }
+    } catch {
+      showToast("Couldn't load posts. Pull to retry.");
     }
     setRefreshing(false);
   }, []);
@@ -321,7 +326,17 @@ export default function CommunityScreen({ navigation }: any) {
       setRemotePosts((prev) =>
         prev.map((p) => (p.id === id ? { ...p, likes: newLikes } : p))
       );
-      await supabase.from("community_posts").update({ likes: newLikes }).eq("id", id);
+      const { error } = await supabase.from("community_posts").update({ likes: newLikes }).eq("id", id);
+      if (error) {
+        // Revert local state on failure
+        setRemotePosts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, likes: post.likes } : p))
+        );
+        setLikedStacks((prev) =>
+          alreadyLiked ? [...prev, id] : prev.filter((s) => s !== id)
+        );
+        showToast("Couldn't update like. Try again.");
+      }
     }
   };
 
@@ -357,7 +372,11 @@ export default function CommunityScreen({ navigation }: any) {
     Alert.alert("Delete Post", "Remove this post from the feed?", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: async () => {
-        await supabase.from("community_posts").delete().eq("id", id);
+        const { error } = await supabase.from("community_posts").delete().eq("id", id);
+        if (error) {
+          showToast("Couldn't delete post. Try again.");
+          return;
+        }
         setRemotePosts((prev) => prev.filter((p) => p.id !== id));
         showToast("Post deleted");
       }},
