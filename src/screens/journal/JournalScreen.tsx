@@ -20,7 +20,7 @@ interface Insight {
 }
 
 function analyzeJournal(entries: JournalEntry[]): Insight[] {
-  if (entries.length < 3) return [];
+  if (entries.length === 0) return [];
 
   const recent = [...entries]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -35,16 +35,19 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   const avgMood = avg((e) => e.mood);
   const avgSoreness = avg((e) => e.soreness);
 
-  // Check trends (compare first half vs second half)
-  const half = Math.floor(recent.length / 2);
-  const newer = recent.slice(0, half);
-  const older = recent.slice(half);
-  const trendAvg = (arr: JournalEntry[], fn: (e: JournalEntry) => number) =>
-    arr.reduce((sum, e) => sum + fn(e), 0) / arr.length;
+  // Check trends (only if enough data for meaningful comparison)
+  let sleepTrend = 0, energyTrend = 0, recoveryTrend = 0;
+  if (recent.length >= 4) {
+    const half = Math.floor(recent.length / 2);
+    const newer = recent.slice(0, half);
+    const older = recent.slice(half);
+    const trendAvg = (arr: JournalEntry[], fn: (e: JournalEntry) => number) =>
+      arr.reduce((sum, e) => sum + fn(e), 0) / arr.length;
 
-  const sleepTrend = trendAvg(newer, (e) => e.sleepQuality) - trendAvg(older, (e) => e.sleepQuality);
-  const energyTrend = trendAvg(newer, (e) => e.energyLevel) - trendAvg(older, (e) => e.energyLevel);
-  const recoveryTrend = trendAvg(newer, (e) => e.recoveryScore) - trendAvg(older, (e) => e.recoveryScore);
+    sleepTrend = trendAvg(newer, (e) => e.sleepQuality) - trendAvg(older, (e) => e.sleepQuality);
+    energyTrend = trendAvg(newer, (e) => e.energyLevel) - trendAvg(older, (e) => e.energyLevel);
+    recoveryTrend = trendAvg(newer, (e) => e.recoveryScore) - trendAvg(older, (e) => e.recoveryScore);
+  }
 
   const insights: Insight[] = [];
 
@@ -350,7 +353,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
 
   // Everything is great
-  if (insights.length === 0 && recent.length >= 5) {
+  if (insights.length === 0 && recent.length >= 1) {
     const allGood = avgSleep >= 3.5 && avgEnergy >= 3.5 && avgRecovery >= 3.5 && avgMood >= 3.5 && avgSoreness >= 3;
     if (allGood) {
       insights.push({
