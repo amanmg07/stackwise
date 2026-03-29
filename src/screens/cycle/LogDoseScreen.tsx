@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { generateId } from "../../utils/id";
 import { useApp } from "../../context/AppContext";
@@ -18,13 +18,12 @@ export default function LogDoseScreen({ route, navigation }: any) {
   const cyclePeptide = cycle?.peptides.find((p) => p.peptideId === initPeptideId);
   const peptide = peptideDB.find((p) => p.id === initPeptideId);
 
-  // Convert initial dose to mg as default
+  // Use the cycle peptide's unit directly instead of always defaulting to mg
   const initUnit = cyclePeptide?.doseUnit || "mg";
   const initAmount = cyclePeptide?.doseAmount || 0.25;
-  const initMg = initUnit === "mcg" ? initAmount / 1000 : initUnit === "mg" ? initAmount : initAmount;
 
-  const [amount, setAmount] = useState(String(initUnit === "mcg" ? initMg : initAmount));
-  const [unit, setUnit] = useState<"mcg" | "mg" | "IU">(initUnit === "IU" ? "IU" : "mg");
+  const [amount, setAmount] = useState(String(initAmount));
+  const [unit, setUnit] = useState<"mcg" | "mg" | "IU">(initUnit);
   const [route_, setRoute] = useState<AdministrationRoute>(cyclePeptide?.route || "subcutaneous");
   const [site, setSite] = useState("");
   const [notes, setNotes] = useState("");
@@ -50,11 +49,16 @@ export default function LogDoseScreen({ route, navigation }: any) {
   };
 
   const save = () => {
+    const parsed = parseFloat(amount);
+    if (!parsed || parsed <= 0) {
+      Alert.alert("Invalid dose", "Please enter a dose amount greater than zero.");
+      return;
+    }
     addDoseLog({
       id: generateId(),
       cycleId,
       peptideId: initPeptideId,
-      amount: parseFloat(amount) || 0,
+      amount: parsed,
       unit,
       route: route_,
       timestamp: new Date().toISOString(),
@@ -93,7 +97,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
 
       <Text style={styles.label}>Route</Text>
       <View style={styles.routeRow}>
-        {(["subcutaneous", "intramuscular", "oral", "nasal"] as AdministrationRoute[]).map((r) => (
+        {(peptide?.routes || ["subcutaneous", "intramuscular", "oral", "nasal"]).map((r) => (
           <TouchableOpacity
             key={r}
             style={[styles.routeBtn, route_ === r && styles.routeBtnActive]}

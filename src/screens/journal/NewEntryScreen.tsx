@@ -43,7 +43,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
   const [energyLevel, setEnergyLevel] = useState(existing?.energyLevel || 3);
   const [recoveryScore, setRecoveryScore] = useState(existing?.recoveryScore || 3);
   const [mood, setMood] = useState(existing?.mood || 3);
-  const [soreness, setSoreness] = useState(existing?.soreness || 1);
+  const [soreness, setSoreness] = useState(existing?.soreness || 3);
   const [notes, setNotes] = useState(existing?.notes || "");
 
   const save = () => {
@@ -104,7 +104,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
       <RatingInput label="Energy Level" value={energyLevel} onChange={setEnergyLevel} lowLabel="Exhausted" highLabel="Fully charged" />
       <RatingInput label="Recovery" value={recoveryScore} onChange={setRecoveryScore} lowLabel="Very sore" highLabel="Fully recovered" />
       <RatingInput label="Mood" value={mood} onChange={setMood} lowLabel="Low" highLabel="Great" />
-      <RatingInput label="Soreness" value={soreness} onChange={setSoreness} lowLabel="No pain" highLabel="Very sore" />
+      <RatingInput label="Soreness" value={soreness} onChange={setSoreness} lowLabel="Very sore" highLabel="No pain" />
 
       <Text style={styles.label}>Notes</Text>
       <TextInput

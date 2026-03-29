@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, Alert, Animated } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
@@ -7,7 +8,7 @@ import { colors, spacing, safeTop } from "../../theme";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 export default function CycleTrackerScreen({ navigation }: any) {
-  const { cycles, doseLogs, deleteCycle } = useApp();
+  const { cycles, doseLogs, deleteCycle, deleteDoseLog, updateCycle } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
 
   if (!activeCycle) {
@@ -100,6 +101,33 @@ export default function CycleTrackerScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
 
+          {/* End cycle */}
+          <TouchableOpacity
+            style={styles.endBtn}
+            onPress={() => {
+              Alert.alert(
+                "End Cycle",
+                `End "${activeCycle.name}" early? It will be marked as completed with today's date.`,
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "End Cycle",
+                    onPress: () => {
+                      updateCycle({
+                        ...activeCycle,
+                        isActive: false,
+                        endDate: new Date().toISOString().split("T")[0],
+                      });
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Ionicons name="checkmark-done-outline" size={16} color={colors.accent} />
+            <Text style={styles.endBtnText}>End Cycle</Text>
+          </TouchableOpacity>
+
           {/* Progress bar */}
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
@@ -160,18 +188,44 @@ export default function CycleTrackerScreen({ navigation }: any) {
       renderItem={({ item }) => {
         const pep = peptides.find((p) => p.id === item.peptideId);
         return (
-          <View style={styles.logRow}>
-            <View>
-              <Text style={styles.logName}>{pep?.name || item.peptideId}</Text>
-              <Text style={styles.logMeta}>
-                {item.amount} {item.unit} · {item.route}
-                {item.site ? ` · ${item.site}` : ""}
+          <Swipeable
+            renderRightActions={(progress, dragX) => {
+              const scale = dragX.interpolate({
+                inputRange: [-80, 0],
+                outputRange: [1, 0.5],
+                extrapolate: "clamp",
+              });
+              return (
+                <TouchableOpacity
+                  style={styles.swipeDelete}
+                  onPress={() => {
+                    Alert.alert("Delete Dose", `Delete this ${pep?.name || item.peptideId} dose log?`, [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Delete", style: "destructive", onPress: () => deleteDoseLog(item.id) },
+                    ]);
+                  }}
+                >
+                  <Animated.View style={{ transform: [{ scale }], alignItems: "center" }}>
+                    <Ionicons name="trash-outline" size={20} color="#fff" />
+                    <Text style={styles.swipeDeleteText}>Delete</Text>
+                  </Animated.View>
+                </TouchableOpacity>
+              );
+            }}
+          >
+            <View style={styles.logRow}>
+              <View>
+                <Text style={styles.logName}>{pep?.name || item.peptideId}</Text>
+                <Text style={styles.logMeta}>
+                  {item.amount} {item.unit} · {item.route}
+                  {item.site ? ` · ${item.site}` : ""}
+                </Text>
+              </View>
+              <Text style={styles.logTime}>
+                {format(parseISO(item.timestamp), "MMM d, h:mm a")}
               </Text>
             </View>
-            <Text style={styles.logTime}>
-              {format(parseISO(item.timestamp), "MMM d, h:mm a")}
-            </Text>
-          </View>
+          </Swipeable>
         );
       }}
     />
@@ -239,4 +293,15 @@ const styles = StyleSheet.create({
   logName: { fontSize: 14, fontWeight: "600", color: colors.text },
   logMeta: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   logTime: { fontSize: 12, color: colors.textSecondary },
+  endBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    backgroundColor: colors.accent + "15", borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16,
+    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: 16,
+  },
+  endBtnText: { fontSize: 13, fontWeight: "700", color: colors.accent },
+  swipeDelete: {
+    backgroundColor: colors.error, justifyContent: "center", alignItems: "center",
+    width: 80, borderRadius: 10, marginBottom: 8,
+  },
+  swipeDeleteText: { color: "#fff", fontSize: 11, fontWeight: "600", marginTop: 4 },
 });

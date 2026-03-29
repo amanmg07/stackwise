@@ -54,7 +54,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "moon-outline",
       color: "#818cf8",
       title: "Sleep needs attention",
-      detail: `Avg sleep quality: ${avgSleep.toFixed(1)}/5. Consider peptides that improve deep sleep.`,
+      detail: `Avg sleep quality: ${avgSleep.toFixed(1)}/5. DSIP promotes delta-wave deep sleep. Ipamorelin triggers GH release during sleep, improving sleep architecture.`,
       peptideIds: ["dsip", "sleep_blend", "ipamorelin", "mk677"],
     });
   } else if (sleepTrend < -0.5) {
@@ -62,7 +62,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "trending-down-outline",
       color: "#818cf8",
       title: "Sleep quality declining",
-      detail: `Your sleep has been trending down recently.`,
+      detail: `Your sleep has been trending down recently. DSIP is a natural sleep-regulating peptide that restores healthy sleep cycles.`,
       peptideIds: ["dsip", "sleep_blend"],
     });
   }
@@ -73,7 +73,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "bandage-outline",
       color: "#4ade80",
       title: "Recovery is lagging",
-      detail: `Avg recovery: ${avgRecovery.toFixed(1)}/5. Healing peptides could help.`,
+      detail: `Avg recovery: ${avgRecovery.toFixed(1)}/5. BPC-157 accelerates tissue repair via angiogenesis. TB-500 reduces inflammation and promotes cell migration to injury sites.`,
       peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu"],
     });
   } else if (recoveryTrend < -0.5) {
@@ -81,18 +81,18 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "trending-down-outline",
       color: "#4ade80",
       title: "Recovery trending down",
-      detail: `Recovery scores dropping — might be overtraining.`,
+      detail: `Recovery scores dropping — could indicate overtraining. BPC-157 and TB-500 support systemic healing and reduce inflammation.`,
       peptideIds: ["bpc157", "tb500", "klow_blend"],
     });
   }
 
-  // High soreness
-  if (avgSoreness >= 3.5) {
+  // High soreness (low score = more sore, since 1=very sore, 5=no pain)
+  if (avgSoreness <= 2.5) {
     insights.push({
       icon: "fitness-outline",
       color: "#f87171",
       title: "High soreness levels",
-      detail: `Avg soreness: ${avgSoreness.toFixed(1)}/5. Anti-inflammatory peptides may help.`,
+      detail: `Avg soreness: ${avgSoreness.toFixed(1)}/5. BPC-157 reduces inflammatory markers. KPV is a potent anti-inflammatory fragment that targets NF-kB pathways.`,
       peptideIds: ["bpc157", "tb500", "kpv", "wolverine_blend"],
     });
   }
@@ -103,7 +103,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "flash-outline",
       color: "#facc15",
       title: "Low energy levels",
-      detail: `Avg energy: ${avgEnergy.toFixed(1)}/5. GH peptides can boost energy and vitality.`,
+      detail: `Avg energy: ${avgEnergy.toFixed(1)}/5. CJC-1295 + Ipamorelin boost GH output, which improves energy, metabolism, and body composition over 4-6 weeks.`,
       peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "tesamorelin"],
     });
   } else if (energyTrend < -0.5) {
@@ -111,7 +111,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "trending-down-outline",
       color: "#facc15",
       title: "Energy declining",
-      detail: `Your energy has been dropping. Consider a GH-boosting stack.`,
+      detail: `Your energy has been dropping. GH-boosting peptides raise IGF-1 levels, which supports cellular energy production and vitality.`,
       peptideIds: ["cjc_ipa_blend", "mk677"],
     });
   }
@@ -122,7 +122,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       icon: "sad-outline",
       color: "#f472b6",
       title: "Mood could be better",
-      detail: `Avg mood: ${avgMood.toFixed(1)}/5. Cognitive peptides may help with wellbeing.`,
+      detail: `Avg mood: ${avgMood.toFixed(1)}/5. Selank modulates GABA and serotonin for anxiolytic effects. Semax boosts BDNF, supporting mood and cognitive resilience.`,
       peptideIds: ["selank", "semax", "cognitive_blend"],
     });
   }
@@ -146,7 +146,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       peptideIds: [],
     });
   }
-  if (avgRecovery >= 4 && avgSoreness < 2.5) {
+  if (avgRecovery >= 4 && avgSoreness >= 3.5) {
     insights.push({
       icon: "fitness-outline",
       color: "#4ade80",
@@ -351,7 +351,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
 
   // Everything is great
   if (insights.length === 0 && recent.length >= 5) {
-    const allGood = avgSleep >= 3.5 && avgEnergy >= 3.5 && avgRecovery >= 3.5 && avgMood >= 3.5 && avgSoreness < 3;
+    const allGood = avgSleep >= 3.5 && avgEnergy >= 3.5 && avgRecovery >= 3.5 && avgMood >= 3.5 && avgSoreness >= 3;
     if (allGood) {
       insights.push({
         icon: "checkmark-circle-outline",
@@ -488,7 +488,7 @@ export default function JournalScreen({ navigation }: any) {
                 <MetricBadge label="Sleep" value={item.sleepQuality} />
                 <MetricBadge label="Recovery" value={item.recoveryScore} />
                 <MetricBadge label="Mood" value={item.mood} />
-                <MetricBadge label="Soreness" value={item.soreness} inverted />
+                <MetricBadge label="Soreness" value={item.soreness} />
               </View>
               {item.notes ? (
                 <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
@@ -597,10 +597,8 @@ function TrendChart({ entries }: { entries: JournalEntry[] }) {
   );
 }
 
-function MetricBadge({ label, value, inverted }: { label: string; value: number; inverted?: boolean }) {
-  const color = inverted
-    ? (value <= 2 ? colors.success : value <= 3 ? colors.warning : colors.error)
-    : (value >= 4 ? colors.success : value >= 3 ? colors.warning : colors.error);
+function MetricBadge({ label, value }: { label: string; value: number }) {
+  const color = value >= 4 ? colors.success : value >= 3 ? colors.warning : colors.error;
   return (
     <View style={styles.badge}>
       <Text style={styles.badgeLabel}>{label}</Text>

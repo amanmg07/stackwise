@@ -10,6 +10,7 @@ import { sendChatMessage } from "../../services/chatService";
 import { generateId } from "../../utils/id";
 import { colors, spacing } from "../../theme";
 import { ChatMessage } from "../../types";
+import { appStorage } from "../../utils/storage";
 
 const STARTERS = [
   "What peptides help with recovery?",
@@ -33,7 +34,21 @@ export default function ChatView({ navigation }: Props) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [chatLoaded, setChatLoaded] = useState(false);
   const listRef = useRef<FlatList>(null);
+
+  // Load persisted chat on mount
+  useEffect(() => {
+    appStorage.loadChatMessages().then((saved) => {
+      if (saved.length > 0) setMessages(saved);
+      setChatLoaded(true);
+    });
+  }, []);
+
+  // Persist chat whenever messages change
+  useEffect(() => {
+    if (chatLoaded && messages.length > 0) appStorage.saveChatMessages(messages);
+  }, [messages, chatLoaded]);
 
   useEffect(() => {
     const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
@@ -225,6 +240,14 @@ export default function ChatView({ navigation }: Props) {
       )}
 
       <View style={[styles.inputRow, { paddingBottom: Math.max(bottomPadding, Platform.OS === "ios" ? 8 : spacing.md) }]}>
+        {messages.length > 0 && !loading && (
+          <TouchableOpacity
+            style={styles.clearBtn}
+            onPress={() => { setMessages([]); appStorage.saveChatMessages([]); }}
+          >
+            <Ionicons name="trash-outline" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+        )}
         <TextInput
           style={styles.input}
           value={input}
@@ -303,4 +326,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent, alignItems: "center", justifyContent: "center",
   },
   sendBtnDisabled: { opacity: 0.4 },
+  clearBtn: {
+    width: 42, height: 42, borderRadius: 21,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
 });

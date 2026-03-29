@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Cycle, DoseLog, JournalEntry, UserSettings, CommunityPost } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, CommunityPost, ChatMessage } from "../types";
 
 const KEYS = {
   cycles: "@stackwise/cycles",
@@ -8,6 +8,7 @@ const KEYS = {
   settings: "@stackwise/settings",
   communityPosts: "@stackwise/community_posts",
   likedPosts: "@stackwise/liked_posts",
+  chatMessages: "@stackwise/chat_messages",
 };
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -64,6 +65,13 @@ export const appStorage = {
   },
   async saveCommunityPosts(posts: CommunityPost[]): Promise<void> {
     return save(KEYS.communityPosts, posts);
+  },
+
+  async loadChatMessages(): Promise<ChatMessage[]> {
+    return load(KEYS.chatMessages, []);
+  },
+  async saveChatMessages(messages: ChatMessage[]): Promise<void> {
+    return save(KEYS.chatMessages, messages);
   },
 
   async loadLikedPosts(): Promise<string[]> {

@@ -414,7 +414,7 @@ export default function CommunityScreen({ navigation }: any) {
         ListHeaderComponent={
           <>
             <Text style={styles.title}>Feed</Text>
-            <Text style={styles.subtitle}>Popular stacks from the peptide community</Text>
+            <Text style={styles.subtitle}>Community stacks and featured protocols</Text>
 
             {/* Search bar */}
             <View style={styles.searchContainer}>
@@ -515,6 +515,7 @@ export default function CommunityScreen({ navigation }: any) {
         renderItem={({ item }) => {
           const liked = likedStacks.includes(item.id);
           const isOwnPost = item.userId != null && item.userId === userId;
+          const isFeatured = !item.isUserPost;
           const displayLikes = item.isUserPost ? item.likes : (liked ? item.likes + 1 : item.likes);
           return (
             <View style={styles.card}>
@@ -534,6 +535,12 @@ export default function CommunityScreen({ navigation }: any) {
                       {isOwnPost && (
                         <View style={styles.youBadge}>
                           <Text style={styles.youBadgeText}>You</Text>
+                        </View>
+                      )}
+                      {isFeatured && (
+                        <View style={styles.featuredBadge}>
+                          <Ionicons name="star" size={9} color={colors.accent} />
+                          <Text style={styles.featuredBadgeText}>Featured</Text>
                         </View>
                       )}
                     </View>
@@ -654,6 +661,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6, paddingVertical: 1,
   },
   youBadgeText: { fontSize: 10, fontWeight: "700", color: colors.success },
+  featuredBadge: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: colors.accent + "15", borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 1,
+  },
+  featuredBadgeText: { fontSize: 10, fontWeight: "700", color: colors.accent },
   durationText: { fontSize: 11, color: colors.textSecondary, marginTop: 1 },
   diffBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   diffText: { fontSize: 11, fontWeight: "700", textTransform: "capitalize" },
