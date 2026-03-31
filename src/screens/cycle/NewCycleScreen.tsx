@@ -13,7 +13,7 @@ import { colors, spacing } from "../../theme";
 import { CyclePeptide, AdministrationRoute } from "../../types";
 
 export default function NewCycleScreen({ route, navigation }: any) {
-  const { addCycle, updateCycle, cycles } = useApp();
+  const { addCycle, updateCycle, cycles, settings } = useApp();
   const templateId = route.params?.templateId;
   const template = templateId ? protocolTemplates.find((t) => t.id === templateId) : null;
   const communityStack = route.params?.communityStack;
@@ -281,9 +281,19 @@ export default function NewCycleScreen({ route, navigation }: any) {
           <Text style={styles.pickerTitle}>Select Peptide</Text>
           {peptideDB
             .filter((p) => !cyclePeptides.some((cp) => cp.peptideId === p.id))
+            .sort((a, b) => {
+              const aS = settings.savedPeptides.includes(a.id) ? 0 : 1;
+              const bS = settings.savedPeptides.includes(b.id) ? 0 : 1;
+              return aS - bS || a.name.localeCompare(b.name);
+            })
             .map((p) => (
               <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => addPeptide(p.id)}>
-                <Text style={styles.pickerName}>{p.name}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
+                  <Text style={styles.pickerName}>{p.name}</Text>
+                  {settings.savedPeptides.includes(p.id) && (
+                    <Ionicons name="bookmark" size={14} color={colors.accent} />
+                  )}
+                </View>
                 <Ionicons name="add" size={20} color={colors.accent} />
               </TouchableOpacity>
             ))}
