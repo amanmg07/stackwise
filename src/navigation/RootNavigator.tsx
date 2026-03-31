@@ -1,25 +1,47 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../theme";
 
-import ExploreScreen from "../screens/explore/ExploreScreen";
-import PeptideDetailScreen from "../screens/research/PeptideDetailScreen";
-import CycleTrackerScreen from "../screens/cycle/CycleTrackerScreen";
-import NewCycleScreen from "../screens/cycle/NewCycleScreen";
-import LogDoseScreen from "../screens/cycle/LogDoseScreen";
-import CycleDetailScreen from "../screens/cycle/CycleDetailScreen";
-import JournalScreen from "../screens/journal/JournalScreen";
-import NewEntryScreen from "../screens/journal/NewEntryScreen";
+// Eagerly load the home tab (first screen users see)
 import ProtocolBuilderScreen from "../screens/protocol/ProtocolBuilderScreen";
-import ProtocolResultScreen from "../screens/protocol/ProtocolResultScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
-import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
-import InteractionCheckerScreen from "../screens/research/InteractionCheckerScreen";
-import CompareScreen from "../screens/research/CompareScreen";
-import CommunityScreen from "../screens/community/CommunityScreen";
-import NewPostScreen from "../screens/community/NewPostScreen";
+
+// Lazy load everything else
+const ExploreScreen = lazy(() => import("../screens/explore/ExploreScreen"));
+const PeptideDetailScreen = lazy(() => import("../screens/research/PeptideDetailScreen"));
+const CycleTrackerScreen = lazy(() => import("../screens/cycle/CycleTrackerScreen"));
+const NewCycleScreen = lazy(() => import("../screens/cycle/NewCycleScreen"));
+const LogDoseScreen = lazy(() => import("../screens/cycle/LogDoseScreen"));
+const CycleDetailScreen = lazy(() => import("../screens/cycle/CycleDetailScreen"));
+const JournalScreen = lazy(() => import("../screens/journal/JournalScreen"));
+const NewEntryScreen = lazy(() => import("../screens/journal/NewEntryScreen"));
+const ProtocolResultScreen = lazy(() => import("../screens/protocol/ProtocolResultScreen"));
+const ReconCalculatorScreen = lazy(() => import("../screens/tools/ReconCalculatorScreen"));
+const InteractionCheckerScreen = lazy(() => import("../screens/research/InteractionCheckerScreen"));
+const CompareScreen = lazy(() => import("../screens/research/CompareScreen"));
+const CommunityScreen = lazy(() => import("../screens/community/CommunityScreen"));
+const NewPostScreen = lazy(() => import("../screens/community/NewPostScreen"));
+
+function LazyFallback() {
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }}>
+      <ActivityIndicator size="small" color={colors.accent} />
+    </View>
+  );
+}
+
+function withSuspense<P extends object>(Component: React.ComponentType<P>) {
+  return function SuspenseWrapper(props: P) {
+    return (
+      <Suspense fallback={<LazyFallback />}>
+        <Component {...props} />
+      </Suspense>
+    );
+  };
+}
 
 const Tab = createBottomTabNavigator();
 
@@ -34,11 +56,11 @@ const ExploreStack = createNativeStackNavigator();
 function ExploreNavigator() {
   return (
     <ExploreStack.Navigator screenOptions={screenOptions}>
-      <ExploreStack.Screen name="ExploreHub" component={ExploreScreen} options={{ headerShown: false }} />
-      <ExploreStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
-      <ExploreStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />
-      <ExploreStack.Screen name="InteractionChecker" component={InteractionCheckerScreen} options={{ title: "Interaction Checker" }} />
-      <ExploreStack.Screen name="Compare" component={CompareScreen} options={{ title: "Compare" }} />
+      <ExploreStack.Screen name="ExploreHub" component={withSuspense(ExploreScreen)} options={{ headerShown: false }} />
+      <ExploreStack.Screen name="PeptideDetail" component={withSuspense(PeptideDetailScreen)} options={{ title: "Details" }} />
+      <ExploreStack.Screen name="ReconCalculator" component={withSuspense(ReconCalculatorScreen)} options={{ title: "Dosing Calculator" }} />
+      <ExploreStack.Screen name="InteractionChecker" component={withSuspense(InteractionCheckerScreen)} options={{ title: "Interaction Checker" }} />
+      <ExploreStack.Screen name="Compare" component={withSuspense(CompareScreen)} options={{ title: "Compare" }} />
     </ExploreStack.Navigator>
   );
 }
@@ -48,10 +70,10 @@ const CycleStack = createNativeStackNavigator();
 function CycleNavigator() {
   return (
     <CycleStack.Navigator screenOptions={screenOptions}>
-      <CycleStack.Screen name="CycleTracker" component={CycleTrackerScreen} options={{ headerShown: false }} />
-      <CycleStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
-      <CycleStack.Screen name="LogDose" component={LogDoseScreen} options={{ title: "Log Dose" }} />
-      <CycleStack.Screen name="CycleDetail" component={CycleDetailScreen} options={{ title: "Cycle Details" }} />
+      <CycleStack.Screen name="CycleTracker" component={withSuspense(CycleTrackerScreen)} options={{ headerShown: false }} />
+      <CycleStack.Screen name="NewCycle" component={withSuspense(NewCycleScreen)} options={{ title: "New Cycle" }} />
+      <CycleStack.Screen name="LogDose" component={withSuspense(LogDoseScreen)} options={{ title: "Log Dose" }} />
+      <CycleStack.Screen name="CycleDetail" component={withSuspense(CycleDetailScreen)} options={{ title: "Cycle Details" }} />
     </CycleStack.Navigator>
   );
 }
@@ -61,8 +83,8 @@ const JournalStack = createNativeStackNavigator();
 function JournalNavigator() {
   return (
     <JournalStack.Navigator screenOptions={screenOptions}>
-      <JournalStack.Screen name="Journal" component={JournalScreen} options={{ headerShown: false }} />
-      <JournalStack.Screen name="NewEntry" component={NewEntryScreen} options={{ title: "New Entry" }} />
+      <JournalStack.Screen name="Journal" component={withSuspense(JournalScreen)} options={{ headerShown: false }} />
+      <JournalStack.Screen name="NewEntry" component={withSuspense(NewEntryScreen)} options={{ title: "New Entry" }} />
     </JournalStack.Navigator>
   );
 }
@@ -73,11 +95,11 @@ function ProtocolNavigator() {
   return (
     <ProtocolStack.Navigator screenOptions={screenOptions}>
       <ProtocolStack.Screen name="ProtocolBuilder" component={ProtocolBuilderScreen} options={{ headerShown: false }} />
-      <ProtocolStack.Screen name="ProtocolResult" component={ProtocolResultScreen} options={{ title: "Results" }} />
-      <ProtocolStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
-      <ProtocolStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />
-      <ProtocolStack.Screen name="InteractionChecker" component={InteractionCheckerScreen} options={{ title: "Interaction Checker" }} />
-      <ProtocolStack.Screen name="Compare" component={CompareScreen} options={{ title: "Compare" }} />
+      <ProtocolStack.Screen name="ProtocolResult" component={withSuspense(ProtocolResultScreen)} options={{ title: "Results" }} />
+      <ProtocolStack.Screen name="NewCycle" component={withSuspense(NewCycleScreen)} options={{ title: "New Cycle" }} />
+      <ProtocolStack.Screen name="ReconCalculator" component={withSuspense(ReconCalculatorScreen)} options={{ title: "Dosing Calculator" }} />
+      <ProtocolStack.Screen name="InteractionChecker" component={withSuspense(InteractionCheckerScreen)} options={{ title: "Interaction Checker" }} />
+      <ProtocolStack.Screen name="Compare" component={withSuspense(CompareScreen)} options={{ title: "Compare" }} />
       <ProtocolStack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
     </ProtocolStack.Navigator>
   );
@@ -88,9 +110,9 @@ const CommunityStack = createNativeStackNavigator();
 function CommunityNavigator() {
   return (
     <CommunityStack.Navigator screenOptions={screenOptions}>
-      <CommunityStack.Screen name="CommunityFeed" component={CommunityScreen} options={{ headerShown: false }} />
-      <CommunityStack.Screen name="NewPost" component={NewPostScreen} options={{ title: "Share Your Stack" }} />
-      <CommunityStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
+      <CommunityStack.Screen name="CommunityFeed" component={withSuspense(CommunityScreen)} options={{ headerShown: false }} />
+      <CommunityStack.Screen name="NewPost" component={withSuspense(NewPostScreen)} options={{ title: "Share Your Stack" }} />
+      <CommunityStack.Screen name="PeptideDetail" component={withSuspense(PeptideDetailScreen)} options={{ title: "Details" }} />
     </CommunityStack.Navigator>
   );
 }

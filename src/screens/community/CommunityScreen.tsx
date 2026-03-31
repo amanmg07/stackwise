@@ -240,24 +240,28 @@ export default function CommunityScreen({ navigation }: any) {
     setRefreshing(false);
   }, []);
 
+  // Only fetch and subscribe when the screen is actually focused (not on mount)
   useEffect(() => {
-    fetchPosts();
+    let channel: any = null;
 
-    // Real-time subscription for instant updates
-    const channel = supabase
-      .channel("community_posts_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "community_posts" }, () => {
-        fetchPosts();
-      })
-      .subscribe();
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchPosts();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [fetchPosts]);
+      // Set up real-time subscription on first focus
+      if (!channel) {
+        channel = supabase
+          .channel("community_posts_changes")
+          .on("postgres_changes", { event: "*", schema: "public", table: "community_posts" }, () => {
+            fetchPosts();
+          })
+          .subscribe();
+      }
+    });
 
-  // Refresh when screen is focused
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", fetchPosts);
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [navigation, fetchPosts]);
 
   const allStacks = useMemo(() => {
