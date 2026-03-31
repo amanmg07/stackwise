@@ -5,7 +5,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
 import { colors, spacing, safeTop } from "../../theme";
-import { PeptideCategory } from "../../types";
+import { PeptideCategory, AdministrationRoute } from "../../types";
 
 const CATEGORIES: { key: PeptideCategory | "all"; label: string }[] = [
   { key: "all", label: "All" },
@@ -50,9 +50,19 @@ const INJECTION_STEPS = [
   { step: "7", title: "After injection", detail: "Apply light pressure with an alcohol swab if needed — don't rub. Dispose of the syringe in a sharps container. Never recap or reuse needles. Rotate injection sites to avoid scar tissue." },
 ];
 
+const ROUTE_FILTERS: { key: AdministrationRoute | "all"; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: "all", label: "All Routes", icon: "apps-outline" },
+  { key: "subcutaneous", label: "SubQ", icon: "medkit-outline" },
+  { key: "intramuscular", label: "IM", icon: "fitness-outline" },
+  { key: "oral", label: "Oral", icon: "tablet-portrait-outline" },
+  { key: "nasal", label: "Nasal", icon: "water-outline" },
+  { key: "topical", label: "Topical", icon: "hand-left-outline" },
+];
+
 export default function ResearchHubScreen({ navigation, embedded }: any) {
   const [search, setSearch] = useState("");
   const [selectedCats, setSelectedCats] = useState<PeptideCategory[]>([]);
+  const [selectedRoutes, setSelectedRoutes] = useState<AdministrationRoute[]>([]);
   const [showGuide, setShowGuide] = useState(false);
 
   const toggleCat = (key: PeptideCategory | "all") => {
@@ -65,6 +75,16 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
     }
   };
 
+  const toggleRoute = (key: AdministrationRoute | "all") => {
+    if (key === "all") {
+      setSelectedRoutes([]);
+    } else {
+      setSelectedRoutes((prev) =>
+        prev.includes(key) ? prev.filter((r) => r !== key) : [...prev, key]
+      );
+    }
+  };
+
   const filtered = useMemo(() => {
     return peptides.filter((p) => {
       const matchSearch =
@@ -72,9 +92,10 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         (p.abbreviation?.toLowerCase().includes(search.toLowerCase()));
       const matchCat = selectedCats.length === 0 || selectedCats.some((c) => p.categories.includes(c));
-      return matchSearch && matchCat;
+      const matchRoute = selectedRoutes.length === 0 || selectedRoutes.some((r) => p.routes.includes(r));
+      return matchSearch && matchCat && matchRoute;
     });
-  }, [search, selectedCats]);
+  }, [search, selectedCats, selectedRoutes]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
@@ -113,6 +134,30 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
             >
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {cat.label}
+              </Text>
+            </TouchableOpacity>
+          );})}
+        </ScrollView>
+      </View>
+
+      {/* Route filter chips */}
+      <View style={styles.chipsWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsContent}
+        >
+          {ROUTE_FILTERS.map((rf) => {
+            const active = rf.key === "all" ? selectedRoutes.length === 0 : selectedRoutes.includes(rf.key as AdministrationRoute);
+            return (
+            <TouchableOpacity
+              key={rf.key}
+              style={[styles.chip, active && styles.chipActive]}
+              onPress={() => toggleRoute(rf.key)}
+            >
+              <Ionicons name={rf.icon} size={13} color={active ? colors.background : colors.textSecondary} />
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                {rf.label}
               </Text>
             </TouchableOpacity>
           );})}
@@ -264,6 +309,9 @@ const styles = StyleSheet.create({
   chipsWrapper: { height: 44, marginBottom: 4 },
   chipsContent: { paddingHorizontal: spacing.md, alignItems: "center", height: 44 },
   chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     backgroundColor: colors.surface,
     borderRadius: 20,
     paddingHorizontal: 16,
