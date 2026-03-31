@@ -3,7 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing, safeTop } from "../../theme";
-import { Goal } from "../../types";
+import { Goal, AdministrationRoute } from "../../types";
+
+const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: "subcutaneous", label: "Injection (SubQ)", icon: "medkit-outline" },
+  { key: "intramuscular", label: "Injection (IM)", icon: "fitness-outline" },
+  { key: "oral", label: "Oral", icon: "tablet-portrait-outline" },
+  { key: "nasal", label: "Nasal", icon: "water-outline" },
+  { key: "topical", label: "Topical", icon: "hand-left-outline" },
+];
 
 const GOALS: { key: Goal; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
   { key: "recovery", label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
@@ -20,10 +28,19 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   const { cycles } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
   const [selectedGoals, setSelectedGoals] = useState<Goal[]>([]);
+  const [selectedRoutes, setSelectedRoutes] = useState<AdministrationRoute[]>(
+    ROUTES.map((r) => r.key)
+  );
 
   const toggleGoal = (goal: Goal) => {
     setSelectedGoals((prev) =>
       prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
+    );
+  };
+
+  const toggleRoute = (route: AdministrationRoute) => {
+    setSelectedRoutes((prev) =>
+      prev.includes(route) ? prev.filter((r) => r !== route) : [...prev, route]
     );
   };
 
@@ -83,10 +100,38 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         })}
       </View>
 
+      {/* Route preferences */}
+      {selectedGoals.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Preferred administration</Text>
+          <Text style={styles.sectionDesc}>Deselect any methods you want to avoid</Text>
+          <View style={styles.routeList}>
+            {ROUTES.map((r) => {
+              const selected = selectedRoutes.includes(r.key);
+              return (
+                <TouchableOpacity
+                  key={r.key}
+                  style={[styles.routeRow, !selected && styles.routeRowOff]}
+                  onPress={() => toggleRoute(r.key)}
+                >
+                  <Ionicons
+                    name={selected ? "checkbox" : "square-outline"}
+                    size={22}
+                    color={selected ? colors.accent : colors.textSecondary}
+                  />
+                  <Ionicons name={r.icon} size={18} color={selected ? colors.text : colors.textSecondary} />
+                  <Text style={[styles.routeLabel, !selected && styles.routeLabelOff]}>{r.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </>
+      )}
+
       <TouchableOpacity
-        style={[styles.buildBtn, selectedGoals.length === 0 && styles.buildBtnDisabled]}
-        disabled={selectedGoals.length === 0}
-        onPress={() => navigation.navigate("ProtocolResult", { goals: selectedGoals })}
+        style={[styles.buildBtn, (selectedGoals.length === 0 || selectedRoutes.length === 0) && styles.buildBtnDisabled]}
+        disabled={selectedGoals.length === 0 || selectedRoutes.length === 0}
+        onPress={() => navigation.navigate("ProtocolResult", { goals: selectedGoals, routes: selectedRoutes })}
       >
         <Ionicons name="flash" size={20} color={colors.background} />
         <Text style={styles.buildBtnText}>View Recommended Protocols</Text>
@@ -161,6 +206,15 @@ const styles = StyleSheet.create({
     position: "absolute", top: 8, right: 8,
     width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center",
   },
+  routeList: { gap: 8, marginBottom: 24 },
+  routeRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  routeRowOff: { opacity: 0.5 },
+  routeLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
+  routeLabelOff: { color: colors.textSecondary },
   buildBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18,

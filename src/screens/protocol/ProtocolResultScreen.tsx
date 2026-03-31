@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { protocolTemplates } from "../../data/protocolTemplates";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
-import { Goal } from "../../types";
+import { Goal, AdministrationRoute } from "../../types";
 
 const DIFFICULTY_COLORS = {
   beginner: colors.success,
@@ -13,7 +13,7 @@ const DIFFICULTY_COLORS = {
 };
 
 export default function ProtocolResultScreen({ route, navigation }: any) {
-  const { goals } = route.params as { goals: Goal[] };
+  const { goals, routes: preferredRoutes } = route.params as { goals: Goal[]; routes?: AdministrationRoute[] };
 
   const scored = protocolTemplates
     .map((t) => {
@@ -21,6 +21,16 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
       return { template: t, score: goalMatch };
     })
     .filter((s) => s.score > 0)
+    .filter((s) => {
+      // If route preferences provided, only show protocols where every peptide
+      // has at least one route matching the user's preferences
+      if (!preferredRoutes || preferredRoutes.length === 0) return true;
+      return s.template.peptides.every((tp) => {
+        const pep = peptideDB.find((p) => p.id === tp.peptideId);
+        if (!pep) return true;
+        return pep.routes.some((r) => preferredRoutes.includes(r));
+      });
+    })
     .sort((a, b) => b.score - a.score);
 
   return (
