@@ -52,7 +52,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 10000); // 10s safety timeout
+    // Load local data first, then show the app immediately
     (async () => {
       const [c, d, j, s, cp] = await Promise.all([
         appStorage.loadCycles(),
@@ -66,16 +66,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setJournal(j);
       setSettings(s);
       setCommunityPosts(cp);
-      // Sign in anonymously
+      setLoading(false);
+    })();
+
+    // Auth in background — don't block the UI on network requests
+    (async () => {
       try {
         const uid = await ensureAuth();
         setUserId(uid);
       } catch (e) {
         console.warn("Auth failed:", e);
       }
-      setLoading(false);
     })();
-    return () => clearTimeout(timeout);
   }, []);
 
   // Persist helpers
