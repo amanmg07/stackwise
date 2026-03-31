@@ -42,7 +42,7 @@ export const peptides: Peptide[] = [
       "A healing peptide based on Thymosin Beta-4, a protein your body naturally makes. Works throughout your entire body to repair tissue, reduce inflammation, and speed recovery. Great for injuries that are slow to heal.",
     mechanism:
       "Boosts a protein called actin that helps cells move and rebuild. Sends repair cells (including stem cells) to injury sites faster. Reduces inflammation. Unlike BPC-157, it works body-wide — doesn't matter where you inject it.",
-    routes: ["subcutaneous", "intramuscular"],
+    routes: ["subcutaneous", "intramuscular", "topical"],
     dosingProtocols: [
       {
         purpose: "Loading phase (first 4-6 weeks)",
@@ -359,7 +359,7 @@ export const peptides: Peptide[] = [
       "A fragment of growth hormone that only does the fat-burning part. Burns fat and blocks new fat creation without the downsides of full GH (no joint pain, no blood sugar issues, no organ growth).",
     mechanism:
       "Mimics the specific part of growth hormone responsible for breaking down fat and stopping new fat from forming. Doesn't raise IGF-1 or affect blood sugar, so it's much safer than taking actual growth hormone for fat loss.",
-    routes: ["subcutaneous"],
+    routes: ["subcutaneous", "oral"],
     dosingProtocols: [
       {
         purpose: "Fat loss",
@@ -415,7 +415,7 @@ export const peptides: Peptide[] = [
       "FDA-approved (as Vyleesi) for low sexual desire. Unlike Viagra which works on blood flow, PT-141 works in your brain to boost actual desire and arousal. Used as-needed, not daily.",
     mechanism:
       "Activates receptors in your brain that control sexual desire and arousal. Works on the wanting, not just the mechanics — which is why it's different from drugs like Viagra or Cialis.",
-    routes: ["subcutaneous"],
+    routes: ["subcutaneous", "nasal"],
     dosingProtocols: [
       {
         purpose: "Sexual desire / arousal",
@@ -820,7 +820,7 @@ export const peptides: Peptide[] = [
       "A synthetic copy of the GnRH hormone your brain naturally makes. Tells your pituitary to release LH and FSH — the hormones that drive testosterone and fertility. Popular in TRT protocols to keep natural hormone production alive.",
     mechanism:
       "Identical to your body's own GnRH. When injected in pulses, it keeps your LH and FSH signaling active. This is why men on testosterone use it — it preserves testicular function and fertility while on TRT.",
-    routes: ["subcutaneous"],
+    routes: ["subcutaneous", "nasal"],
     dosingProtocols: [
       {
         purpose: "Fertility preservation during TRT",
@@ -935,7 +935,7 @@ export const peptides: Peptide[] = [
       "One of the most prescribed growth hormone peptides. A shortened version of your body's own GHRH that tells your pituitary to release GH naturally. Considered one of the safest GH boosters because it works with your body's feedback system — you can't overshoot.",
     mechanism:
       "Binds to GHRH receptors on your pituitary gland, triggering a natural growth hormone pulse. Unlike synthetic HGH, it preserves your body's negative feedback loop — your pituitary won't release more GH than it should. This makes it very safe for long-term use.",
-    routes: ["subcutaneous"],
+    routes: ["subcutaneous", "nasal"],
     dosingProtocols: [
       {
         purpose: "Anti-aging / general wellness",
@@ -1234,5 +1234,205 @@ export const peptides: Peptide[] = [
     halfLife: "Varies — Tesamorelin ~30 min, CJC ~30 min, Ipamorelin ~2 hours.",
     storage: "Powder: freezer at -20°C. Mixed: fridge at 2-8°C. Avoid freeze-thaw.",
         notes: "Contains: Tesamorelin (6mg) + CJC-1295 no DAC (3mg) + Ipamorelin (3mg). Sold by Peptide Sciences, Liberty Peptides, LIVV Natural. Not for beginners — start with CJC/Ipa blend first.",
+  },
+  {
+    id: "oxytocin",
+    name: "Oxytocin",
+    categories: ["cognitive", "sexual_health"],
+    description:
+      "A neuropeptide hormone that modulates social bonding, trust, empathy, and anxiety reduction. Intranasal oxytocin has gained significant interest for its effects on social cognition, stress resilience, and intimacy. One of the most studied peptides for emotional wellbeing.",
+    mechanism:
+      "Binds to oxytocin receptors in the CNS, modulating GABA and serotonin systems. Reduces amygdala reactivity (lowering anxiety and fear responses), increases social reward signaling, and promotes pair bonding. Also has mild anti-inflammatory and analgesic properties.",
+    routes: ["nasal"],
+    dosingProtocols: [
+      {
+        purpose: "Anxiolytic / social cognition",
+        doseRange: "20-24 IU",
+        frequency: "1-2x daily",
+        cycleDuration: "4-8 weeks with breaks",
+        timing: "Intranasal spray, 30 min before social situations or morning.",
+      },
+      {
+        purpose: "Intimacy / bonding",
+        doseRange: "20-40 IU",
+        frequency: "As needed",
+        cycleDuration: "Situational use",
+        timing: "30-60 min before desired effect.",
+      },
+    ],
+    sideEffects: ["Nasal irritation", "Headache (rare)", "Emotional sensitivity", "Potential receptor downregulation with chronic use", "Contraindicated in pregnancy"],
+    stacksWith: ["selank", "semax", "pt141"],
+    halfLife: "3-5 minutes in plasma; CNS effects last 2-4 hours after nasal administration.",
+    storage: "Refrigerate at 2-8°C. Reconstituted nasal solution stable for 4-6 weeks refrigerated. Protect from light.",
+        notes: "Originally a hormone associated with childbirth and breastfeeding, oxytocin's role in social cognition makes it popular for anxiety, social confidence, and relationship enhancement. Nasal is the standard route for cognitive effects — bypasses the blood-brain barrier more effectively.",
+  },
+  {
+    id: "cerebrolysin",
+    name: "Cerebrolysin",
+    abbreviation: "CBL",
+    categories: ["cognitive", "recovery"],
+    description:
+      "A mixture of low-molecular-weight neuropeptides and amino acids derived from porcine brain tissue. One of the most studied nootropic peptide compounds with over 200 clinical trials, primarily used for cognitive enhancement, TBI recovery, and neurodegenerative conditions.",
+    mechanism:
+      "Exhibits neurotrophic activity similar to BDNF, CNTF, and NGF. Promotes neuronal sprouting, synaptic repair, dendritic branching, and neuroplasticity. Reduces amyloid-beta aggregation and supports mitochondrial function in neurons.",
+    routes: ["nasal", "intramuscular"],
+    dosingProtocols: [
+      {
+        purpose: "Cognitive enhancement / nootropic",
+        doseRange: "1-2 mL per nostril",
+        frequency: "1x daily",
+        cycleDuration: "10-20 day cycles, 2-3x per year",
+        timing: "Morning on empty stomach. Nasal spray formulation.",
+      },
+      {
+        purpose: "TBI / neuro recovery",
+        doseRange: "5-10 mL IM",
+        frequency: "1x daily",
+        cycleDuration: "20 days",
+        timing: "Morning injection.",
+      },
+    ],
+    sideEffects: ["Nasal irritation", "Headache", "Dizziness", "Mild agitation", "Rare fever", "Derived from porcine tissue — allergy concern"],
+    stacksWith: ["semax", "selank", "dihexa", "pe2228"],
+    halfLife: "Peptide fragments vary; effects build cumulatively over the treatment cycle.",
+    storage: "Refrigerate at 2-8°C. Protect from light. Ampules: use immediately once opened.",
+        notes: "Widely prescribed in Europe and Asia for stroke recovery, TBI, and Alzheimer's. Banned by some sports organizations. The nasal spray formulation is compounded and popular in the nootropic community. Effects are cumulative — expect results after 5-7 days of daily use.",
+  },
+  {
+    id: "pinealon",
+    name: "Pinealon",
+    categories: ["sleep", "cognitive", "anti_aging"],
+    description:
+      "A Khavinson tripeptide bioregulator (Glu-Asp-Arg) that targets the pineal gland. Normalizes melatonin synthesis and circadian rhythm regulation with neuroprotective properties. Part of the Russian bioregulator peptide family developed for age-related sleep disruption.",
+    mechanism:
+      "Regulates gene expression in pinealocytes, normalizing melatonin production without introducing exogenous melatonin. Supports circadian rhythm calibration, has antioxidant effects on brain tissue, and promotes healthy sleep architecture through natural pathways.",
+    routes: ["nasal", "oral"],
+    dosingProtocols: [
+      {
+        purpose: "Sleep regulation",
+        doseRange: "10 mg capsule or 10-20 µg nasal",
+        frequency: "1x daily before bed",
+        cycleDuration: "10-30 days, repeat 2-3x per year",
+        timing: "30-60 min before bed.",
+      },
+      {
+        purpose: "Neuroprotection / anti-aging",
+        doseRange: "10 mg oral",
+        frequency: "1x daily",
+        cycleDuration: "30 days, 2-3x per year",
+        timing: "Morning or evening.",
+      },
+    ],
+    sideEffects: ["Mild drowsiness (expected)", "Very well tolerated overall", "Rare headache"],
+    stacksWith: ["epithalon", "dsip", "cortagen", "selank"],
+    halfLife: "Short peptide half-life, but epigenetic effects are cumulative and sustained.",
+    storage: "Room temperature in sealed container, away from moisture.",
+        notes: "Part of the Khavinson peptide bioregulator family developed in Russia. Unlike melatonin supplements, Pinealon works by normalizing your own melatonin production rather than introducing exogenous hormones. Best for people whose circadian rhythm is disrupted from shift work, travel, or aging.",
+  },
+  {
+    id: "cortagen",
+    name: "Cortagen",
+    categories: ["cognitive", "anti_aging"],
+    description:
+      "A synthetic tetrapeptide bioregulator targeting cerebral cortex tissue. Promotes gene expression related to neuronal health and repair, supports cognitive function, and provides neuroprotection against age-related decline.",
+    mechanism:
+      "Activates gene expression in cerebral cortex neurons related to neuronal repair, synaptic plasticity, and neuroprotection. Part of the Khavinson peptide bioregulator system — short peptides that regulate tissue-specific gene activity without hormonal side effects.",
+    routes: ["nasal", "subcutaneous"],
+    dosingProtocols: [
+      {
+        purpose: "Cognitive enhancement",
+        doseRange: "10-20 µg nasal or 10 mg capsule",
+        frequency: "1x daily",
+        cycleDuration: "10-30 days, 2-3x per year",
+        timing: "Morning for cognitive focus.",
+      },
+      {
+        purpose: "Neuroprotection",
+        doseRange: "10 mg oral",
+        frequency: "1x daily",
+        cycleDuration: "30 days",
+        timing: "Morning.",
+      },
+    ],
+    sideEffects: ["Very well tolerated", "Rare mild headache", "Rare nasal irritation (nasal route)"],
+    stacksWith: ["epithalon", "semax", "selank", "pinealon", "cerebrolysin"],
+    halfLife: "Short (minutes as a peptide), but effects are epigenetic and cumulative.",
+    storage: "Room temperature in sealed container.",
+        notes: "Developed by Professor Vladimir Khavinson in Russia. Cortagen specifically targets the brain cortex, while other bioregulators target different organs. Best used in cycles 2-3 times per year for long-term cognitive maintenance. Often combined with Pinealon for a brain + sleep bioregulator stack.",
+  },
+  {
+    id: "larazotide",
+    name: "Larazotide",
+    abbreviation: "AT-1001",
+    categories: ["immune", "recovery"],
+    description:
+      "A tight junction regulator peptide that decreases intestinal permeability (leaky gut). The first drug specifically designed to restore the gut epithelial barrier. Originally developed for celiac disease, now widely used in the biohacking community for gut health optimization.",
+    mechanism:
+      "Acts on zonulin pathways to restore tight junction integrity in the intestinal epithelium. Prevents the opening of gaps between intestinal cells that cause increased permeability. Works locally in the gut with minimal systemic absorption.",
+    routes: ["oral"],
+    dosingProtocols: [
+      {
+        purpose: "Gut barrier restoration",
+        doseRange: "0.5-1 mg",
+        frequency: "3x daily before meals",
+        cycleDuration: "8-12 weeks",
+        timing: "15 minutes before meals on empty stomach.",
+      },
+    ],
+    sideEffects: ["Generally well-tolerated", "Occasional headache", "Mild nausea", "Mild GI discomfort", "Very low systemic side effects (acts locally)"],
+    stacksWith: ["bpc157", "kpv", "ll37", "thymosin_a1"],
+    halfLife: "2-4 hours (acts locally in the gut).",
+    storage: "Room temperature, cool dry place. Capsule form — no reconstitution needed.",
+        notes: "Reached Phase 3 clinical trials for celiac disease (INN-202). Unlike BPC-157 which heals gut tissue, Larazotide specifically targets the tight junction mechanism that causes leaky gut. Can be combined with oral BPC-157 for comprehensive gut healing — BPC repairs tissue while Larazotide seals the barriers.",
+  },
+  {
+    id: "argireline",
+    name: "Argireline",
+    abbreviation: "Acetyl Hexapeptide-3",
+    categories: ["anti_aging"],
+    description:
+      "A hexapeptide that reduces wrinkle depth by inhibiting neurotransmitter release at the neuromuscular junction — often called 'topical Botox.' One of the most popular and clinically validated cosmetic peptides, found in thousands of skincare products worldwide.",
+    mechanism:
+      "Inhibits SNARE complex formation (specifically targeting SNAP-25), reducing neurotransmitter release at the neuromuscular junction. This decreases the intensity of muscle contractions that cause dynamic wrinkles (forehead lines, crow's feet, frown lines). Non-paralytic — reduces but doesn't eliminate muscle movement.",
+    routes: ["topical"],
+    dosingProtocols: [
+      {
+        purpose: "Wrinkle reduction",
+        doseRange: "5-10% serum concentration",
+        frequency: "2x daily",
+        cycleDuration: "Ongoing daily use",
+        timing: "Apply to clean skin on forehead, crow's feet, and frown lines. Morning and evening.",
+      },
+    ],
+    sideEffects: ["Very well tolerated", "Rare mild skin irritation", "Rare contact dermatitis", "No systemic effects at topical concentrations"],
+    stacksWith: ["ghkcu", "matrixyl", "pe2228"],
+    halfLife: "Local topical activity — not systemically absorbed.",
+    storage: "Room temperature, away from heat and direct sunlight. Stable in formulated products for 12+ months.",
+        notes: "Studies show up to 30% wrinkle depth reduction after 28 days of consistent use. Works best on expression lines (dynamic wrinkles) rather than deep static wrinkles. Synergistic with GHK-Cu and Matrixyl — Argireline relaxes muscles while the others stimulate collagen. Available OTC in most skincare stores.",
+  },
+  {
+    id: "matrixyl",
+    name: "Matrixyl",
+    abbreviation: "Palmitoyl Pentapeptide-4",
+    categories: ["anti_aging"],
+    description:
+      "A lipopeptide that mimics collagen fragments to signal fibroblasts to produce more collagen, elastin, and hyaluronic acid. One of the most clinically proven anti-aging peptides with studies showing double the collagen production compared to retinol. Available as Matrixyl 3000 (enhanced formula).",
+    mechanism:
+      "Mimics matrikines — collagen breakdown fragments that signal the body to produce new collagen. Activates fibroblasts to synthesize collagen types I, III, and IV, fibronectin, and hyaluronic acid. Matrixyl 3000 adds palmitoyl tetrapeptide-7 which reduces IL-6 inflammation that accelerates aging.",
+    routes: ["topical"],
+    dosingProtocols: [
+      {
+        purpose: "Anti-aging / collagen stimulation",
+        doseRange: "2-8% serum concentration",
+        frequency: "1-2x daily",
+        cycleDuration: "Ongoing daily use, visible results after 8-12 weeks",
+        timing: "Apply to clean skin. Layer under moisturizer.",
+      },
+    ],
+    sideEffects: ["Very well tolerated", "Rare mild irritation", "Safe for sensitive skin"],
+    stacksWith: ["ghkcu", "argireline", "pe2228", "epithalon"],
+    halfLife: "Local topical activity — not systemically absorbed.",
+    storage: "Room temperature, away from direct sunlight. Stable in formulation.",
+        notes: "Procter & Gamble's clinical studies showed Matrixyl was nearly twice as effective as retinol for collagen production, with none of the irritation. Matrixyl 3000 is the enhanced version combining two peptides for anti-wrinkle + anti-inflammatory effects. Best combined with Argireline (muscle relaxation) and GHK-Cu (tissue remodeling) for a complete topical peptide stack.",
   },
 ];
