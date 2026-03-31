@@ -6,8 +6,8 @@ import { colors, spacing, safeTop } from "../../theme";
 import { Goal, AdministrationRoute } from "../../types";
 
 const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: "subcutaneous", label: "Injection (SubQ)", icon: "medkit-outline" },
-  { key: "intramuscular", label: "Injection (IM)", icon: "fitness-outline" },
+  { key: "subcutaneous", label: "Subcutaneous Injection", icon: "medkit-outline" },
+  { key: "intramuscular", label: "Intramuscular Injection", icon: "fitness-outline" },
   { key: "oral", label: "Oral", icon: "tablet-portrait-outline" },
   { key: "nasal", label: "Nasal", icon: "water-outline" },
   { key: "topical", label: "Topical", icon: "hand-left-outline" },
