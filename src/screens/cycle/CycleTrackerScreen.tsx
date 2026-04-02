@@ -37,7 +37,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
   const end = parseISO(activeCycle.endDate + "T00:00:00");
   const today = parseISO(todayDate + "T00:00:00");
   const totalDays = differenceInDays(end, start);
-  const elapsed = differenceInDays(today, start) + 1;
+  const elapsed = differenceInDays(today, start);
   const progress = Math.min(Math.max(elapsed / totalDays, 0), 1);
 
   const todayStr = todayDate;
@@ -95,7 +95,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
                     return `  ${pep?.name || cp.peptideId} — ${cp.doseAmount} ${cp.doseUnit}, ${cp.frequency}`;
                   })
                   .join("\n");
-                const msg = `My Stack: ${activeCycle.name}\n\nPeptides:\n${pepList}\n\nDay ${elapsed} of ${totalDays}\n\nShared from StackWise`;
+                const msg = `My Stack: ${activeCycle.name}\n\nPeptides:\n${pepList}\n\nDay ${elapsed} of ${totalDays} completed\n\nShared from StackWise`;
                 try { await Share.share({ message: msg }); } catch {}
               }}
             >
@@ -136,7 +136,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
               <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
             </View>
             <Text style={styles.progressText}>
-              Day {elapsed} of {totalDays}
+              Day {elapsed} of {totalDays} completed
             </Text>
           </View>
 
