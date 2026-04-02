@@ -77,6 +77,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
   );
   const [showPicker, setShowPicker] = useState(false);
   const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
+  const [pickerSearch, setPickerSearch] = useState("");
 
   const interactions = useMemo(
     () => getInteractions(cyclePeptides.map((cp) => cp.peptideId)),
@@ -292,6 +293,46 @@ export default function NewCycleScreen({ route, navigation }: any) {
         <View style={styles.pickerCard}>
           <Text style={styles.pickerTitle}>Select Peptide</Text>
 
+          {/* Search bar */}
+          <View style={styles.pickerSearchBar}>
+            <Ionicons name="search" size={16} color={colors.textSecondary} />
+            <TextInput
+              style={styles.pickerSearchInput}
+              placeholder="Search peptides..."
+              placeholderTextColor={colors.textSecondary}
+              value={pickerSearch}
+              onChangeText={setPickerSearch}
+              autoCapitalize="none"
+            />
+            {pickerSearch.length > 0 && (
+              <TouchableOpacity onPress={() => setPickerSearch("")}>
+                <Ionicons name="close-circle" size={16} color={colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Flat search results when searching */}
+          {pickerSearch.length > 0 ? (
+            peptideDB
+              .filter((p) => !cyclePeptides.some((cp) => cp.peptideId === p.id))
+              .filter((p) =>
+                p.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
+                (p.abbreviation?.toLowerCase().includes(pickerSearch.toLowerCase()))
+              )
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((p) => (
+                <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => { addPeptide(p.id); setPickerSearch(""); }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
+                    <Text style={styles.pickerName}>{p.name}</Text>
+                    {settings.savedPeptides.includes(p.id) && (
+                      <Ionicons name="bookmark" size={14} color={colors.accent} />
+                    )}
+                  </View>
+                  <Ionicons name="add" size={20} color={colors.accent} />
+                </TouchableOpacity>
+              ))
+          ) : (
+          <>
           {/* Saved peptides section */}
           {settings.savedPeptides.length > 0 && (() => {
             const savedAvailable = peptideDB
@@ -354,8 +395,10 @@ export default function NewCycleScreen({ route, navigation }: any) {
               </View>
             );
           })}
+          </>
+          )}
 
-          <TouchableOpacity onPress={() => setShowPicker(false)}>
+          <TouchableOpacity onPress={() => { setShowPicker(false); setPickerSearch(""); }}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -446,7 +489,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: colors.border, marginTop: 8,
   },
-  pickerTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  pickerTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 8 },
+  pickerSearchBar: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: colors.background, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+    borderWidth: 1, borderColor: colors.border, marginBottom: 6,
+  },
+  pickerSearchInput: { flex: 1, fontSize: 14, color: colors.text, padding: 0 },
   catSection: { marginTop: 6 },
   catHeader: {
     flexDirection: "row", alignItems: "center", gap: 8,
