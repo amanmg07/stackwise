@@ -32,13 +32,15 @@ export default function CycleTrackerScreen({ navigation }: any) {
     );
   }
 
-  const start = parseISO(activeCycle.startDate);
-  const end = parseISO(activeCycle.endDate);
+  const todayDate = new Date().toISOString().split("T")[0];
+  const start = parseISO(activeCycle.startDate + "T00:00:00");
+  const end = parseISO(activeCycle.endDate + "T00:00:00");
+  const today = parseISO(todayDate + "T00:00:00");
   const totalDays = differenceInDays(end, start);
-  const elapsed = differenceInDays(new Date(), start) + 1;
+  const elapsed = differenceInDays(today, start) + 1;
   const progress = Math.min(Math.max(elapsed / totalDays, 0), 1);
 
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const todayStr = todayDate;
   const todayLogs = doseLogs.filter(
     (l) => l.cycleId === activeCycle.id && l.timestamp.startsWith(todayStr)
   );
