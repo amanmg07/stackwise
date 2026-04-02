@@ -37,13 +37,22 @@ export default function CycleTrackerScreen({ navigation }: any) {
   const end = parseISO(activeCycle.endDate + "T00:00:00");
   const today = parseISO(todayDate + "T00:00:00");
   const totalDays = differenceInDays(end, start);
-  const elapsed = differenceInDays(today, start);
-  const progress = Math.min(Math.max(elapsed / totalDays, 0), 1);
 
   const todayStr = todayDate;
   const todayLogs = doseLogs.filter(
     (l) => l.cycleId === activeCycle.id && l.timestamp.startsWith(todayStr)
   );
+
+  // Count days where ALL peptides were logged
+  const cycleLogs = doseLogs.filter((l) => l.cycleId === activeCycle.id);
+  const logDays = new Set(cycleLogs.map((l) => l.timestamp.split("T")[0]));
+  const pepCount = activeCycle.peptides.length;
+  let completedDays = 0;
+  logDays.forEach((day) => {
+    const uniquePeps = new Set(cycleLogs.filter((l) => l.timestamp.startsWith(day)).map((l) => l.peptideId));
+    if (uniquePeps.size >= pepCount) completedDays++;
+  });
+  const progress = Math.min(Math.max(completedDays / totalDays, 0), 1);
 
   const recentLogs = doseLogs
     .filter((l) => l.cycleId === activeCycle.id)
@@ -95,7 +104,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
                     return `  ${pep?.name || cp.peptideId} — ${cp.doseAmount} ${cp.doseUnit}, ${cp.frequency}`;
                   })
                   .join("\n");
-                const msg = `My Stack: ${activeCycle.name}\n\nPeptides:\n${pepList}\n\nDay ${elapsed} of ${totalDays} completed\n\nShared from StackWise`;
+                const msg = `My Stack: ${activeCycle.name}\n\nPeptides:\n${pepList}\n\nDay ${completedDays} of ${totalDays} completed\n\nShared from StackWise`;
                 try { await Share.share({ message: msg }); } catch {}
               }}
             >
@@ -136,7 +145,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
               <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
             </View>
             <Text style={styles.progressText}>
-              Day {elapsed} of {totalDays} completed
+              Day {completedDays} of {totalDays} completed
             </Text>
           </View>
 
