@@ -10,7 +10,18 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { protocolTemplates } from "../../data/protocolTemplates";
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing } from "../../theme";
-import { CyclePeptide, AdministrationRoute } from "../../types";
+import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
+
+const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
+  { key: "recovery", label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
+  { key: "fat_loss", label: "Fat Loss", icon: "flame-outline", color: "#f87171" },
+  { key: "muscle_gain", label: "Muscle Gain", icon: "barbell-outline", color: "#60a5fa" },
+  { key: "anti_aging", label: "Anti-Aging", icon: "sparkles-outline", color: "#c084fc" },
+  { key: "sleep", label: "Sleep", icon: "moon-outline", color: "#818cf8" },
+  { key: "cognitive", label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
+  { key: "immune", label: "Immune Health", icon: "shield-checkmark-outline", color: "#2dd4bf" },
+  { key: "sexual_health", label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
+];
 
 export default function NewCycleScreen({ route, navigation }: any) {
   const { addCycle, updateCycle, cycles, settings } = useApp();
@@ -65,6 +76,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
     editCycle ? editCycle.peptides : buildInitialPeptides()
   );
   const [showPicker, setShowPicker] = useState(false);
+  const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
 
   const interactions = useMemo(
     () => getInteractions(cyclePeptides.map((cp) => cp.peptideId)),
@@ -279,24 +291,70 @@ export default function NewCycleScreen({ route, navigation }: any) {
       {showPicker ? (
         <View style={styles.pickerCard}>
           <Text style={styles.pickerTitle}>Select Peptide</Text>
-          {peptideDB
-            .filter((p) => !cyclePeptides.some((cp) => cp.peptideId === p.id))
-            .sort((a, b) => {
-              const aS = settings.savedPeptides.includes(a.id) ? 0 : 1;
-              const bS = settings.savedPeptides.includes(b.id) ? 0 : 1;
-              return aS - bS || a.name.localeCompare(b.name);
-            })
-            .map((p) => (
-              <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => addPeptide(p.id)}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
-                  <Text style={styles.pickerName}>{p.name}</Text>
-                  {settings.savedPeptides.includes(p.id) && (
-                    <Ionicons name="bookmark" size={14} color={colors.accent} />
+
+          {/* Saved peptides section */}
+          {settings.savedPeptides.length > 0 && (() => {
+            const savedAvailable = peptideDB
+              .filter((p) => settings.savedPeptides.includes(p.id) && !cyclePeptides.some((cp) => cp.peptideId === p.id))
+              .sort((a, b) => a.name.localeCompare(b.name));
+            if (savedAvailable.length === 0) return null;
+            const expanded = expandedCats.includes("saved");
+            return (
+              <View style={styles.catSection}>
+                <TouchableOpacity
+                  style={styles.catHeader}
+                  onPress={() => setExpandedCats((prev) =>
+                    prev.includes("saved") ? prev.filter((c) => c !== "saved") : [...prev, "saved"]
                   )}
-                </View>
-                <Ionicons name="add" size={20} color={colors.accent} />
-              </TouchableOpacity>
-            ))}
+                >
+                  <Ionicons name="bookmark" size={18} color={colors.accent} />
+                  <Text style={[styles.catHeaderText, { color: colors.accent }]}>Saved ({savedAvailable.length})</Text>
+                  <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textSecondary} />
+                </TouchableOpacity>
+                {expanded && savedAvailable.map((p) => (
+                  <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => addPeptide(p.id)}>
+                    <Text style={styles.pickerName}>{p.name}</Text>
+                    <Ionicons name="add" size={20} color={colors.accent} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+          })()}
+
+          {/* Category sections */}
+          {CATEGORY_INFO.map((cat) => {
+            const catPeptides = peptideDB
+              .filter((p) => p.categories.includes(cat.key) && !cyclePeptides.some((cp) => cp.peptideId === p.id))
+              .sort((a, b) => a.name.localeCompare(b.name));
+            if (catPeptides.length === 0) return null;
+            const expanded = expandedCats.includes(cat.key);
+            return (
+              <View key={cat.key} style={styles.catSection}>
+                <TouchableOpacity
+                  style={styles.catHeader}
+                  onPress={() => setExpandedCats((prev) =>
+                    prev.includes(cat.key) ? prev.filter((c) => c !== cat.key) : [...prev, cat.key]
+                  )}
+                >
+                  <Ionicons name={cat.icon} size={18} color={cat.color} />
+                  <Text style={[styles.catHeaderText, { color: cat.color }]}>{cat.label} ({catPeptides.length})</Text>
+                  <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textSecondary} />
+                </TouchableOpacity>
+                {expanded && catPeptides.map((p) => (
+                  <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => addPeptide(p.id)}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
+                      <Text style={styles.pickerName}>{p.name}</Text>
+                      {settings.savedPeptides.includes(p.id) && (
+                        <Ionicons name="bookmark" size={14} color={colors.accent} />
+                      )}
+                    </View>
+                    <Ionicons name="add" size={20} color={colors.accent} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+          })}
+
           <TouchableOpacity onPress={() => setShowPicker(false)}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
@@ -388,7 +446,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: colors.border, marginTop: 8,
   },
-  pickerTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 10 },
+  pickerTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  catSection: { marginTop: 6 },
+  catHeader: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  catHeaderText: { fontSize: 14, fontWeight: "700", flex: 1 },
   pickerRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border,
