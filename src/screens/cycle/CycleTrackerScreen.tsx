@@ -35,7 +35,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
   const start = parseISO(activeCycle.startDate);
   const end = parseISO(activeCycle.endDate);
   const totalDays = differenceInDays(end, start);
-  const elapsed = differenceInDays(new Date(), start);
+  const elapsed = differenceInDays(new Date(), start) + 1;
   const progress = Math.min(Math.max(elapsed / totalDays, 0), 1);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
