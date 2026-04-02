@@ -650,8 +650,8 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md, marginBottom: 14,
     borderWidth: 1, borderColor: colors.border,
   },
-  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  authorRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 },
+  authorRow: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1, flexShrink: 1 },
   avatar: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: colors.accent + "20", alignItems: "center", justifyContent: "center",

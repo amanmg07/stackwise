@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 14, padding: spacing.md,
     borderWidth: 1, borderColor: colors.border, marginBottom: 16, overflow: "hidden",
   },
-  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 },
   cardName: { fontSize: 18, fontWeight: "700", color: colors.accent, flex: 1 },
   diffBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, flexShrink: 0 },
   diffText: { fontSize: 11, fontWeight: "700", textTransform: "uppercase" },
