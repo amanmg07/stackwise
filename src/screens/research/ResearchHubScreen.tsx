@@ -35,7 +35,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const ROUTE_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
   subcutaneous: { icon: "medical-outline", label: "Injection" },
   intramuscular: { icon: "medical-outline", label: "IM Injection" },
-  oral: { icon: "tablet-portrait-outline", label: "Oral" },
+  oral: { icon: "nutrition-outline", label: "Oral" },
   topical: { icon: "hand-left-outline", label: "Topical" },
   nasal: { icon: "water-outline", label: "Nasal" },
 };
@@ -54,7 +54,7 @@ const ROUTE_FILTERS: { key: AdministrationRoute | "all"; label: string; icon: ke
   { key: "all", label: "All Routes", icon: "apps-outline" },
   { key: "subcutaneous", label: "SubQ", icon: "medkit-outline" },
   { key: "intramuscular", label: "IM", icon: "fitness-outline" },
-  { key: "oral", label: "Oral", icon: "tablet-portrait-outline" },
+  { key: "oral", label: "Oral", icon: "nutrition-outline" },
   { key: "nasal", label: "Nasal", icon: "water-outline" },
   { key: "topical", label: "Topical", icon: "hand-left-outline" },
 ];

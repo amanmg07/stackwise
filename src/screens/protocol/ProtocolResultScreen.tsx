@@ -1,8 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { format, addWeeks } from "date-fns";
 import { protocolTemplates } from "../../data/protocolTemplates";
 import { peptides as peptideDB } from "../../data/peptides";
+import { useApp } from "../../context/AppContext";
+import { generateId } from "../../utils/id";
 import { colors, spacing } from "../../theme";
 import { Goal, AdministrationRoute } from "../../types";
 
@@ -14,6 +17,7 @@ const DIFFICULTY_COLORS = {
 
 export default function ProtocolResultScreen({ route, navigation }: any) {
   const { goals, routes: preferredRoutes } = route.params as { goals: Goal[]; routes?: AdministrationRoute[] };
+  const { addCycle } = useApp();
 
   const scored = protocolTemplates
     .map((t) => {
@@ -101,7 +105,35 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
 
           <TouchableOpacity
             style={styles.startBtn}
-            onPress={() => navigation.navigate("NewCycle", { templateId: t.id })}
+            onPress={() => {
+              const peptidesList = t.peptides.map((tp) => {
+                const pep = peptideDB.find((p) => p.id === tp.peptideId);
+                const doseMatch = tp.suggestedDose.match(/([\d.]+)/);
+                return {
+                  peptideId: tp.peptideId,
+                  doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
+                  doseUnit: "mg" as const,
+                  frequency: tp.suggestedFrequency,
+                  route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
+                  timeOfDay: ["morning"] as string[],
+                };
+              });
+              const startDate = new Date().toISOString().split("T")[0];
+              const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
+              addCycle({
+                id: generateId(),
+                name: t.name,
+                peptides: peptidesList,
+                startDate,
+                endDate,
+                isActive: true,
+                notes: `Based on ${t.name} protocol`,
+                createdAt: new Date().toISOString(),
+              });
+              Alert.alert("Cycle Started", `${t.name} is now active!`, [
+                { text: "View Cycle", onPress: () => navigation.navigate("CycleTab") },
+              ]);
+            }}
           >
             <Ionicons name="play" size={16} color={colors.background} />
             <Text style={styles.startBtnText}>Start This Protocol</Text>
