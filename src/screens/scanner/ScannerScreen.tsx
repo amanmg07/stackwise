@@ -58,7 +58,7 @@ export default function ScannerScreen({ navigation }: any) {
 
     const result = await pickerMethod({
       mediaTypes: ["images"],
-      quality: 0.7,
+      quality: 0.3,
       allowsEditing: true,
       aspect: [3, 4],
     });
@@ -82,16 +82,20 @@ export default function ScannerScreen({ navigation }: any) {
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
       const { data, error } = await supabase.functions.invoke("scan-analyze", {
-        body: { imageBase64: base64, mediaType },
+        body: JSON.stringify({ imageBase64: base64, mediaType }),
+        headers: { "Content-Type": "application/json" },
       });
 
       if (error) throw error;
 
-      if (data.error) {
-        Alert.alert("Analysis Issue", data.error);
+      // data may be a string if response wasn't parsed
+      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+
+      if (parsed.error) {
+        Alert.alert("Analysis Issue", parsed.error);
         setResult(null);
       } else {
-        setResult(data);
+        setResult(parsed);
       }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to analyze image. Please try again.");
