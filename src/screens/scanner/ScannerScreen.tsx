@@ -3,7 +3,6 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop } from "../../theme";
@@ -60,23 +59,24 @@ export default function ScannerScreen({ navigation }: any) {
       quality: 0.3,
       allowsEditing: true,
       aspect: [3, 4],
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
-      const uri = result.assets[0].uri;
-      setImageUri(uri);
+      const asset = result.assets[0];
+      setImageUri(asset.uri);
       setResult(null);
-      analyzeImage(uri);
+      if (asset.base64) {
+        analyzeImage(asset.base64, asset.uri);
+      } else {
+        Alert.alert("Error", "Could not read image data. Please try again.");
+      }
     }
   };
 
-  const analyzeImage = async (uri: string) => {
+  const analyzeImage = async (base64: string, uri: string) => {
     setLoading(true);
     try {
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
       const ext = uri.split(".").pop()?.toLowerCase();
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
