@@ -61,13 +61,18 @@ Deno.serve(async (req) => {
     if (typeof body === "string") {
       body = JSON.parse(body);
     }
-    const { imageBase64, mediaType } = body;
+    let { imageBase64, mediaType } = body;
 
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: "No image provided" }), {
-        status: 400,
+        status: 200,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Strip data URI prefix if present
+    if (imageBase64.includes(",")) {
+      imageBase64 = imageBase64.split(",")[1];
     }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -105,9 +110,14 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Anthropic API error:", errorText);
-      return new Response(JSON.stringify({ error: "Analysis failed. Please try again." }), {
-        status: 502,
+      console.error("Anthropic API error:", response.status, errorText);
+      let errorMsg = "Analysis failed. Please try again.";
+      try {
+        const errJson = JSON.parse(errorText);
+        errorMsg = errJson.error?.message || errorMsg;
+      } catch {}
+      return new Response(JSON.stringify({ error: errorMsg }), {
+        status: 200, // Return 200 so client can read the error message
         headers: { "Content-Type": "application/json" },
       });
     }
