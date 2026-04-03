@@ -192,12 +192,12 @@ IMPORTANT DISTINCTION:
   if (!imageUri) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Scanner</Text>
+        <Text style={styles.title}>Self Scan</Text>
         <View style={styles.landingContent}>
           <View style={styles.scanIconWrap}>
             <Ionicons name="scan-outline" size={60} color={colors.accent} />
           </View>
-          <Text style={styles.landingTitle}>Peptide Scanner</Text>
+          <Text style={styles.landingTitle}>Self Scan</Text>
           <Text style={styles.landingDesc}>
             Take a photo and our AI will analyze visible characteristics to recommend peptides tailored to your goals.
           </Text>
@@ -227,7 +227,7 @@ IMPORTANT DISTINCTION:
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Scanner</Text>
+        <Text style={styles.title}>Self Scan</Text>
         <TouchableOpacity style={styles.resetBtn} onPress={reset}>
           <Ionicons name="refresh-outline" size={18} color={colors.accent} />
           <Text style={styles.resetBtnText}>New Scan</Text>

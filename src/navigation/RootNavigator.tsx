@@ -129,7 +129,7 @@ export default function RootNavigator() {
       <Tab.Screen name="CycleTab" component={CycleNavigator} options={{ title: "Cycle" }} />
       <Tab.Screen name="ExploreTab" component={ExploreNavigator} options={{ title: "Explore" }} />
       <Tab.Screen name="JournalTab" component={JournalNavigator} options={{ title: "Journal" }} />
-      <Tab.Screen name="ScannerTab" component={ScannerNavigator} options={{ title: "Scan" }} />
+      <Tab.Screen name="ScannerTab" component={ScannerNavigator} options={{ title: "Self Scan" }} />
     </Tab.Navigator>
   );
 }
