@@ -18,8 +18,7 @@ import ProfileScreen from "../screens/profile/ProfileScreen";
 import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
 import InteractionCheckerScreen from "../screens/research/InteractionCheckerScreen";
 import CompareScreen from "../screens/research/CompareScreen";
-import CommunityScreen from "../screens/community/CommunityScreen";
-import NewPostScreen from "../screens/community/NewPostScreen";
+import ScannerScreen from "../screens/scanner/ScannerScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -83,15 +82,14 @@ function ProtocolNavigator() {
   );
 }
 
-// Community Stack
-const CommunityStack = createNativeStackNavigator();
-function CommunityNavigator() {
+// Scanner Stack
+const ScannerStack = createNativeStackNavigator();
+function ScannerNavigator() {
   return (
-    <CommunityStack.Navigator screenOptions={screenOptions}>
-      <CommunityStack.Screen name="CommunityFeed" component={CommunityScreen} options={{ headerShown: false }} />
-      <CommunityStack.Screen name="NewPost" component={NewPostScreen} options={{ title: "Share Your Stack" }} />
-      <CommunityStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
-    </CommunityStack.Navigator>
+    <ScannerStack.Navigator screenOptions={screenOptions}>
+      <ScannerStack.Screen name="ScannerHome" component={ScannerScreen} options={{ headerShown: false }} />
+      <ScannerStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
+    </ScannerStack.Navigator>
   );
 }
 
@@ -102,7 +100,7 @@ const TAB_ICONS: Record<string, { focused: TabIconName; default: TabIconName }> 
   CycleTab: { focused: "repeat", default: "repeat-outline" },
   ExploreTab: { focused: "compass", default: "compass-outline" },
   JournalTab: { focused: "book", default: "book-outline" },
-  CommunityTab: { focused: "people", default: "people-outline" },
+  ScannerTab: { focused: "scan", default: "scan-outline" },
 };
 
 export default function RootNavigator() {
@@ -131,7 +129,7 @@ export default function RootNavigator() {
       <Tab.Screen name="CycleTab" component={CycleNavigator} options={{ title: "Cycle" }} />
       <Tab.Screen name="ExploreTab" component={ExploreNavigator} options={{ title: "Explore" }} />
       <Tab.Screen name="JournalTab" component={JournalNavigator} options={{ title: "Journal" }} />
-      <Tab.Screen name="CommunityTab" component={CommunityNavigator} options={{ title: "Feed" }} />
+      <Tab.Screen name="ScannerTab" component={ScannerNavigator} options={{ title: "Scan" }} />
     </Tab.Navigator>
   );
 }
