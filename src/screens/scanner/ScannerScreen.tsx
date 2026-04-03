@@ -18,7 +18,8 @@ interface Observation {
 }
 
 interface ScanResult {
-  observations: Observation[];
+  strengths: Observation[];
+  improvements: Observation[];
   recommendedCategories: PeptideCategory[];
   summary: string;
   error?: string;
@@ -104,14 +105,14 @@ IMPORTANT:
 - Always recommend anti_aging for any skin quality issues (acne, scars, texture, tone)
 
 Respond ONLY with valid JSON:
-{"observations":[{"category":"anti_aging","observation":"Description of what you see","confidence":"high"}],"recommendedCategories":["anti_aging","immune","recovery"],"summary":"Brief encouraging 1-2 sentence summary."}
+{"strengths":[{"category":"muscle_gain","observation":"Good muscle definition in arms and shoulders","confidence":"high"}],"improvements":[{"category":"anti_aging","observation":"Some acne scarring on cheeks","confidence":"high"}],"recommendedCategories":["anti_aging","immune","recovery"],"summary":"Brief encouraging 1-2 sentence summary."}
 
-Rules:
-- Be encouraging, positive, and specific about what you observe
-- Never diagnose medical conditions — describe visible signs only
-- One observation can appear under multiple categories
-- confidence: "high", "medium", or "low"
-- recommendedCategories: ordered by relevance, include ALL that apply
+IMPORTANT DISTINCTION:
+- "strengths": things the person is clearly doing well — good skin, healthy weight, strong build, clear complexion, youthful appearance, good hair, etc. These are areas where peptides can MAINTAIN and OPTIMIZE what they already have.
+- "improvements": areas where peptides could help — skin issues, signs of aging, body composition goals, fatigue signs, inflammation, etc. These are areas to START CONSIDERING.
+- ALWAYS include at least 1 strength — find something positive to highlight
+- Each observation needs: category, observation text, confidence ("high"/"medium"/"low")
+- recommendedCategories: ordered by relevance, include ALL that apply (from both strengths and improvements)
 - If photo is unclear or not a person: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}`;
 
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -253,14 +254,46 @@ Rules:
             <Text style={styles.summaryText}>{result.summary}</Text>
           </View>
 
-          {/* Observations */}
-          {result.observations.length > 0 && (
+          {/* Strengths */}
+          {result.strengths && result.strengths.length > 0 && (
             <>
-              <Text style={styles.sectionTitle}>What We Noticed</Text>
-              {result.observations.map((obs, i) => {
+              <View style={styles.sectionHeader}>
+                <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                <Text style={[styles.sectionTitle, { color: colors.success, marginBottom: 0 }]}>Keep It Up</Text>
+              </View>
+              <Text style={styles.sectionDesc}>Peptides to maintain what you're doing well</Text>
+              {result.strengths.map((obs, i) => {
                 const catInfo = CATEGORY_INFO[obs.category];
                 return (
-                  <View key={i} style={styles.obsCard}>
+                  <View key={`s-${i}`} style={[styles.obsCard, { borderColor: colors.success + "30" }]}>
+                    <View style={styles.obsHeader}>
+                      <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
+                      <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
+                      <View style={[styles.confidenceBadge, { backgroundColor: CONFIDENCE_COLORS[obs.confidence] + "20" }]}>
+                        <Text style={[styles.confidenceText, { color: CONFIDENCE_COLORS[obs.confidence] }]}>
+                          {CONFIDENCE_LABELS[obs.confidence] || obs.confidence}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.obsText}>{obs.observation}</Text>
+                  </View>
+                );
+              })}
+            </>
+          )}
+
+          {/* Improvements */}
+          {result.improvements && result.improvements.length > 0 && (
+            <>
+              <View style={[styles.sectionHeader, { marginTop: 8 }]}>
+                <Ionicons name="trending-up" size={18} color={colors.accent} />
+                <Text style={[styles.sectionTitle, { color: colors.accent, marginBottom: 0 }]}>Start Considering</Text>
+              </View>
+              <Text style={styles.sectionDesc}>Areas where peptides could help</Text>
+              {result.improvements.map((obs, i) => {
+                const catInfo = CATEGORY_INFO[obs.category];
+                return (
+                  <View key={`i-${i}`} style={[styles.obsCard, { borderColor: colors.accent + "30" }]}>
                     <View style={styles.obsHeader}>
                       <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
                       <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
@@ -366,10 +399,12 @@ const styles = StyleSheet.create({
   },
   summaryText: { fontSize: 15, color: colors.text, lineHeight: 22, flex: 1 },
   // Observations
+  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4, marginBottom: 4 },
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
     textTransform: "uppercase", letterSpacing: 1, marginBottom: 10, marginTop: 4,
   },
+  sectionDesc: { fontSize: 13, color: colors.textSecondary, marginBottom: 10 },
   obsCard: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: colors.border, marginBottom: 8,
