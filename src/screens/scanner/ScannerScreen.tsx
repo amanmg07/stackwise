@@ -35,7 +35,8 @@ const CATEGORY_INFO: Record<string, { label: string; icon: keyof typeof Ionicons
   sexual_health: { label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
 };
 
-const CONFIDENCE_COLORS = { high: colors.success, medium: colors.warning, low: colors.textSecondary };
+const CONFIDENCE_LABELS: Record<string, string> = { high: "Clearly visible", medium: "Somewhat visible", low: "Subtle" };
+const CONFIDENCE_COLORS: Record<string, string> = { high: colors.success, medium: colors.warning, low: colors.textSecondary };
 
 export default function ScannerScreen({ navigation }: any) {
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -265,7 +266,7 @@ Rules:
                       <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
                       <View style={[styles.confidenceBadge, { backgroundColor: CONFIDENCE_COLORS[obs.confidence] + "20" }]}>
                         <Text style={[styles.confidenceText, { color: CONFIDENCE_COLORS[obs.confidence] }]}>
-                          {obs.confidence}
+                          {CONFIDENCE_LABELS[obs.confidence] || obs.confidence}
                         </Text>
                       </View>
                     </View>
