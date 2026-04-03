@@ -8,7 +8,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop } from "../../theme";
 import { PeptideCategory } from "../../types";
-import { supabase } from "../../utils/supabase";
 
 interface Observation {
   category: PeptideCategory;
@@ -81,14 +80,23 @@ export default function ScannerScreen({ navigation }: any) {
       const ext = uri.split(".").pop()?.toLowerCase();
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
-      const { data, error } = await supabase.functions.invoke("scan-analyze", {
-        body: { imageBase64: base64, mediaType },
-      });
+      // Call edge function directly via fetch to avoid supabase SDK issues
+      const response = await fetch(
+        "https://criicsyjvafvgovqlyfq.supabase.co/functions/v1/scan-analyze",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64: base64, mediaType }),
+        }
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("Scanner error:", response.status, errText);
+        throw new Error("Analysis failed. Please try again.");
+      }
 
-      // data may be a string if response wasn't parsed
-      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+      const parsed = await response.json();
 
       if (parsed.error) {
         Alert.alert("Analysis Issue", parsed.error);
