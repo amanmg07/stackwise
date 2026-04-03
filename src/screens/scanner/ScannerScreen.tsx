@@ -322,19 +322,18 @@ IMPORTANT DISTINCTION:
                   <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
                   <Text style={[styles.catHeaderText, { color: catInfo?.color }]}>{catInfo?.label}</Text>
                 </View>
-                {catPeptides.map((p) => (
-                  <TouchableOpacity
-                    key={p.id}
-                    style={styles.peptideRow}
-                    onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.peptideName}>{p.name}</Text>
-                      <Text style={styles.peptideDesc} numberOfLines={2}>{p.description}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-                  </TouchableOpacity>
-                ))}
+                <View style={styles.peptideChips}>
+                  {catPeptides.map((p) => (
+                    <TouchableOpacity
+                      key={p.id}
+                      style={styles.peptideChip}
+                      onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                    >
+                      <Text style={styles.peptideChipText}>{p.name}</Text>
+                      <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             );
           })}
@@ -418,13 +417,13 @@ const styles = StyleSheet.create({
   catSection: { marginBottom: 16 },
   catHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
   catHeaderText: { fontSize: 16, fontWeight: "700" },
-  peptideRow: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: colors.border, marginBottom: 8,
+  peptideChips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  peptideChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: colors.surface, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
+    borderWidth: 1, borderColor: colors.border,
   },
-  peptideName: { fontSize: 15, fontWeight: "600", color: colors.text },
-  peptideDesc: { fontSize: 12, color: colors.textSecondary, lineHeight: 17, marginTop: 2 },
+  peptideChipText: { fontSize: 14, fontWeight: "600", color: colors.text },
   // Disclaimer
   disclaimer: {
     flexDirection: "row", alignItems: "flex-start", gap: 8,
