@@ -5,7 +5,7 @@ const RESEARCH_VENDORS: PeptideSource[] = [
   { name: "Core Peptides", url: "https://www.corepeptides.com" },
   { name: "Biotech Peptides", url: "https://www.biotechpeptides.com" },
   { name: "Amino Asylum", url: "https://www.aminoasylum.com" },
-  { name: "Neuro Labs", url: "https://www.neurolabs.co" },
+  { name: "Neuro Labs", url: "https://neurolabsresearch.com" },
   { name: "Onyx Research", url: "https://www.onyxresearch.co" },
   { name: "Ascend Peptides", url: "https://www.ascendpeptides.com" },
 ];
