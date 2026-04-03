@@ -56,7 +56,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { imageBase64, mediaType } = await req.json();
+    let body = await req.json();
+    // Handle double-stringified body
+    if (typeof body === "string") {
+      body = JSON.parse(body);
+    }
+    const { imageBase64, mediaType } = body;
 
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: "No image provided" }), {

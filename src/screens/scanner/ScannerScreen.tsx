@@ -82,8 +82,7 @@ export default function ScannerScreen({ navigation }: any) {
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
       const { data, error } = await supabase.functions.invoke("scan-analyze", {
-        body: JSON.stringify({ imageBase64: base64, mediaType }),
-        headers: { "Content-Type": "application/json" },
+        body: { imageBase64: base64, mediaType },
       });
 
       if (error) throw error;
