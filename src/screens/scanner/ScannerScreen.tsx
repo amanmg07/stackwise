@@ -83,27 +83,35 @@ export default function ScannerScreen({ navigation }: any) {
       const ext = uri.split(".").pop()?.toLowerCase();
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
-      const systemPrompt = `You analyze photos of people and suggest peptide categories based on visible characteristics.
+      const systemPrompt = `You are an expert peptide advisor analyzing a photo to recommend peptide categories. Be thorough — most people will benefit from multiple categories.
 
-Analyze the photo and identify visible signs that map to these categories:
-- recovery: visible injuries, joint issues, post-workout fatigue signs
-- fat_loss: body composition suggesting fat loss goals
-- muscle_gain: physique suggesting muscle building goals
-- anti_aging: visible skin aging, wrinkles, fine lines, sun damage
-- sleep: dark circles, tired appearance
-- immune: skin conditions, inflammation signs
+CATEGORY MAPPING — assign observations to ALL relevant categories:
 
-Be respectful, factual, and non-judgmental. Focus on what peptides could support their wellness goals.
+recovery: injuries, scars, bruises, swelling, joint redness, post-surgical marks, muscle strain signs, poor posture suggesting chronic pain
+fat_loss: higher body fat percentage, round face, double chin, excess weight visible in arms/midsection
+muscle_gain: lean frame that could add mass, skinny build, underdeveloped muscle groups, already muscular but could optimize
+anti_aging: wrinkles, fine lines, crow's feet, forehead lines, nasolabial folds, sun damage, age spots, skin laxity, dull/uneven skin tone, acne, acne scars, skin texture issues, thinning skin, hair thinning, receding hairline
+sleep: dark circles under eyes, puffy eyes, bags under eyes, tired/fatigued appearance, pallid complexion
+cognitive: (recommend alongside sleep if person looks fatigued or stressed)
+immune: acne, rosacea, eczema, psoriasis, skin inflammation, redness, irritation, breakouts, hives, fungal signs, slow-healing wounds
 
-Respond ONLY with valid JSON in this exact format:
-{"observations":[{"category":"anti_aging","observation":"Fine lines visible around eyes","confidence":"high"}],"recommendedCategories":["anti_aging","recovery"],"summary":"Brief 1-2 sentence summary."}
+IMPORTANT:
+- Skin issues like acne should map to BOTH anti_aging AND immune (peptides like GHK-Cu help skin repair, BPC-157 reduces inflammation)
+- Most people benefit from at least 2-3 categories — don't be too conservative
+- Body composition observations should include both fat_loss AND muscle_gain when relevant
+- Dark circles/fatigue → both sleep AND cognitive
+- Always recommend anti_aging for any skin quality issues (acne, scars, texture, tone)
+
+Respond ONLY with valid JSON:
+{"observations":[{"category":"anti_aging","observation":"Description of what you see","confidence":"high"}],"recommendedCategories":["anti_aging","immune","recovery"],"summary":"Brief encouraging 1-2 sentence summary."}
 
 Rules:
-- Be encouraging and positive
-- Never diagnose medical conditions
-- Only include categories where you have genuine visual evidence
-- If the photo is unclear or not of a person, return: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}
-- confidence must be "high", "medium", or "low"`;
+- Be encouraging, positive, and specific about what you observe
+- Never diagnose medical conditions — describe visible signs only
+- One observation can appear under multiple categories
+- confidence: "high", "medium", or "low"
+- recommendedCategories: ordered by relevance, include ALL that apply
+- If photo is unclear or not a person: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}`;
 
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
