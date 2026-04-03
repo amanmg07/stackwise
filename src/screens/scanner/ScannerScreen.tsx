@@ -3,10 +3,13 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop } from "../../theme";
 import { PeptideCategory } from "../../types";
+
+const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
 
 interface Observation {
   category: PeptideCategory;
@@ -80,23 +83,76 @@ export default function ScannerScreen({ navigation }: any) {
       const ext = uri.split(".").pop()?.toLowerCase();
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
-      // Call edge function directly via fetch to avoid supabase SDK issues
-      const response = await fetch(
-        "https://criicsyjvafvgovqlyfq.supabase.co/functions/v1/scan-analyze",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageBase64: base64, mediaType }),
-        }
-      );
+      const systemPrompt = `You analyze photos of people and suggest peptide categories based on visible characteristics.
+
+Analyze the photo and identify visible signs that map to these categories:
+- recovery: visible injuries, joint issues, post-workout fatigue signs
+- fat_loss: body composition suggesting fat loss goals
+- muscle_gain: physique suggesting muscle building goals
+- anti_aging: visible skin aging, wrinkles, fine lines, sun damage
+- sleep: dark circles, tired appearance
+- immune: skin conditions, inflammation signs
+
+Be respectful, factual, and non-judgmental. Focus on what peptides could support their wellness goals.
+
+Respond ONLY with valid JSON in this exact format:
+{"observations":[{"category":"anti_aging","observation":"Fine lines visible around eyes","confidence":"high"}],"recommendedCategories":["anti_aging","recovery"],"summary":"Brief 1-2 sentence summary."}
+
+Rules:
+- Be encouraging and positive
+- Never diagnose medical conditions
+- Only include categories where you have genuine visual evidence
+- If the photo is unclear or not of a person, return: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}
+- confidence must be "high", "medium", or "low"`;
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.2-90b-vision-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image_url",
+                  image_url: { url: `data:${mediaType};base64,${base64}` },
+                },
+                {
+                  type: "text",
+                  text: "Analyze this person's photo and recommend peptide categories based on what you observe. Be respectful and positive. Respond with JSON only.",
+                },
+              ],
+            },
+          ],
+          max_tokens: 1024,
+          temperature: 0.5,
+        }),
+      });
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error("Scanner error:", response.status, errText);
+        console.error("Groq vision error:", response.status, errText);
+        if (response.status === 429) {
+          throw new Error("Rate limit reached. Wait a moment and try again.");
+        }
         throw new Error("Analysis failed. Please try again.");
       }
 
-      const parsed = await response.json();
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content || "";
+
+      // Extract JSON from response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("Could not parse analysis. Please try again.");
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]);
 
       if (parsed.error) {
         Alert.alert("Analysis Issue", parsed.error);
