@@ -19,6 +19,11 @@ const SLIDES = [
     subtitle: "Ask StackWise AI anything about peptides — dosing, stacking, side effects. Get real answers, not disclaimers.",
   },
   {
+    icon: "scan-outline" as const,
+    title: "Self Scan",
+    subtitle: "Snap a photo and our AI analyzes your appearance to recommend peptides tailored to you. Your photos are never saved or stored.",
+  },
+  {
     icon: "bar-chart-outline" as const,
     title: "Track & Optimize",
     subtitle: "Log daily metrics in your journal. StackWise spots trends and recommends peptides based on how you feel.",
