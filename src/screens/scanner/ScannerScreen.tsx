@@ -5,9 +5,12 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
+import { format, addWeeks } from "date-fns";
 import { peptides as peptideDB } from "../../data/peptides";
+import { useApp } from "../../context/AppContext";
+import { generateId } from "../../utils/id";
 import { colors, spacing, safeTop } from "../../theme";
-import { PeptideCategory } from "../../types";
+import { PeptideCategory, AdministrationRoute } from "../../types";
 
 const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
 
@@ -115,6 +118,7 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
+  const { addCycle } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -349,23 +353,42 @@ IMPORTANT DISTINCTION:
                 <Text style={[styles.sectionTitle, { color: colors.success, marginBottom: 0 }]}>Keep It Up</Text>
               </View>
               <Text style={styles.sectionDesc}>Peptides to maintain what you're doing well</Text>
-              {result.strengths.map((obs, i) => {
-                const catInfo = CATEGORY_INFO[obs.category];
-                return (
-                  <View key={`s-${i}`} style={[styles.obsCard, { borderColor: colors.success + "30" }]}>
-                    <View style={styles.obsHeader}>
-                      <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
-                      <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
-                      <View style={[styles.confidenceBadge, { backgroundColor: CONFIDENCE_COLORS[obs.confidence] + "20" }]}>
-                        <Text style={[styles.confidenceText, { color: CONFIDENCE_COLORS[obs.confidence] }]}>
-                          {CONFIDENCE_LABELS[obs.confidence] || obs.confidence}
-                        </Text>
+              {(() => {
+                const shown = new Set<string>();
+                return result.strengths.map((obs, i) => {
+                  const catInfo = CATEGORY_INFO[obs.category];
+                  const catPeptides = getPeptidesForCategory(obs.category).filter((p) => !shown.has(p.id));
+                  catPeptides.forEach((p) => shown.add(p.id));
+                  return (
+                    <View key={`s-${i}`} style={[styles.obsCard, { borderColor: colors.success + "30" }]}>
+                      <View style={styles.obsHeader}>
+                        <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
+                        <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
+                        <View style={[styles.confidenceBadge, { backgroundColor: CONFIDENCE_COLORS[obs.confidence] + "20" }]}>
+                          <Text style={[styles.confidenceText, { color: CONFIDENCE_COLORS[obs.confidence] }]}>
+                            {CONFIDENCE_LABELS[obs.confidence] || obs.confidence}
+                          </Text>
+                        </View>
                       </View>
+                      <Text style={styles.obsText}>{obs.observation}</Text>
+                      {catPeptides.length > 0 && (
+                        <View style={styles.inlinePeptides}>
+                          {catPeptides.map((p) => (
+                            <TouchableOpacity
+                              key={p.id}
+                              style={styles.peptideChip}
+                              onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                            >
+                              <Text style={styles.peptideChipText}>{p.name}</Text>
+                              <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.obsText}>{obs.observation}</Text>
-                  </View>
-                );
-              })}
+                  );
+                });
+              })()}
             </>
           )}
 
@@ -377,57 +400,94 @@ IMPORTANT DISTINCTION:
                 <Text style={[styles.sectionTitle, { color: colors.accent, marginBottom: 0 }]}>Start Considering</Text>
               </View>
               <Text style={styles.sectionDesc}>Areas where peptides could help</Text>
-              {result.improvements.map((obs, i) => {
-                const catInfo = CATEGORY_INFO[obs.category];
-                return (
-                  <View key={`i-${i}`} style={[styles.obsCard, { borderColor: colors.accent + "30" }]}>
-                    <View style={styles.obsHeader}>
-                      <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
-                      <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
-                      <View style={[styles.confidenceBadge, { backgroundColor: CONFIDENCE_COLORS[obs.confidence] + "20" }]}>
-                        <Text style={[styles.confidenceText, { color: CONFIDENCE_COLORS[obs.confidence] }]}>
-                          {CONFIDENCE_LABELS[obs.confidence] || obs.confidence}
-                        </Text>
+              {(() => {
+                const shown = new Set<string>();
+                // Collect already-shown peptide IDs from strengths
+                if (result.strengths) {
+                  result.strengths.forEach((obs) => {
+                    getPeptidesForCategory(obs.category).forEach((p) => shown.add(p.id));
+                  });
+                }
+                return result.improvements.map((obs, i) => {
+                  const catInfo = CATEGORY_INFO[obs.category];
+                  const catPeptides = getPeptidesForCategory(obs.category).filter((p) => !shown.has(p.id));
+                  catPeptides.forEach((p) => shown.add(p.id));
+                  return (
+                    <View key={`i-${i}`} style={[styles.obsCard, { borderColor: colors.accent + "30" }]}>
+                      <View style={styles.obsHeader}>
+                        <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
+                        <Text style={[styles.obsCategory, { color: catInfo?.color }]}>{catInfo?.label || obs.category}</Text>
+                        <View style={[styles.confidenceBadge, { backgroundColor: CONFIDENCE_COLORS[obs.confidence] + "20" }]}>
+                          <Text style={[styles.confidenceText, { color: CONFIDENCE_COLORS[obs.confidence] }]}>
+                            {CONFIDENCE_LABELS[obs.confidence] || obs.confidence}
+                          </Text>
+                        </View>
                       </View>
+                      <Text style={styles.obsText}>{obs.observation}</Text>
+                      {catPeptides.length > 0 && (
+                        <View style={styles.inlinePeptides}>
+                          {catPeptides.map((p) => (
+                            <TouchableOpacity
+                              key={p.id}
+                              style={styles.peptideChip}
+                              onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                            >
+                              <Text style={styles.peptideChipText}>{p.name}</Text>
+                              <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.obsText}>{obs.observation}</Text>
-                  </View>
-                );
-              })}
+                  );
+                });
+              })()}
             </>
           )}
 
-          {/* Recommended peptides by category */}
-          <Text style={styles.sectionTitle}>Recommended Peptides</Text>
-          {(() => {
-            const shown = new Set<string>();
-            return result.recommendedCategories.map((cat) => {
-              const catInfo = CATEGORY_INFO[cat];
-              const catPeptides = getPeptidesForCategory(cat).filter((p) => !shown.has(p.id));
-              if (catPeptides.length === 0) return null;
-              catPeptides.forEach((p) => shown.add(p.id));
-              return (
-                <View key={cat} style={styles.catSection}>
-                  <View style={styles.catHeader}>
-                    <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
-                    <Text style={[styles.catHeaderText, { color: catInfo?.color }]}>{catInfo?.label}</Text>
-                  </View>
-                  <View style={styles.peptideChips}>
-                    {catPeptides.map((p) => (
-                      <TouchableOpacity
-                        key={p.id}
-                        style={styles.peptideChip}
-                        onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                      >
-                        <Text style={styles.peptideChipText}>{p.name}</Text>
-                        <Ionicons name="chevron-forward" size={14} color={colors.accent} />
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              );
-            });
-          })()}
+          {/* Add to Cycle */}
+          <TouchableOpacity
+            style={styles.addToCycleBtn}
+            onPress={() => {
+              const allObs = [...(result.strengths || []), ...(result.improvements || [])];
+              const seen = new Set<string>();
+              const cyclePeptides: any[] = [];
+              allObs.forEach((obs) => {
+                getPeptidesForCategory(obs.category).forEach((p) => {
+                  if (seen.has(p.id)) return;
+                  seen.add(p.id);
+                  const doseMatch = p.dosingProtocols?.[0]?.doseRange?.match(/([\d.]+)/);
+                  cyclePeptides.push({
+                    peptideId: p.id,
+                    doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
+                    doseUnit: "mg" as const,
+                    frequency: p.dosingProtocols?.[0]?.frequency || "daily",
+                    route: (p.routes?.[0] || "subcutaneous") as AdministrationRoute,
+                    timeOfDay: ["morning"],
+                  });
+                });
+              });
+              if (cyclePeptides.length === 0) return;
+              const startDate = new Date().toISOString().split("T")[0];
+              const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
+              addCycle({
+                id: generateId(),
+                name: "Self Scan Protocol",
+                peptides: cyclePeptides,
+                startDate,
+                endDate,
+                isActive: true,
+                notes: "Created from Self Scan results",
+                createdAt: new Date().toISOString(),
+              });
+              Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
+                { text: "View Cycle", onPress: () => navigation.navigate("CycleTab") },
+              ]);
+            }}
+          >
+            <Ionicons name="add-circle" size={20} color={colors.background} />
+            <Text style={styles.addToCycleBtnText}>Add to Cycle</Text>
+          </TouchableOpacity>
 
           {/* Disclaimer */}
           <View style={styles.disclaimer}>
@@ -499,17 +559,20 @@ const styles = StyleSheet.create({
   confidenceBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
   confidenceText: { fontSize: 10, fontWeight: "700", textTransform: "uppercase" },
   obsText: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
-  // Peptide recommendations
-  catSection: { marginBottom: 16 },
-  catHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
-  catHeaderText: { fontSize: 16, fontWeight: "700" },
-  peptideChips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  inlinePeptides: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
   peptideChip: {
     flexDirection: "row", alignItems: "center", gap: 6,
     backgroundColor: colors.surface, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
     borderWidth: 1, borderColor: colors.border,
   },
   peptideChipText: { fontSize: 14, fontWeight: "600", color: colors.text },
+  // Add to Cycle
+  addToCycleBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
+    backgroundColor: colors.accent, borderRadius: 14, paddingVertical: 16, paddingHorizontal: 32,
+    marginTop: 20,
+  },
+  addToCycleBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
   // Disclaimer
   disclaimer: {
     flexDirection: "row", alignItems: "flex-start", gap: 8,
