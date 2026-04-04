@@ -229,7 +229,7 @@ IMPORTANT DISTINCTION:
           <View style={styles.disclaimer}>
             <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             <Text style={styles.disclaimerText}>
-              This is not medical advice. Recommendations are for educational purposes only. Always consult a healthcare provider.
+              Your photos are not saved or stored in any database. All analysis is done in real-time and discarded immediately.
             </Text>
           </View>
         </View>
@@ -360,7 +360,7 @@ IMPORTANT DISTINCTION:
           <View style={styles.disclaimer}>
             <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             <Text style={styles.disclaimerText}>
-              This is not medical advice. Recommendations are for educational purposes only. Always consult a healthcare provider before starting any peptide protocol.
+              Your photos are not saved or stored in any database. All analysis is done in real-time and discarded immediately.
             </Text>
           </View>
         </>
