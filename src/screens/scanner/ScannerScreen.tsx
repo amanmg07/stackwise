@@ -205,7 +205,14 @@ IMPORTANT DISTINCTION:
 - ALWAYS include at least 1 strength — find something positive to highlight
 - Each observation needs: category, observation text, confidence ("high"/"medium"/"low")
 - recommendedCategories: ordered by relevance, include ALL that apply (from both strengths and improvements)
-- If photo is unclear or not a person: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}`;
+- If photo is unclear or not a person: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}
+
+FINAL CHECK — before returning your JSON, review EVERY item in "improvements". For each one, ask: "Does my observation describe something that is ACTUALLY WRONG that I can see?" If your observation contains phrases like "no visible signs", "maintaining", "important to", "could benefit from prevention", or "proactive" — MOVE IT TO STRENGTHS. Examples of WRONG placement:
+  WRONG in improvements: "No visible signs of aging, but maintaining skin health is important" → MOVE TO STRENGTHS
+  WRONG in improvements: "Skin looks healthy, proactive care recommended" → MOVE TO STRENGTHS
+  WRONG in improvements: "No major concerns but preventive peptides could help" → MOVE TO STRENGTHS
+  CORRECT in improvements: "Visible acne scarring on cheeks" (actual problem)
+  CORRECT in improvements: "Dark circles under eyes indicating poor sleep" (actual problem)`;
 
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
