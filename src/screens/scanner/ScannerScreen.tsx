@@ -177,10 +177,22 @@ IMPORTANT DISTINCTION:
     }
   };
 
+  const PRIORITY_PEPTIDES: Partial<Record<PeptideCategory, string[]>> = {
+    fat_loss: ["retatrutide", "semaglutide", "tirzepatide"],
+  };
+
   const getPeptidesForCategory = (cat: PeptideCategory) => {
-    return peptideDB
-      .filter((p) => p.categories.includes(cat))
-      .slice(0, 3);
+    const priority = PRIORITY_PEPTIDES[cat] || [];
+    const all = peptideDB.filter((p) => p.categories.includes(cat));
+    const sorted = all.sort((a, b) => {
+      const aIdx = priority.indexOf(a.id);
+      const bIdx = priority.indexOf(b.id);
+      if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
+      if (aIdx >= 0) return -1;
+      if (bIdx >= 0) return 1;
+      return 0;
+    });
+    return sorted.slice(0, 3);
   };
 
   const reset = () => {
