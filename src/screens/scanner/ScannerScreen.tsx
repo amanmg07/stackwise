@@ -180,7 +180,7 @@ CATEGORY MAPPING — assign observations to ALL relevant categories:
 
 recovery: injuries, scars, bruises, swelling, joint redness, post-surgical marks, muscle strain signs, poor posture suggesting chronic pain
 fat_loss: higher body fat percentage, round face, double chin, excess weight visible in arms/midsection
-muscle_gain: lean/skinny frame that could add mass, underdeveloped muscle groups, average build without visible muscle tone, lack of definition
+muscle_gain: lean frame that could add mass, average build that could benefit from more definition, room for muscle development
 anti_aging: wrinkles, fine lines, crow's feet, forehead lines, nasolabial folds, sun damage, age spots, skin laxity, dull/uneven skin tone, acne, acne scars, skin texture issues, thinning skin, hair thinning, receding hairline
 sleep: dark circles under eyes, puffy eyes, bags under eyes, tired/fatigued appearance, pallid complexion
 cognitive: (recommend alongside sleep if person looks fatigued or stressed)
@@ -193,7 +193,7 @@ IMPORTANT:
 - Dark circles/fatigue → both sleep AND cognitive
 - Always recommend anti_aging for any skin quality issues (acne, scars, texture, tone)
 
-HONESTY RULE: Be accurate, not flattering. Do NOT exaggerate positives. If someone has an average build with no visible muscle definition, do NOT say "good muscle definition". If they have a normal body, say so — don't invent strengths that aren't there. It's better to have fewer strengths than fake ones. The user wants honest, useful feedback.
+HONESTY RULE: Be accurate and constructive. Don't exaggerate strengths that aren't there, but don't be harsh either. Frame improvements as opportunities, not criticisms. For example, say "room to add more muscle mass" instead of "underdeveloped muscles" or "lack of definition".
 
 Respond ONLY with valid JSON:
 {"strengths":[{"category":"anti_aging","observation":"Clear, youthful skin with no visible wrinkles","confidence":"high"}],"improvements":[{"category":"muscle_gain","observation":"Average build — could benefit from muscle development","confidence":"medium"}],"recommendedCategories":["muscle_gain","anti_aging"],"summary":"Brief encouraging 1-2 sentence summary."}
