@@ -109,8 +109,8 @@ Respond ONLY with valid JSON:
 
 IMPORTANT DISTINCTION:
 - "strengths": things the person is clearly doing well — good skin, healthy weight, strong build, clear complexion, youthful appearance, good hair, etc. These are areas where peptides can MAINTAIN and OPTIMIZE what they already have.
-- "improvements": areas where peptides could help — skin issues, signs of aging, body composition goals, fatigue signs, inflammation, etc. These are areas to START CONSIDERING.
-- NEVER put a category in "improvements" if your observation says the person looks good in that area. For example, if someone looks young with no signs of aging, anti_aging goes in "strengths" NOT "improvements". Only list a category in "improvements" if there is a genuine visible concern.
+- "improvements": areas where there is a VISIBLE PROBLEM that peptides could fix — actual skin damage, actual excess body fat, actual dark circles, actual inflammation, etc.
+- STRICT RULE: "improvements" is ONLY for things that are visibly WRONG right now. Preventive advice, maintenance suggestions, and "it's important to..." statements are NOT improvements. If the person looks fine in a category, it MUST go in "strengths" even if you think they could benefit from prevention. For example: "no visible signs of aging but maintaining skin health is important" = STRENGTHS, not improvements. "Clear skin with good complexion" = STRENGTHS. Only "visible wrinkles on forehead" or "acne scarring on cheeks" = IMPROVEMENTS.
 - ALWAYS include at least 1 strength — find something positive to highlight
 - Each observation needs: category, observation text, confidence ("high"/"medium"/"low")
 - recommendedCategories: ordered by relevance, include ALL that apply (from both strengths and improvements)
