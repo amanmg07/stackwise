@@ -180,7 +180,7 @@ CATEGORY MAPPING — assign observations to ALL relevant categories:
 
 recovery: injuries, scars, bruises, swelling, joint redness, post-surgical marks, muscle strain signs, poor posture suggesting chronic pain
 fat_loss: higher body fat percentage, round face, double chin, excess weight visible in arms/midsection
-muscle_gain: lean frame that could add mass, skinny build, underdeveloped muscle groups, already muscular but could optimize
+muscle_gain: lean/skinny frame that could add mass, underdeveloped muscle groups, average build without visible muscle tone, lack of definition
 anti_aging: wrinkles, fine lines, crow's feet, forehead lines, nasolabial folds, sun damage, age spots, skin laxity, dull/uneven skin tone, acne, acne scars, skin texture issues, thinning skin, hair thinning, receding hairline
 sleep: dark circles under eyes, puffy eyes, bags under eyes, tired/fatigued appearance, pallid complexion
 cognitive: (recommend alongside sleep if person looks fatigued or stressed)
@@ -193,11 +193,13 @@ IMPORTANT:
 - Dark circles/fatigue → both sleep AND cognitive
 - Always recommend anti_aging for any skin quality issues (acne, scars, texture, tone)
 
+HONESTY RULE: Be accurate, not flattering. Do NOT exaggerate positives. If someone has an average build with no visible muscle definition, do NOT say "good muscle definition". If they have a normal body, say so — don't invent strengths that aren't there. It's better to have fewer strengths than fake ones. The user wants honest, useful feedback.
+
 Respond ONLY with valid JSON:
-{"strengths":[{"category":"muscle_gain","observation":"Good muscle definition in arms and shoulders","confidence":"high"}],"improvements":[{"category":"anti_aging","observation":"Some acne scarring on cheeks","confidence":"high"}],"recommendedCategories":["anti_aging","immune","recovery"],"summary":"Brief encouraging 1-2 sentence summary."}
+{"strengths":[{"category":"anti_aging","observation":"Clear, youthful skin with no visible wrinkles","confidence":"high"}],"improvements":[{"category":"muscle_gain","observation":"Average build — could benefit from muscle development","confidence":"medium"}],"recommendedCategories":["muscle_gain","anti_aging"],"summary":"Brief encouraging 1-2 sentence summary."}
 
 IMPORTANT DISTINCTION:
-- "strengths": things the person is clearly doing well — good skin, healthy weight, strong build, clear complexion, youthful appearance, good hair, etc. These are areas where peptides can MAINTAIN and OPTIMIZE what they already have.
+- "strengths": things the person is GENUINELY doing well that you can clearly see — not generic compliments. Only list a strength if it's actually visible and notable. "Good skin" is only a strength if their skin actually looks good. Do NOT list "good muscle definition" unless you can genuinely see defined muscles.
 - "improvements": areas where there is a VISIBLE PROBLEM that peptides could fix — actual skin damage, actual excess body fat, actual dark circles, actual inflammation, etc.
 - STRICT RULE: "improvements" is ONLY for things that are visibly WRONG right now. Preventive advice, maintenance suggestions, and "it's important to..." statements are NOT improvements. If the person looks fine in a category, it MUST go in "strengths" even if you think they could benefit from prevention. For example: "no visible signs of aging but maintaining skin health is important" = STRENGTHS, not improvements. "Clear skin with good complexion" = STRENGTHS. Only "visible wrinkles on forehead" or "acne scarring on cheeks" = IMPROVEMENTS.
 - ALWAYS include at least 1 strength — find something positive to highlight
