@@ -15,7 +15,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
     return (
       <View style={emptyStateStyle.container}>
         <View style={emptyStateStyle.icon}>
-          <Ionicons name="calendar-outline" size={44} color={colors.accent} />
+          <Ionicons name="repeat-outline" size={44} color={colors.accent} />
         </View>
         <Text style={emptyStateStyle.title}>No Active Cycle</Text>
         <Text style={emptyStateStyle.subtitle}>
