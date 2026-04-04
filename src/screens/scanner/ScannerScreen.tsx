@@ -312,31 +312,35 @@ IMPORTANT DISTINCTION:
 
           {/* Recommended peptides by category */}
           <Text style={styles.sectionTitle}>Recommended Peptides</Text>
-          {result.recommendedCategories.map((cat) => {
-            const catInfo = CATEGORY_INFO[cat];
-            const catPeptides = getPeptidesForCategory(cat);
-            if (catPeptides.length === 0) return null;
-            return (
-              <View key={cat} style={styles.catSection}>
-                <View style={styles.catHeader}>
-                  <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
-                  <Text style={[styles.catHeaderText, { color: catInfo?.color }]}>{catInfo?.label}</Text>
+          {(() => {
+            const shown = new Set<string>();
+            return result.recommendedCategories.map((cat) => {
+              const catInfo = CATEGORY_INFO[cat];
+              const catPeptides = getPeptidesForCategory(cat).filter((p) => !shown.has(p.id));
+              if (catPeptides.length === 0) return null;
+              catPeptides.forEach((p) => shown.add(p.id));
+              return (
+                <View key={cat} style={styles.catSection}>
+                  <View style={styles.catHeader}>
+                    <Ionicons name={catInfo?.icon || "ellipse-outline"} size={18} color={catInfo?.color || colors.accent} />
+                    <Text style={[styles.catHeaderText, { color: catInfo?.color }]}>{catInfo?.label}</Text>
+                  </View>
+                  <View style={styles.peptideChips}>
+                    {catPeptides.map((p) => (
+                      <TouchableOpacity
+                        key={p.id}
+                        style={styles.peptideChip}
+                        onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                      >
+                        <Text style={styles.peptideChipText}>{p.name}</Text>
+                        <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.peptideChips}>
-                  {catPeptides.map((p) => (
-                    <TouchableOpacity
-                      key={p.id}
-                      style={styles.peptideChip}
-                      onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                    >
-                      <Text style={styles.peptideChipText}>{p.name}</Text>
-                      <Ionicons name="chevron-forward" size={14} color={colors.accent} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            );
-          })}
+              );
+            });
+          })()}
 
           {/* Disclaimer */}
           <View style={styles.disclaimer}>
