@@ -122,6 +122,16 @@ export default function ScannerScreen({ navigation }: any) {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [selectedPeptides, setSelectedPeptides] = useState<Set<string>>(new Set());
+
+  const togglePeptide = (id: string) => {
+    setSelectedPeptides((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const pickImage = async (useCamera: boolean) => {
     const permissionMethod = useCamera
@@ -280,6 +290,7 @@ IMPORTANT DISTINCTION:
   const reset = () => {
     setImageUri(null);
     setResult(null);
+    setSelectedPeptides(new Set());
   };
 
   // Landing state — no image yet
@@ -373,16 +384,24 @@ IMPORTANT DISTINCTION:
                       <Text style={styles.obsText}>{obs.observation}</Text>
                       {catPeptides.length > 0 && (
                         <View style={styles.inlinePeptides}>
-                          {catPeptides.map((p) => (
-                            <TouchableOpacity
-                              key={p.id}
-                              style={styles.peptideChip}
-                              onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                            >
-                              <Text style={styles.peptideChipText}>{p.name}</Text>
-                              <Ionicons name="chevron-forward" size={14} color={colors.accent} />
-                            </TouchableOpacity>
-                          ))}
+                          {catPeptides.map((p) => {
+                            const selected = selectedPeptides.has(p.id);
+                            return (
+                              <TouchableOpacity
+                                key={p.id}
+                                style={[styles.peptideChip, selected && styles.peptideChipSelected]}
+                                onPress={() => togglePeptide(p.id)}
+                                onLongPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                              >
+                                <Ionicons
+                                  name={selected ? "checkmark-circle" : "add-circle-outline"}
+                                  size={16}
+                                  color={selected ? colors.success : colors.textSecondary}
+                                />
+                                <Text style={styles.peptideChipText}>{p.name}</Text>
+                              </TouchableOpacity>
+                            );
+                          })}
                         </View>
                       )}
                     </View>
@@ -426,16 +445,24 @@ IMPORTANT DISTINCTION:
                       <Text style={styles.obsText}>{obs.observation}</Text>
                       {catPeptides.length > 0 && (
                         <View style={styles.inlinePeptides}>
-                          {catPeptides.map((p) => (
-                            <TouchableOpacity
-                              key={p.id}
-                              style={styles.peptideChip}
-                              onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                            >
-                              <Text style={styles.peptideChipText}>{p.name}</Text>
-                              <Ionicons name="chevron-forward" size={14} color={colors.accent} />
-                            </TouchableOpacity>
-                          ))}
+                          {catPeptides.map((p) => {
+                            const selected = selectedPeptides.has(p.id);
+                            return (
+                              <TouchableOpacity
+                                key={p.id}
+                                style={[styles.peptideChip, selected && styles.peptideChipSelected]}
+                                onPress={() => togglePeptide(p.id)}
+                                onLongPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                              >
+                                <Ionicons
+                                  name={selected ? "checkmark-circle" : "add-circle-outline"}
+                                  size={16}
+                                  color={selected ? colors.success : colors.textSecondary}
+                                />
+                                <Text style={styles.peptideChipText}>{p.name}</Text>
+                              </TouchableOpacity>
+                            );
+                          })}
                         </View>
                       )}
                     </View>
@@ -446,48 +473,43 @@ IMPORTANT DISTINCTION:
           )}
 
           {/* Add to Cycle */}
-          <TouchableOpacity
-            style={styles.addToCycleBtn}
-            onPress={() => {
-              const allObs = [...(result.strengths || []), ...(result.improvements || [])];
-              const seen = new Set<string>();
-              const cyclePeptides: any[] = [];
-              allObs.forEach((obs) => {
-                getPeptidesForCategory(obs.category).forEach((p) => {
-                  if (seen.has(p.id)) return;
-                  seen.add(p.id);
+          {selectedPeptides.size > 0 && (
+            <TouchableOpacity
+              style={styles.addToCycleBtn}
+              onPress={() => {
+                const cyclePeptides = [...selectedPeptides].map((id) => {
+                  const p = peptideDB.find((pep) => pep.id === id)!;
                   const doseMatch = p.dosingProtocols?.[0]?.doseRange?.match(/([\d.]+)/);
-                  cyclePeptides.push({
+                  return {
                     peptideId: p.id,
                     doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
                     doseUnit: "mg" as const,
                     frequency: p.dosingProtocols?.[0]?.frequency || "daily",
                     route: (p.routes?.[0] || "subcutaneous") as AdministrationRoute,
                     timeOfDay: ["morning"],
-                  });
+                  };
                 });
-              });
-              if (cyclePeptides.length === 0) return;
-              const startDate = new Date().toISOString().split("T")[0];
-              const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
-              addCycle({
-                id: generateId(),
-                name: "Self Scan Protocol",
-                peptides: cyclePeptides,
-                startDate,
-                endDate,
-                isActive: true,
-                notes: "Created from Self Scan results",
-                createdAt: new Date().toISOString(),
-              });
-              Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
-                { text: "View Cycle", onPress: () => navigation.navigate("CycleTab") },
-              ]);
-            }}
-          >
-            <Ionicons name="add-circle" size={20} color={colors.background} />
-            <Text style={styles.addToCycleBtnText}>Add to Cycle</Text>
-          </TouchableOpacity>
+                const startDate = new Date().toISOString().split("T")[0];
+                const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
+                addCycle({
+                  id: generateId(),
+                  name: "Self Scan Protocol",
+                  peptides: cyclePeptides,
+                  startDate,
+                  endDate,
+                  isActive: true,
+                  notes: "Created from Self Scan results",
+                  createdAt: new Date().toISOString(),
+                });
+                Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
+                  { text: "View Cycle", onPress: () => navigation.navigate("CycleTab") },
+                ]);
+              }}
+            >
+              <Ionicons name="add-circle" size={20} color={colors.background} />
+              <Text style={styles.addToCycleBtnText}>Add {selectedPeptides.size} to Cycle</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Disclaimer */}
           <View style={styles.disclaimer}>
@@ -565,6 +587,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
     borderWidth: 1, borderColor: colors.border,
   },
+  peptideChipSelected: { borderColor: colors.success + "50", backgroundColor: colors.success + "10" },
   peptideChipText: { fontSize: 14, fontWeight: "600", color: colors.text },
   // Add to Cycle
   addToCycleBtn: {
