@@ -1,13 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Cycle, DoseLog, JournalEntry, UserSettings, CommunityPost, ChatMessage } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, ChatMessage } from "../types";
 
 const KEYS = {
   cycles: "@stackwise/cycles",
   doseLogs: "@stackwise/dose_logs",
   journal: "@stackwise/journal",
   settings: "@stackwise/settings",
-  communityPosts: "@stackwise/community_posts",
-  likedPosts: "@stackwise/liked_posts",
   chatMessages: "@stackwise/chat_messages",
 };
 
@@ -60,25 +58,11 @@ export const appStorage = {
     return save(KEYS.settings, settings);
   },
 
-  async loadCommunityPosts(): Promise<CommunityPost[]> {
-    return load(KEYS.communityPosts, []);
-  },
-  async saveCommunityPosts(posts: CommunityPost[]): Promise<void> {
-    return save(KEYS.communityPosts, posts);
-  },
-
   async loadChatMessages(): Promise<ChatMessage[]> {
     return load(KEYS.chatMessages, []);
   },
   async saveChatMessages(messages: ChatMessage[]): Promise<void> {
     return save(KEYS.chatMessages, messages);
-  },
-
-  async loadLikedPosts(): Promise<string[]> {
-    return load(KEYS.likedPosts, []);
-  },
-  async saveLikedPosts(ids: string[]): Promise<void> {
-    return save(KEYS.likedPosts, ids);
   },
 
   async clearAll(): Promise<void> {

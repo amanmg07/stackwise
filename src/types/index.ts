@@ -119,20 +119,6 @@ export interface UserSettings {
   profileImage: string | null;
 }
 
-export interface CommunityPost {
-  id: string;
-  author: string;
-  title: string;
-  description: string;
-  goals: string[];
-  peptides: { peptideId: string; dose: string; frequency: string }[];
-  difficulty: "beginner" | "intermediate" | "advanced";
-  likes: number;
-  duration: string;
-  createdAt: string;
-  isUserPost: boolean;
-}
-
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";

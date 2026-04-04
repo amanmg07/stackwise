@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useApp } from "../../context/AppContext";
-import { uploadAvatar } from "../../utils/supabase";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
 
@@ -28,18 +27,7 @@ export default function ProfileScreen({ navigation }: any) {
       quality: 0.5,
     });
     if (!result.canceled && result.assets[0]) {
-      const localUri = result.assets[0].uri;
-      // Show local preview immediately
-      updateSettings({ profileImage: localUri });
-      // Upload to Supabase so others can see it
-      if (userId) {
-        try {
-          const publicUrl = await uploadAvatar(userId, localUri);
-          updateSettings({ profileImage: publicUrl });
-        } catch (e) {
-          Alert.alert("Upload failed", "Photo saved locally but others won't see it yet. Try again later.");
-        }
-      }
+      updateSettings({ profileImage: result.assets[0].uri });
     }
   };
 
