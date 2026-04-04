@@ -387,19 +387,26 @@ IMPORTANT DISTINCTION:
                           {catPeptides.map((p) => {
                             const selected = selectedPeptides.has(p.id);
                             return (
-                              <TouchableOpacity
-                                key={p.id}
-                                style={[styles.peptideChip, selected && styles.peptideChipSelected]}
-                                onPress={() => togglePeptide(p.id)}
-                                onLongPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                              >
-                                <Ionicons
-                                  name={selected ? "checkmark-circle" : "add-circle-outline"}
-                                  size={16}
-                                  color={selected ? colors.success : colors.textSecondary}
-                                />
-                                <Text style={styles.peptideChipText}>{p.name}</Text>
-                              </TouchableOpacity>
+                              <View key={p.id} style={[styles.peptideChip, selected && styles.peptideChipSelected]}>
+                                <TouchableOpacity
+                                  style={styles.peptideChipSelect}
+                                  onPress={() => togglePeptide(p.id)}
+                                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 0 }}
+                                >
+                                  <Ionicons
+                                    name={selected ? "checkmark-circle" : "add-circle-outline"}
+                                    size={18}
+                                    color={selected ? colors.success : colors.textSecondary}
+                                  />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={styles.peptideChipLabel}
+                                  onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                                >
+                                  <Text style={styles.peptideChipText}>{p.name}</Text>
+                                  <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+                                </TouchableOpacity>
+                              </View>
                             );
                           })}
                         </View>
@@ -448,19 +455,26 @@ IMPORTANT DISTINCTION:
                           {catPeptides.map((p) => {
                             const selected = selectedPeptides.has(p.id);
                             return (
-                              <TouchableOpacity
-                                key={p.id}
-                                style={[styles.peptideChip, selected && styles.peptideChipSelected]}
-                                onPress={() => togglePeptide(p.id)}
-                                onLongPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                              >
-                                <Ionicons
-                                  name={selected ? "checkmark-circle" : "add-circle-outline"}
-                                  size={16}
-                                  color={selected ? colors.success : colors.textSecondary}
-                                />
-                                <Text style={styles.peptideChipText}>{p.name}</Text>
-                              </TouchableOpacity>
+                              <View key={p.id} style={[styles.peptideChip, selected && styles.peptideChipSelected]}>
+                                <TouchableOpacity
+                                  style={styles.peptideChipSelect}
+                                  onPress={() => togglePeptide(p.id)}
+                                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 0 }}
+                                >
+                                  <Ionicons
+                                    name={selected ? "checkmark-circle" : "add-circle-outline"}
+                                    size={18}
+                                    color={selected ? colors.success : colors.textSecondary}
+                                  />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={styles.peptideChipLabel}
+                                  onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
+                                >
+                                  <Text style={styles.peptideChipText}>{p.name}</Text>
+                                  <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+                                </TouchableOpacity>
+                              </View>
                             );
                           })}
                         </View>
@@ -583,11 +597,13 @@ const styles = StyleSheet.create({
   obsText: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
   inlinePeptides: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
   peptideChip: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: colors.surface, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: colors.surface, borderRadius: 10,
     borderWidth: 1, borderColor: colors.border,
   },
   peptideChipSelected: { borderColor: colors.success + "50", backgroundColor: colors.success + "10" },
+  peptideChipSelect: { paddingVertical: 10, paddingLeft: 12, paddingRight: 4 },
+  peptideChipLabel: { flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 10, paddingRight: 12, paddingLeft: 6 },
   peptideChipText: { fontSize: 14, fontWeight: "600", color: colors.text },
   // Add to Cycle
   addToCycleBtn: {
