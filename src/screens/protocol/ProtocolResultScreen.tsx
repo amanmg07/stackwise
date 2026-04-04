@@ -6,7 +6,7 @@ import { protocolTemplates } from "../../data/protocolTemplates";
 import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, emptyStateStyle } from "../../theme";
 import { Goal, AdministrationRoute } from "../../types";
 
 const DIFFICULTY_COLORS = {
@@ -45,9 +45,12 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
       </Text>
 
       {scored.length === 0 && (
-        <View style={styles.empty}>
-          <Ionicons name="search-outline" size={40} color={colors.border} />
-          <Text style={styles.emptyText}>No matching protocols found. Try selecting different goals.</Text>
+        <View style={{ alignItems: "center", paddingTop: 80 }}>
+          <View style={emptyStateStyle.icon}>
+            <Ionicons name="search-outline" size={44} color={colors.accent} />
+          </View>
+          <Text style={emptyStateStyle.title}>No Matching Protocols</Text>
+          <Text style={emptyStateStyle.subtitle}>Try selecting different goals to find protocols that match.</Text>
         </View>
       )}
 
@@ -147,19 +150,17 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   title: { fontSize: 28, fontWeight: "800", color: colors.text, marginBottom: 4 },
-  subtitle: { fontSize: 14, color: colors.textSecondary, marginBottom: 24 },
-  empty: { alignItems: "center", paddingTop: 60, gap: 16 },
-  emptyText: { fontSize: 14, color: colors.textSecondary, textAlign: "center" },
+  subtitle: { fontSize: 14, color: colors.textSecondary, marginBottom: spacing.lg },
   card: {
     backgroundColor: colors.surface, borderRadius: 14, padding: spacing.md,
-    borderWidth: 1, borderColor: colors.border, marginBottom: 16, overflow: "hidden",
+    borderWidth: 1, borderColor: colors.border, marginBottom: spacing.md, overflow: "hidden",
   },
-  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm, gap: 10 },
   cardName: { fontSize: 18, fontWeight: "700", color: colors.accent, flex: 1 },
   diffBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, flexShrink: 0 },
   diffText: { fontSize: 11, fontWeight: "700", textTransform: "uppercase" },
-  cardDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: 12 },
-  goalsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 14 },
+  cardDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: spacing.md },
+  goalsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: spacing.md },
   goalChip: {
     backgroundColor: colors.background, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4,
     borderWidth: 1, borderColor: colors.border,

@@ -4,7 +4,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 export default function CycleTrackerScreen({ navigation }: any) {
@@ -13,20 +13,20 @@ export default function CycleTrackerScreen({ navigation }: any) {
 
   if (!activeCycle) {
     return (
-      <View style={styles.empty}>
-        <View style={styles.emptyIcon}>
-          <Ionicons name="calendar-outline" size={40} color={colors.border} />
+      <View style={emptyStateStyle.container}>
+        <View style={emptyStateStyle.icon}>
+          <Ionicons name="calendar-outline" size={44} color={colors.accent} />
         </View>
-        <Text style={styles.emptyTitle}>No Active Cycle</Text>
-        <Text style={styles.emptySubtext}>
-          Start a new cycle to track your peptide protocol
+        <Text style={emptyStateStyle.title}>No Active Cycle</Text>
+        <Text style={emptyStateStyle.subtitle}>
+          Start a new cycle to track your peptide protocol and log daily doses
         </Text>
         <TouchableOpacity
-          style={styles.startBtn}
+          style={emptyStateStyle.button}
           onPress={() => navigation.navigate("NewCycle")}
         >
           <Ionicons name="add" size={20} color={colors.background} />
-          <Text style={styles.startBtnText}>Start New Cycle</Text>
+          <Text style={emptyStateStyle.buttonText}>Start New Cycle</Text>
         </TouchableOpacity>
       </View>
     );
@@ -192,7 +192,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
           })}
 
           {recentLogs.length > 0 && (
-            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Recent Doses</Text>
+            <Text style={[styles.sectionTitle, { marginTop: spacing.lg }]}>Recent Doses</Text>
           )}
         </>
       }
@@ -245,22 +245,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
-  empty: {
-    flex: 1, backgroundColor: colors.background,
-    justifyContent: "center", alignItems: "center", padding: spacing.xl, paddingTop: safeTop,
-  },
-  emptyIcon: {
-    width: 88, height: 88, borderRadius: 44,
-    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center", marginBottom: 20,
-  },
-  emptyTitle: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 8 },
-  emptySubtext: { fontSize: 14, color: colors.textSecondary, textAlign: "center", marginBottom: 32 },
-  startBtn: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: colors.accent, borderRadius: 14, padding: 18, paddingHorizontal: 32,
-  },
-  startBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
-  cycleHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 16 },
+  cycleHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: spacing.md },
   deleteBtn: {
     padding: 10, backgroundColor: colors.error + "15", borderRadius: 10,
     borderWidth: 1, borderColor: colors.error + "30",
@@ -275,7 +260,7 @@ const styles = StyleSheet.create({
   },
   cycleName: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 4 },
   dateRange: { fontSize: 14, color: colors.textSecondary },
-  progressContainer: { marginBottom: 24 },
+  progressContainer: { marginBottom: spacing.lg },
   progressBar: {
     height: 8, backgroundColor: colors.surface, borderRadius: 4, overflow: "hidden",
     borderWidth: 1, borderColor: colors.border,
@@ -284,7 +269,7 @@ const styles = StyleSheet.create({
   progressText: { fontSize: 12, color: colors.textSecondary, marginTop: 6 },
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
-    textTransform: "uppercase", letterSpacing: 1, marginBottom: 10,
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: spacing.sm,
   },
   peptideRow: {
     flexDirection: "row", alignItems: "center", gap: 12,
@@ -307,7 +292,7 @@ const styles = StyleSheet.create({
   endBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
     backgroundColor: colors.accent + "15", borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16,
-    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: 16,
+    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: spacing.md,
   },
   endBtnText: { fontSize: 13, fontWeight: "700", color: colors.accent },
   swipeDelete: {

@@ -5,7 +5,7 @@ import { LineChart } from "react-native-chart-kit";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, parseISO } from "date-fns";
 import { JournalEntry } from "../../types";
 
@@ -435,13 +435,13 @@ export default function JournalScreen({ navigation }: any) {
           )}
         </>}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <View style={styles.emptyIcon}>
-              <Ionicons name="book-outline" size={40} color={colors.border} />
+          <View style={{ alignItems: "center", paddingTop: 80, paddingHorizontal: spacing.xl }}>
+            <View style={emptyStateStyle.icon}>
+              <Ionicons name="book-outline" size={44} color={colors.accent} />
             </View>
-            <Text style={styles.emptyTitle}>No Entries Yet</Text>
-            <Text style={styles.emptySubtext}>
-              Start logging your daily metrics — after a few entries, StackWise will analyze your trends and recommend peptides tailored to what your body needs.
+            <Text style={emptyStateStyle.title}>No Entries Yet</Text>
+            <Text style={emptyStateStyle.subtitle}>
+              Start logging your daily metrics — after a few entries, StackWise will analyze your trends and recommend peptides tailored to you.
             </Text>
           </View>
         }
@@ -613,16 +613,16 @@ function MetricBadge({ label, value }: { label: string; value: number }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: safeTop },
   journalTitle: { fontSize: 28, fontWeight: "800", color: colors.text, paddingHorizontal: spacing.md, marginBottom: 4 },
-  journalSubtitle: { fontSize: 13, color: colors.textSecondary, paddingHorizontal: spacing.md, marginBottom: 16, lineHeight: 18 },
+  journalSubtitle: { fontSize: 13, color: colors.textSecondary, paddingHorizontal: spacing.md, marginBottom: spacing.md, lineHeight: 18 },
   // Insights
   insightsSection: { paddingHorizontal: spacing.md, paddingTop: 4, marginBottom: 8 },
   insightsTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
-    textTransform: "uppercase", letterSpacing: 1, marginBottom: 10,
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: spacing.sm,
   },
   insightCard: {
     backgroundColor: colors.surface, borderRadius: 14, padding: 14,
-    borderWidth: 1, borderColor: colors.border, marginBottom: 10,
+    borderWidth: 1, borderColor: colors.border, marginBottom: spacing.sm,
   },
   insightHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   insightIcon: {
@@ -639,20 +639,12 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.accent + "30",
   },
   recChipText: { fontSize: 12, fontWeight: "600", color: colors.accent },
-  // Existing styles
-  empty: { alignItems: "center", paddingTop: 80, paddingHorizontal: spacing.xl },
-  emptyIcon: {
-    width: 88, height: 88, borderRadius: 44,
-    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center", marginBottom: 20,
-  },
-  emptyTitle: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 8 },
-  emptySubtext: { fontSize: 14, color: colors.textSecondary, textAlign: "center" },
   card: {
     backgroundColor: colors.surface, borderRadius: 14, padding: spacing.md,
     marginHorizontal: spacing.md, marginTop: 12,
     borderWidth: 1, borderColor: colors.border,
   },
-  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm },
   cardDate: { fontSize: 16, fontWeight: "700", color: colors.text },
   cardWeight: { fontSize: 14, fontWeight: "600", color: colors.accent },
   metrics: { flexDirection: "row", gap: 4, marginBottom: 8 },
@@ -673,13 +665,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, marginBottom: 4,
   },
   chartSection: {
-    paddingHorizontal: spacing.md, marginBottom: 12,
+    paddingHorizontal: spacing.md, marginBottom: spacing.md,
   },
   chartTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
-    textTransform: "uppercase", letterSpacing: 1, marginBottom: 10,
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: spacing.sm,
   },
-  chartLegend: { flexDirection: "row", gap: 4, marginBottom: 12 },
+  chartLegend: { flexDirection: "row", gap: 4, marginBottom: spacing.md },
   legendChip: {
     flexDirection: "row", alignItems: "center", gap: 4,
     paddingHorizontal: 8, paddingVertical: 5, borderRadius: 8,

@@ -34,3 +34,56 @@ export const cardStyle = {
   borderWidth: 1,
   borderColor: colors.border,
 };
+
+export const emptyStateStyle = {
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    padding: spacing.xl,
+    paddingTop: safeTop,
+  },
+  icon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.surface,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700" as const,
+    color: colors.text,
+    marginBottom: spacing.sm,
+    textAlign: "center" as const,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    textAlign: "center" as const,
+    lineHeight: 22,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
+  },
+  button: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: spacing.sm,
+    backgroundColor: colors.accent,
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: spacing.xl,
+    width: "100%" as const,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: colors.background,
+  },
+};
