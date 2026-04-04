@@ -181,6 +181,7 @@ IMPORTANT DISTINCTION:
   const PRIORITY_PEPTIDES: Partial<Record<PeptideCategory, string[]>> = {
     fat_loss: ["retatrutide", "semaglutide", "tirzepatide"],
     muscle_gain: ["tesamorelin", "igf1_lr3"],
+    anti_aging: ["ghkcu", "klow_blend", "glow_blend"],
   };
 
   const getPeptidesForCategory = (cat: PeptideCategory) => {
