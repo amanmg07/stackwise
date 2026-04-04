@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, Alert,
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Animated, Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
@@ -38,6 +38,81 @@ const CATEGORY_INFO: Record<string, { label: string; icon: keyof typeof Ionicons
 
 const CONFIDENCE_LABELS: Record<string, string> = { high: "Clearly visible", medium: "Somewhat visible", low: "Subtle" };
 const CONFIDENCE_COLORS: Record<string, string> = { high: colors.success, medium: colors.warning, low: colors.textSecondary };
+
+function ShimmerBlock({ width, height, style }: { width: number | string; height: number; style?: any }) {
+  const shimmer = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, { toValue: 1, duration: 1000, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 0, duration: 1000, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [shimmer]);
+  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.7] });
+  return (
+    <Animated.View
+      style={[{ width: width as any, height, borderRadius: 6, backgroundColor: colors.border, opacity }, style]}
+    />
+  );
+}
+
+function SkeletonResults() {
+  return (
+    <View style={{ marginTop: 16 }}>
+      {/* Summary skeleton */}
+      <View style={[styles.summaryCard, { gap: 10 }]}>
+        <ShimmerBlock width={20} height={20} />
+        <View style={{ flex: 1, gap: 6 }}>
+          <ShimmerBlock width="100%" height={14} />
+          <ShimmerBlock width="70%" height={14} />
+        </View>
+      </View>
+
+      {/* Strengths skeleton */}
+      <View style={styles.sectionHeader}>
+        <ShimmerBlock width={18} height={18} style={{ borderRadius: 9 }} />
+        <ShimmerBlock width={100} height={14} />
+      </View>
+      <ShimmerBlock width="40%" height={12} style={{ marginBottom: 10 }} />
+      {[1, 2].map((i) => (
+        <View key={`ss-${i}`} style={[styles.obsCard, { gap: 8 }]}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <ShimmerBlock width={18} height={18} style={{ borderRadius: 9 }} />
+            <ShimmerBlock width={90} height={14} />
+          </View>
+          <ShimmerBlock width="90%" height={12} />
+        </View>
+      ))}
+
+      {/* Improvements skeleton */}
+      <View style={[styles.sectionHeader, { marginTop: 8 }]}>
+        <ShimmerBlock width={18} height={18} style={{ borderRadius: 9 }} />
+        <ShimmerBlock width={130} height={14} />
+      </View>
+      <ShimmerBlock width="50%" height={12} style={{ marginBottom: 10 }} />
+      {[1, 2].map((i) => (
+        <View key={`is-${i}`} style={[styles.obsCard, { gap: 8 }]}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <ShimmerBlock width={18} height={18} style={{ borderRadius: 9 }} />
+            <ShimmerBlock width={90} height={14} />
+          </View>
+          <ShimmerBlock width="85%" height={12} />
+        </View>
+      ))}
+
+      {/* Peptide chips skeleton */}
+      <ShimmerBlock width={160} height={14} style={{ marginTop: 16, marginBottom: 12 }} />
+      <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
+        {[1, 2, 3].map((i) => (
+          <ShimmerBlock key={`pc-${i}`} width={100} height={38} style={{ borderRadius: 10 }} />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export default function ScannerScreen({ navigation }: any) {
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -252,13 +327,10 @@ IMPORTANT DISTINCTION:
       {/* Photo preview */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: imageUri }} style={styles.image} />
-        {loading && (
-          <View style={styles.imageOverlay}>
-            <ActivityIndicator size="large" color={colors.accent} />
-            <Text style={styles.analyzingText}>Analyzing...</Text>
-          </View>
-        )}
       </View>
+
+      {/* Skeleton while loading */}
+      {loading && <SkeletonResults />}
 
       {/* Results */}
       {result && !result.error && (
@@ -404,11 +476,6 @@ const styles = StyleSheet.create({
   // Image
   imageContainer: { borderRadius: 16, overflow: "hidden", marginBottom: 16, position: "relative" },
   image: { width: "100%", aspectRatio: 3 / 4, borderRadius: 16 },
-  imageOverlay: {
-    ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.6)",
-    alignItems: "center", justifyContent: "center", borderRadius: 16, gap: 12,
-  },
-  analyzingText: { fontSize: 16, fontWeight: "600", color: colors.text },
   // Summary
   summaryCard: {
     flexDirection: "row", alignItems: "flex-start", gap: 10,
