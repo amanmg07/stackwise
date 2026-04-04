@@ -51,10 +51,10 @@ function ShimmerBlock({ width, height, style }: { width: number | string; height
     loop.start();
     return () => loop.stop();
   }, [shimmer]);
-  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.7] });
+  const opacity = shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] });
   return (
     <Animated.View
-      style={[{ width: width as any, height, borderRadius: 6, backgroundColor: colors.border, opacity }, style]}
+      style={[{ width: width as any, height, borderRadius: 6, backgroundColor: colors.surfaceLight, opacity }, style]}
     />
   );
 }
