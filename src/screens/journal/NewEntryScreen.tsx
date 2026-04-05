@@ -11,29 +11,41 @@ const THUMB_SIZE = 24;
 
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
   const [trackWidth, setTrackWidth] = useState(0);
+  const trackPageX = useRef(0);
+  const trackRef = useRef<View>(null);
   const valueRef = useRef(value);
   valueRef.current = value;
 
-  const onLayout = (e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width);
+  const onTrackLayout = (e: LayoutChangeEvent) => {
+    setTrackWidth(e.nativeEvent.layout.width);
+    // measure absolute page position so PanResponder can use gestureState.moveX
+    setTimeout(() => {
+      trackRef.current?.measureInWindow((x) => {
+        trackPageX.current = x;
+      });
+    }, 0);
+  };
 
-  const valueFromX = (x: number) => {
+  const valueFromPageX = (pageX: number) => {
     if (trackWidth <= 0) return valueRef.current;
-    // x is relative to sliderWrap; subtract horizontal padding to get track-relative x
-    const onTrack = Math.max(0, Math.min(trackWidth, x - THUMB_SIZE / 2));
-    const raw = (onTrack / trackWidth) * 9 + 1; // 1..10
+    const onTrack = Math.max(0, Math.min(trackWidth, pageX - trackPageX.current));
+    const raw = (onTrack / trackWidth) * 9 + 1;
     return Math.round(raw);
   };
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e) => {
-        const next = valueFromX(e.nativeEvent.locationX);
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (_, g) => {
+        const next = valueFromPageX(g.x0);
         if (next !== valueRef.current) onChange(next);
       },
-      onPanResponderMove: (e) => {
-        const next = valueFromX(e.nativeEvent.locationX);
+      onPanResponderMove: (_, g) => {
+        const next = valueFromPageX(g.moveX);
         if (next !== valueRef.current) onChange(next);
       },
     })
@@ -49,7 +61,7 @@ function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: s
         <Text style={styles.ratingValue}>{value}<Text style={styles.ratingValueMax}>/10</Text></Text>
       </View>
       <View style={styles.sliderWrap} {...panResponder.panHandlers}>
-        <View style={styles.sliderTrack} onLayout={onLayout}>
+        <View ref={trackRef} style={styles.sliderTrack} onLayout={onTrackLayout}>
           <View style={[styles.sliderFill, { width: `${fillPct}%` }]} />
         </View>
         <View style={[styles.sliderThumb, { left: thumbLeft }]} pointerEvents="none" />
