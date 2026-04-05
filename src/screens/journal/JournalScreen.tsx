@@ -18,7 +18,7 @@ interface Insight {
   peptideIds: string[];
 }
 
-function analyzeJournal(entries: JournalEntry[]): Insight[] {
+function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs"): Insight[] {
   if (entries.length === 0) return [];
 
   const recent = [...entries]
@@ -100,23 +100,36 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     const recentAvg = recentWeight.reduce((s, e) => s + (e.weight as number), 0) / recentWeight.length;
     const delta = recentAvg - baselineAvg;
     const pct = (delta / baselineAvg) * 100;
+    const weeks = daySpan / 7;
+    const pctPerWeek = pct / weeks;
     if (Math.abs(pct) >= 1.5) {
-      const direction = delta < 0 ? "down" : "up";
       const abs = Math.abs(delta).toFixed(1);
+      const spanLabel = weeks < 1.5 ? "the past week" : `${weeks.toFixed(1)} weeks`;
       if (delta < 0) {
-        insights.push({
-          icon: "trending-down-outline",
-          color: "#fb923c",
-          title: `Weight trending ${direction}`,
-          detail: `${abs} lost over your logged weeks (${Math.abs(pct).toFixed(1)}%). GLP-1 peptides can amplify fat-loss momentum when paired with protein & training.`,
-          peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "tesamorelin"],
-        });
+        // Rapid loss warning — >2%/week is generally too aggressive
+        if (pctPerWeek <= -2) {
+          insights.push({
+            icon: "warning-outline",
+            color: "#f87171",
+            title: "Losing weight very fast",
+            detail: `Down ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pctPerWeek).toFixed(1)}%/week). That's aggressive — risk of muscle loss and water/glycogen drops. Prioritize protein and consider easing the deficit.`,
+            peptideIds: ["bpc157", "cjc_ipa_blend", "ipamorelin"],
+          });
+        } else {
+          insights.push({
+            icon: "trending-down-outline",
+            color: "#fb923c",
+            title: "Weight trending down",
+            detail: `Down ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pct).toFixed(1)}%). GLP-1 peptides can amplify fat-loss momentum when paired with protein & training.`,
+            peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "tesamorelin"],
+          });
+        }
       } else {
         insights.push({
           icon: "trending-up-outline",
           color: "#60a5fa",
-          title: `Weight trending ${direction}`,
-          detail: `${abs} gained over your logged weeks (${Math.abs(pct).toFixed(1)}%). If bulking, GH secretagogues support lean gains; if unintended, watch calorie drift.`,
+          title: "Weight trending up",
+          detail: `Up ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pct).toFixed(1)}%). If bulking, GH secretagogues support lean gains; if unintended, watch calorie drift.`,
           peptideIds: ["cjc_ipa_blend", "ipamorelin", "mk677"],
         });
       }
@@ -426,7 +439,7 @@ const PAGE_SIZE = 7;
 export default function JournalScreen({ navigation }: any) {
   const { journal, settings, deleteJournalEntry } = useApp();
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
-  const insights = analyzeJournal(journal);
+  const insights = analyzeJournal(journal, settings.weightUnit);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const visible = sorted.slice(0, visibleCount);
   const hasMore = visibleCount < sorted.length;
