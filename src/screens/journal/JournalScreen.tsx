@@ -366,7 +366,17 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     }
   }
 
-  return insights;
+  // Prioritize: problems first, then trends, then notes, then positives.
+  // Cap at 3 to avoid overwhelming the user.
+  const priority = (i: Insight): number => {
+    const t = i.title.toLowerCase();
+    if (t.includes("needs attention") || t.includes("lagging") || t.includes("high ") || t.includes("low ") || t.includes("could be better")) return 0;
+    if (t.includes("declining") || t.includes("trending down")) return 1;
+    if (t.includes("mentioned") || t.includes("noted") || t.includes("multi-benefit")) return 2;
+    return 3; // positives / improving trends
+  };
+  insights.sort((a, b) => priority(a) - priority(b));
+  return insights.slice(0, 3);
 }
 
 export default function JournalScreen({ navigation }: any) {
@@ -425,7 +435,9 @@ export default function JournalScreen({ navigation }: any) {
         contentContainerStyle={{ paddingBottom: 100 }}
         ListHeaderComponent={<>
           <Text style={styles.journalTitle}>Journal</Text>
-          <Text style={styles.journalSubtitle}>Log how you feel daily — StackWise will spot trends and recommend peptides based on your metrics.</Text>
+          {sorted.length === 0 && (
+            <Text style={styles.journalSubtitle}>Log how you feel daily — StackWise will spot trends and recommend peptides based on your metrics.</Text>
+          )}
           {header()}
           {sorted.length >= 3 && <TrendChart entries={sorted} />}
           {sorted.length > 0 && (
@@ -486,13 +498,7 @@ export default function JournalScreen({ navigation }: any) {
                   </Text>
                 )}
               </View>
-              <View style={styles.metrics}>
-                <MetricBadge label="Energy" value={item.energyLevel} />
-                <MetricBadge label="Sleep" value={item.sleepQuality} />
-                <MetricBadge label="Recovery" value={item.recoveryScore} />
-                <MetricBadge label="Mood" value={item.mood} />
-                <MetricBadge label="Soreness" value={item.soreness} />
-              </View>
+              <MetricSummary entry={item} />
               {item.notes ? (
                 <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
               ) : null}
@@ -610,6 +616,44 @@ function MetricBadge({ label, value }: { label: string; value: number }) {
   );
 }
 
+function dotColor(v: number) {
+  return v >= 4 ? colors.success : v >= 3 ? colors.warning : colors.error;
+}
+
+function MetricSummary({ entry }: { entry: JournalEntry }) {
+  const dots = [
+    { label: "Sleep", value: entry.sleepQuality },
+    { label: "Energy", value: entry.energyLevel },
+    { label: "Recovery", value: entry.recoveryScore },
+    { label: "Mood", value: entry.mood },
+    { label: "Soreness", value: entry.soreness },
+  ];
+  const avg = dots.reduce((s, d) => s + d.value, 0) / dots.length;
+  const avgColor = dotColor(avg);
+  const worst = dots.reduce((lo, d) => (d.value < lo.value ? d : lo), dots[0]);
+  return (
+    <View style={styles.summary}>
+      <View style={styles.summaryAvg}>
+        <Text style={[styles.summaryAvgValue, { color: avgColor }]}>{avg.toFixed(1)}</Text>
+        <Text style={styles.summaryAvgLabel}>avg</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <View style={styles.dotRow}>
+          {dots.map((d) => (
+            <View key={d.label} style={styles.dotItem}>
+              <View style={[styles.dot, { backgroundColor: dotColor(d.value) }]} />
+              <Text style={styles.dotLabel}>{d.label[0]}</Text>
+            </View>
+          ))}
+        </View>
+        {worst.value <= 2 && (
+          <Text style={styles.worstText}>Low {worst.label.toLowerCase()}: {worst.value}/5</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: safeTop },
   journalTitle: { fontSize: 28, fontWeight: "800", color: colors.text, paddingHorizontal: spacing.md, marginBottom: 4 },
@@ -648,6 +692,15 @@ const styles = StyleSheet.create({
   cardDate: { fontSize: 16, fontWeight: "700", color: colors.text },
   cardWeight: { fontSize: 14, fontWeight: "600", color: colors.accent },
   metrics: { flexDirection: "row", gap: 4, marginBottom: 8 },
+  summary: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 8 },
+  summaryAvg: { alignItems: "center", minWidth: 44 },
+  summaryAvgValue: { fontSize: 22, fontWeight: "800" },
+  summaryAvgLabel: { fontSize: 9, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginTop: -2 },
+  dotRow: { flexDirection: "row", gap: 14 },
+  dotItem: { alignItems: "center", gap: 3 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  dotLabel: { fontSize: 9, color: colors.textSecondary, fontWeight: "600" },
+  worstText: { fontSize: 11, color: colors.textSecondary, marginTop: 6 },
   badge: {
     flex: 1, backgroundColor: colors.background, borderRadius: 8,
     paddingVertical: 8, paddingHorizontal: 4, alignItems: "center",
