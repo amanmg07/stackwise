@@ -1,6 +1,6 @@
 import { JournalEntry } from "../types";
 
-// Replicate the analyzeJournal logic for testing
+// Replicate the analyzeJournal logic for testing (1-10 scale)
 function analyzeJournal(entries: JournalEntry[]) {
   if (entries.length < 3) return [];
 
@@ -19,19 +19,20 @@ function analyzeJournal(entries: JournalEntry[]) {
 
   const insights: any[] = [];
 
-  if (avgSleep < 3) {
+  if (avgSleep < 6) {
     insights.push({ title: "Sleep needs attention", peptideIds: ["dsip", "sleep_blend", "ipamorelin", "mk677"] });
   }
-  if (avgRecovery < 3) {
+  if (avgRecovery < 6) {
     insights.push({ title: "Recovery is lagging", peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu"] });
   }
-  if (avgSoreness >= 3.5) {
+  // soreness: 1=very sore, 10=no pain
+  if (avgSoreness <= 5) {
     insights.push({ title: "High soreness levels", peptideIds: ["bpc157", "tb500", "kpv", "wolverine_blend"] });
   }
-  if (avgEnergy < 3) {
+  if (avgEnergy < 6) {
     insights.push({ title: "Low energy levels", peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "tesamorelin"] });
   }
-  if (avgMood < 3) {
+  if (avgMood < 6) {
     insights.push({ title: "Mood could be better", peptideIds: ["selank", "semax", "cognitive_blend"] });
   }
 
@@ -41,14 +42,15 @@ function analyzeJournal(entries: JournalEntry[]) {
 function makeEntry(overrides: Partial<JournalEntry> & { date: string }): JournalEntry {
   return {
     id: "test-" + overrides.date,
-    date: overrides.date,
-    sleepQuality: overrides.sleepQuality ?? 3,
-    energyLevel: overrides.energyLevel ?? 3,
-    recoveryScore: overrides.recoveryScore ?? 3,
-    mood: overrides.mood ?? 3,
-    soreness: overrides.soreness ?? 1,
+    sleepQuality: 7,
+    energyLevel: 7,
+    recoveryScore: 7,
+    mood: 7,
+    soreness: 8,
     notes: "",
     createdAt: new Date().toISOString(),
+    scaleV2: true,
+    ...overrides,
   };
 }
 
@@ -63,10 +65,10 @@ describe("Journal Analysis", () => {
 
   it("should detect low sleep quality", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", sleepQuality: 1 }),
-      makeEntry({ date: "2026-03-14", sleepQuality: 2 }),
-      makeEntry({ date: "2026-03-13", sleepQuality: 2 }),
-      makeEntry({ date: "2026-03-12", sleepQuality: 1 }),
+      makeEntry({ date: "2026-03-15", sleepQuality: 2 }),
+      makeEntry({ date: "2026-03-14", sleepQuality: 4 }),
+      makeEntry({ date: "2026-03-13", sleepQuality: 4 }),
+      makeEntry({ date: "2026-03-12", sleepQuality: 2 }),
     ];
     const insights = analyzeJournal(entries);
     expect(insights.some((i) => i.title === "Sleep needs attention")).toBe(true);
@@ -74,9 +76,9 @@ describe("Journal Analysis", () => {
 
   it("should detect low energy", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", energyLevel: 1 }),
-      makeEntry({ date: "2026-03-14", energyLevel: 2 }),
-      makeEntry({ date: "2026-03-13", energyLevel: 2 }),
+      makeEntry({ date: "2026-03-15", energyLevel: 2 }),
+      makeEntry({ date: "2026-03-14", energyLevel: 4 }),
+      makeEntry({ date: "2026-03-13", energyLevel: 4 }),
     ];
     const insights = analyzeJournal(entries);
     expect(insights.some((i) => i.title === "Low energy levels")).toBe(true);
@@ -84,9 +86,9 @@ describe("Journal Analysis", () => {
 
   it("should detect poor recovery", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", recoveryScore: 1 }),
-      makeEntry({ date: "2026-03-14", recoveryScore: 2 }),
-      makeEntry({ date: "2026-03-13", recoveryScore: 2 }),
+      makeEntry({ date: "2026-03-15", recoveryScore: 2 }),
+      makeEntry({ date: "2026-03-14", recoveryScore: 4 }),
+      makeEntry({ date: "2026-03-13", recoveryScore: 4 }),
     ];
     const insights = analyzeJournal(entries);
     expect(insights.some((i) => i.title === "Recovery is lagging")).toBe(true);
@@ -94,8 +96,8 @@ describe("Journal Analysis", () => {
 
   it("should detect high soreness", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", soreness: 4 }),
-      makeEntry({ date: "2026-03-14", soreness: 5 }),
+      makeEntry({ date: "2026-03-15", soreness: 3 }),
+      makeEntry({ date: "2026-03-14", soreness: 2 }),
       makeEntry({ date: "2026-03-13", soreness: 4 }),
     ];
     const insights = analyzeJournal(entries);
@@ -104,9 +106,9 @@ describe("Journal Analysis", () => {
 
   it("should detect low mood", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", mood: 1 }),
-      makeEntry({ date: "2026-03-14", mood: 2 }),
-      makeEntry({ date: "2026-03-13", mood: 2 }),
+      makeEntry({ date: "2026-03-15", mood: 2 }),
+      makeEntry({ date: "2026-03-14", mood: 4 }),
+      makeEntry({ date: "2026-03-13", mood: 4 }),
     ];
     const insights = analyzeJournal(entries);
     expect(insights.some((i) => i.title === "Mood could be better")).toBe(true);
@@ -114,9 +116,9 @@ describe("Journal Analysis", () => {
 
   it("should return no insights when all metrics are good", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", sleepQuality: 4, energyLevel: 4, recoveryScore: 4, mood: 4, soreness: 1 }),
-      makeEntry({ date: "2026-03-14", sleepQuality: 5, energyLevel: 4, recoveryScore: 5, mood: 5, soreness: 1 }),
-      makeEntry({ date: "2026-03-13", sleepQuality: 4, energyLevel: 5, recoveryScore: 4, mood: 4, soreness: 2 }),
+      makeEntry({ date: "2026-03-15", sleepQuality: 8, energyLevel: 8, recoveryScore: 8, mood: 8, soreness: 9 }),
+      makeEntry({ date: "2026-03-14", sleepQuality: 9, energyLevel: 8, recoveryScore: 9, mood: 9, soreness: 10 }),
+      makeEntry({ date: "2026-03-13", sleepQuality: 8, energyLevel: 9, recoveryScore: 8, mood: 8, soreness: 8 }),
     ];
     const insights = analyzeJournal(entries);
     expect(insights.length).toBe(0);
@@ -124,9 +126,9 @@ describe("Journal Analysis", () => {
 
   it("should recommend peptides for each insight", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", sleepQuality: 1, energyLevel: 1, recoveryScore: 1, mood: 1, soreness: 5 }),
-      makeEntry({ date: "2026-03-14", sleepQuality: 1, energyLevel: 1, recoveryScore: 1, mood: 1, soreness: 5 }),
-      makeEntry({ date: "2026-03-13", sleepQuality: 1, energyLevel: 1, recoveryScore: 1, mood: 1, soreness: 5 }),
+      makeEntry({ date: "2026-03-15", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2, soreness: 2 }),
+      makeEntry({ date: "2026-03-14", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2, soreness: 2 }),
+      makeEntry({ date: "2026-03-13", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2, soreness: 2 }),
     ];
     const insights = analyzeJournal(entries);
     for (const insight of insights) {

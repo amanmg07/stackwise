@@ -9,7 +9,6 @@ import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, parseISO } from "date-fns";
 import { JournalEntry } from "../../types";
 
-const RATING_LABELS = ["", "Poor", "Low", "Average", "Good", "Excellent"];
 
 interface Insight {
   icon: keyof typeof Ionicons.glyphMap;
@@ -48,19 +47,21 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     energyTrend = trendAvg(newer, (e) => e.energyLevel) - trendAvg(older, (e) => e.energyLevel);
     recoveryTrend = trendAvg(newer, (e) => e.recoveryScore) - trendAvg(older, (e) => e.recoveryScore);
   }
+  // Trend thresholds are on 1-10 scale so double the old 0.5 threshold
+  const TREND_THRESHOLD = 1.0;
 
   const insights: Insight[] = [];
 
   // Sleep issues
-  if (avgSleep < 3) {
+  if (avgSleep < 6) {
     insights.push({
       icon: "moon-outline",
       color: "#818cf8",
       title: "Sleep needs attention",
-      detail: `Avg sleep quality: ${avgSleep.toFixed(1)}/5. DSIP promotes delta-wave deep sleep. Ipamorelin triggers GH release during sleep, improving sleep architecture.`,
+      detail: `Avg sleep quality: ${avgSleep.toFixed(1)}/10. DSIP promotes delta-wave deep sleep. Ipamorelin triggers GH release during sleep, improving sleep architecture.`,
       peptideIds: ["dsip", "sleep_blend", "ipamorelin", "mk677"],
     });
-  } else if (sleepTrend < -0.5) {
+  } else if (sleepTrend < -TREND_THRESHOLD) {
     insights.push({
       icon: "trending-down-outline",
       color: "#818cf8",
@@ -71,15 +72,15 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
 
   // Recovery issues
-  if (avgRecovery < 3) {
+  if (avgRecovery < 6) {
     insights.push({
       icon: "bandage-outline",
       color: "#4ade80",
       title: "Recovery is lagging",
-      detail: `Avg recovery: ${avgRecovery.toFixed(1)}/5. BPC-157 accelerates tissue repair via angiogenesis. TB-500 reduces inflammation and promotes cell migration to injury sites.`,
+      detail: `Avg recovery: ${avgRecovery.toFixed(1)}/10. BPC-157 accelerates tissue repair via angiogenesis. TB-500 reduces inflammation and promotes cell migration to injury sites.`,
       peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu"],
     });
-  } else if (recoveryTrend < -0.5) {
+  } else if (recoveryTrend < -TREND_THRESHOLD) {
     insights.push({
       icon: "trending-down-outline",
       color: "#4ade80",
@@ -89,27 +90,27 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     });
   }
 
-  // High soreness (low score = more sore, since 1=very sore, 5=no pain)
-  if (avgSoreness <= 2.5) {
+  // High soreness (low score = more sore, since 1=very sore, 10=no pain)
+  if (avgSoreness <= 5) {
     insights.push({
       icon: "fitness-outline",
       color: "#f87171",
       title: "High soreness levels",
-      detail: `Avg soreness: ${avgSoreness.toFixed(1)}/5. BPC-157 reduces inflammatory markers. KPV is a potent anti-inflammatory fragment that targets NF-kB pathways.`,
+      detail: `Avg soreness: ${avgSoreness.toFixed(1)}/10. BPC-157 reduces inflammatory markers. KPV is a potent anti-inflammatory fragment that targets NF-kB pathways.`,
       peptideIds: ["bpc157", "tb500", "kpv", "wolverine_blend"],
     });
   }
 
   // Low energy
-  if (avgEnergy < 3) {
+  if (avgEnergy < 6) {
     insights.push({
       icon: "flash-outline",
       color: "#facc15",
       title: "Low energy levels",
-      detail: `Avg energy: ${avgEnergy.toFixed(1)}/5. CJC-1295 + Ipamorelin boost GH output, which improves energy, metabolism, and body composition over 4-6 weeks.`,
+      detail: `Avg energy: ${avgEnergy.toFixed(1)}/10. CJC-1295 + Ipamorelin boost GH output, which improves energy, metabolism, and body composition over 4-6 weeks.`,
       peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "tesamorelin"],
     });
-  } else if (energyTrend < -0.5) {
+  } else if (energyTrend < -TREND_THRESHOLD) {
     insights.push({
       icon: "trending-down-outline",
       color: "#facc15",
@@ -120,56 +121,56 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   }
 
   // Low mood
-  if (avgMood < 3) {
+  if (avgMood < 6) {
     insights.push({
       icon: "sad-outline",
       color: "#f472b6",
       title: "Mood could be better",
-      detail: `Avg mood: ${avgMood.toFixed(1)}/5. Selank modulates GABA and serotonin for anxiolytic effects. Semax boosts BDNF, supporting mood and cognitive resilience.`,
+      detail: `Avg mood: ${avgMood.toFixed(1)}/10. Selank modulates GABA and serotonin for anxiolytic effects. Semax boosts BDNF, supporting mood and cognitive resilience.`,
       peptideIds: ["selank", "semax", "cognitive_blend"],
     });
   }
 
   // Positive affirmations for good metrics
-  if (avgSleep >= 4) {
+  if (avgSleep >= 8) {
     insights.push({
       icon: "moon-outline",
       color: "#818cf8",
       title: "Sleep is on point",
-      detail: `Avg ${avgSleep.toFixed(1)}/5 — quality rest fuels everything. Your recovery and gains benefit hugely from this.`,
+      detail: `Avg ${avgSleep.toFixed(1)}/10 — quality rest fuels everything. Your recovery and gains benefit hugely from this.`,
       peptideIds: [],
     });
   }
-  if (avgEnergy >= 4) {
+  if (avgEnergy >= 8) {
     insights.push({
       icon: "flash-outline",
       color: "#facc15",
       title: "Energy levels are strong",
-      detail: `Avg ${avgEnergy.toFixed(1)}/5 — you're firing on all cylinders. Great energy means your stack and habits are working.`,
+      detail: `Avg ${avgEnergy.toFixed(1)}/10 — you're firing on all cylinders. Great energy means your stack and habits are working.`,
       peptideIds: [],
     });
   }
-  if (avgRecovery >= 4 && avgSoreness >= 3.5) {
+  if (avgRecovery >= 8 && avgSoreness >= 7) {
     insights.push({
       icon: "fitness-outline",
       color: "#4ade80",
       title: "Recovery is dialed in",
-      detail: `Avg recovery ${avgRecovery.toFixed(1)}/5 with low soreness. Your body is bouncing back fast — keep pushing.`,
+      detail: `Avg recovery ${avgRecovery.toFixed(1)}/10 with low soreness. Your body is bouncing back fast — keep pushing.`,
       peptideIds: [],
     });
   }
-  if (avgMood >= 4) {
+  if (avgMood >= 8) {
     insights.push({
       icon: "happy-outline",
       color: "#f472b6",
       title: "Mood is thriving",
-      detail: `Avg ${avgMood.toFixed(1)}/5 — feeling good mentally is just as important as physical metrics. You're in a great headspace.`,
+      detail: `Avg ${avgMood.toFixed(1)}/10 — feeling good mentally is just as important as physical metrics. You're in a great headspace.`,
       peptideIds: [],
     });
   }
 
   // Improving trends
-  if (sleepTrend >= 0.5) {
+  if (sleepTrend >= TREND_THRESHOLD) {
     insights.push({
       icon: "trending-up-outline",
       color: "#818cf8",
@@ -178,7 +179,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       peptideIds: [],
     });
   }
-  if (energyTrend >= 0.5) {
+  if (energyTrend >= TREND_THRESHOLD) {
     insights.push({
       icon: "trending-up-outline",
       color: "#facc15",
@@ -187,7 +188,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       peptideIds: [],
     });
   }
-  if (recoveryTrend >= 0.5) {
+  if (recoveryTrend >= TREND_THRESHOLD) {
     insights.push({
       icon: "trending-up-outline",
       color: "#4ade80",
@@ -354,7 +355,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
 
   // Everything is great
   if (insights.length === 0 && recent.length >= 1) {
-    const allGood = avgSleep >= 3.5 && avgEnergy >= 3.5 && avgRecovery >= 3.5 && avgMood >= 3.5 && avgSoreness >= 3;
+    const allGood = avgSleep >= 7 && avgEnergy >= 7 && avgRecovery >= 7 && avgMood >= 7 && avgSoreness >= 6;
     if (allGood) {
       insights.push({
         icon: "checkmark-circle-outline",
@@ -606,18 +607,8 @@ function TrendChart({ entries }: { entries: JournalEntry[] }) {
   );
 }
 
-function MetricBadge({ label, value }: { label: string; value: number }) {
-  const color = value >= 4 ? colors.success : value >= 3 ? colors.warning : colors.error;
-  return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeLabel}>{label}</Text>
-      <Text style={[styles.badgeValue, { color }]}>{value}/5</Text>
-    </View>
-  );
-}
-
 function dotColor(v: number) {
-  return v >= 4 ? colors.success : v >= 3 ? colors.warning : colors.error;
+  return v >= 8 ? colors.success : v >= 5 ? colors.warning : colors.error;
 }
 
 function MetricSummary({ entry }: { entry: JournalEntry }) {
@@ -642,12 +633,12 @@ function MetricSummary({ entry }: { entry: JournalEntry }) {
           {dots.map((d) => (
             <View key={d.label} style={styles.dotItem}>
               <View style={[styles.dot, { backgroundColor: dotColor(d.value) }]} />
-              <Text style={styles.dotLabel}>{d.label[0]}</Text>
+              <Text style={styles.dotLabel}>{d.label}</Text>
             </View>
           ))}
         </View>
-        {worst.value <= 2 && (
-          <Text style={styles.worstText}>Low {worst.label.toLowerCase()}: {worst.value}/5</Text>
+        {worst.value <= 4 && (
+          <Text style={styles.worstText}>Low {worst.label.toLowerCase()}: {worst.value}/10</Text>
         )}
       </View>
     </View>
@@ -696,8 +687,8 @@ const styles = StyleSheet.create({
   summaryAvg: { alignItems: "center", minWidth: 44 },
   summaryAvgValue: { fontSize: 22, fontWeight: "800" },
   summaryAvgLabel: { fontSize: 9, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginTop: -2 },
-  dotRow: { flexDirection: "row", gap: 14 },
-  dotItem: { alignItems: "center", gap: 3 },
+  dotRow: { flexDirection: "row", justifyContent: "space-between" },
+  dotItem: { alignItems: "center", gap: 3, flex: 1 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   dotLabel: { fontSize: 9, color: colors.textSecondary, fontWeight: "600" },
   worstText: { fontSize: 11, color: colors.textSecondary, marginTop: 6 },

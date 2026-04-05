@@ -87,6 +87,7 @@ export interface JournalEntry {
   soreness: number;
   notes: string;
   createdAt: string;
+  scaleV2?: boolean;
 }
 
 export type Goal = "recovery" | "fat_loss" | "muscle_gain" | "anti_aging" | "sleep" | "cognitive" | "immune" | "sexual_health" | "hormone";

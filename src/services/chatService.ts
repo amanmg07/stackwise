@@ -73,7 +73,7 @@ Peptides: ${activeCycle.peptides.map((p) => {
 
   if (recentJournal.length > 0) {
     const entries = recentJournal.slice(0, 5).map((e) =>
-      `${e.date}: energy=${e.energyLevel}/5, sleep=${e.sleepQuality}/5, recovery=${e.recoveryScore}/5, mood=${e.mood}/5`
+      `${e.date}: energy=${e.energyLevel}/10, sleep=${e.sleepQuality}/10, recovery=${e.recoveryScore}/10, mood=${e.mood}/10`
     );
     prompt += `\nRECENT JOURNAL:\n${entries.join("\n")}`;
   }

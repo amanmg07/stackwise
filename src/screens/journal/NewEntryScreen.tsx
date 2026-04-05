@@ -10,16 +10,17 @@ import { colors, spacing } from "../../theme";
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
   return (
     <View style={styles.ratingContainer}>
-      <Text style={styles.ratingLabel}>{label}</Text>
+      <View style={styles.ratingHeader}>
+        <Text style={styles.ratingLabel}>{label}</Text>
+        <Text style={styles.ratingValue}>{value}<Text style={styles.ratingValueMax}>/10</Text></Text>
+      </View>
       <View style={styles.ratingRow}>
-        {[1, 2, 3, 4, 5].map((n) => (
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
           <TouchableOpacity
             key={n}
-            style={[styles.ratingBtn, value >= n && styles.ratingBtnActive]}
+            style={[styles.ratingSeg, value >= n && styles.ratingSegActive]}
             onPress={() => onChange(n)}
-          >
-            <Text style={[styles.ratingText, value >= n && styles.ratingTextActive]}>{n}</Text>
-          </TouchableOpacity>
+          />
         ))}
       </View>
       <View style={styles.ratingHints}>
@@ -39,11 +40,11 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
   const [weight, setWeight] = useState(existing?.weight?.toString() || "");
   const [sleepHours, setSleepHours] = useState(existing?.sleepHours?.toString() || "");
-  const [sleepQuality, setSleepQuality] = useState(existing?.sleepQuality || 3);
-  const [energyLevel, setEnergyLevel] = useState(existing?.energyLevel || 3);
-  const [recoveryScore, setRecoveryScore] = useState(existing?.recoveryScore || 3);
-  const [mood, setMood] = useState(existing?.mood || 3);
-  const [soreness, setSoreness] = useState(existing?.soreness || 3);
+  const [sleepQuality, setSleepQuality] = useState(existing?.sleepQuality || 5);
+  const [energyLevel, setEnergyLevel] = useState(existing?.energyLevel || 5);
+  const [recoveryScore, setRecoveryScore] = useState(existing?.recoveryScore || 5);
+  const [mood, setMood] = useState(existing?.mood || 5);
+  const [soreness, setSoreness] = useState(existing?.soreness || 5);
   const [notes, setNotes] = useState(existing?.notes || "");
 
   const save = () => {
@@ -60,6 +61,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
       soreness,
       notes,
       createdAt: existing?.createdAt || new Date().toISOString(),
+      scaleV2: true,
     };
 
     if (existing) {
@@ -142,19 +144,19 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: "row", gap: 12 },
   half: { flex: 1 },
-  ratingContainer: { marginBottom: 14 },
-  ratingLabel: { fontSize: 14, color: colors.text, marginBottom: 8 },
-  ratingRow: { flexDirection: "row", gap: 8 },
-  ratingHints: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 },
+  ratingContainer: { marginBottom: 18 },
+  ratingHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 },
+  ratingLabel: { fontSize: 14, color: colors.text },
+  ratingValue: { fontSize: 20, fontWeight: "800", color: colors.accent },
+  ratingValueMax: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
+  ratingRow: { flexDirection: "row", gap: 4 },
+  ratingHints: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
   ratingHint: { fontSize: 10, color: colors.textSecondary },
-  ratingBtn: {
-    flex: 1, backgroundColor: colors.surface, borderRadius: 10,
-    paddingVertical: 12, alignItems: "center",
+  ratingSeg: {
+    flex: 1, height: 10, backgroundColor: colors.surface, borderRadius: 3,
     borderWidth: 1, borderColor: colors.border,
   },
-  ratingBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  ratingText: { fontSize: 16, fontWeight: "700", color: colors.textSecondary },
-  ratingTextActive: { color: colors.background },
+  ratingSegActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   saveBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18, marginTop: 32,
