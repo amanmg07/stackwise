@@ -85,12 +85,15 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     }
   }
 
-  // Weight trend — only after at least a week of weight data
+  // Weight trend — only flag once the logged weights span at least a week
   const weightEntries = [...entries]
     .filter((e) => typeof e.weight === "number" && e.weight! > 0)
     .sort((a, b) => a.date.localeCompare(b.date));
-  if (weightEntries.length >= 7) {
-    const baselineCount = Math.min(3, Math.floor(weightEntries.length / 3));
+  const daySpan = weightEntries.length >= 2
+    ? (new Date(weightEntries[weightEntries.length - 1].date).getTime() - new Date(weightEntries[0].date).getTime()) / 86400000
+    : 0;
+  if (weightEntries.length >= 3 && daySpan >= 7) {
+    const baselineCount = Math.min(3, Math.max(1, Math.floor(weightEntries.length / 3)));
     const baseline = weightEntries.slice(0, baselineCount);
     const recentWeight = weightEntries.slice(-baselineCount);
     const baselineAvg = baseline.reduce((s, e) => s + (e.weight as number), 0) / baseline.length;
