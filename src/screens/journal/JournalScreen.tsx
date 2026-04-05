@@ -418,10 +418,15 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   return insights.slice(0, 3);
 }
 
+const PAGE_SIZE = 7;
+
 export default function JournalScreen({ navigation }: any) {
   const { journal, settings, deleteJournalEntry } = useApp();
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const visible = sorted.slice(0, visibleCount);
+  const hasMore = visibleCount < sorted.length;
 
   const header = () => {
     if (insights.length === 0) return null;
@@ -469,9 +474,21 @@ export default function JournalScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={sorted}
+        data={visible}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
+        ListFooterComponent={
+          hasMore ? (
+            <TouchableOpacity
+              style={styles.loadMoreBtn}
+              onPress={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            >
+              <Text style={styles.loadMoreText}>
+                Show {Math.min(PAGE_SIZE, sorted.length - visibleCount)} more
+              </Text>
+            </TouchableOpacity>
+          ) : null
+        }
         ListHeaderComponent={<>
           <Text style={styles.journalTitle}>Journal</Text>
           {sorted.length === 0 && (
@@ -740,6 +757,11 @@ const styles = StyleSheet.create({
     width: 80, borderRadius: 14, marginTop: 12, marginRight: spacing.md,
   },
   deleteBtnText: { color: "#fff", fontSize: 11, fontWeight: "600", marginTop: 4 },
+  loadMoreBtn: {
+    alignSelf: "center", marginTop: spacing.md, paddingHorizontal: 18, paddingVertical: 10,
+    borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+  },
+  loadMoreText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
   swipeHint: {
     fontSize: 11, color: colors.textSecondary, textAlign: "right",
     paddingHorizontal: spacing.md, marginBottom: 4,
