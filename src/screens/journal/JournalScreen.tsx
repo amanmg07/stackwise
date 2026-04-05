@@ -70,6 +70,56 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     });
   }
 
+  // Short sleep duration (separate from quality rating)
+  const hoursEntries = recent.filter((e) => typeof e.sleepHours === "number" && e.sleepHours! > 0);
+  if (hoursEntries.length >= 3) {
+    const avgHours = hoursEntries.reduce((s, e) => s + (e.sleepHours as number), 0) / hoursEntries.length;
+    if (avgHours < 6.5) {
+      insights.push({
+        icon: "bed-outline",
+        color: "#818cf8",
+        title: "Not getting enough sleep",
+        detail: `Avg ${avgHours.toFixed(1)} hrs/night. Most adults need 7-9. Short sleep hits recovery, GH output, and body comp.`,
+        peptideIds: ["dsip", "sleep_blend", "ipamorelin"],
+      });
+    }
+  }
+
+  // Weight trend — only after at least a week of weight data
+  const weightEntries = [...entries]
+    .filter((e) => typeof e.weight === "number" && e.weight! > 0)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (weightEntries.length >= 7) {
+    const baselineCount = Math.min(3, Math.floor(weightEntries.length / 3));
+    const baseline = weightEntries.slice(0, baselineCount);
+    const recentWeight = weightEntries.slice(-baselineCount);
+    const baselineAvg = baseline.reduce((s, e) => s + (e.weight as number), 0) / baseline.length;
+    const recentAvg = recentWeight.reduce((s, e) => s + (e.weight as number), 0) / recentWeight.length;
+    const delta = recentAvg - baselineAvg;
+    const pct = (delta / baselineAvg) * 100;
+    if (Math.abs(pct) >= 1.5) {
+      const direction = delta < 0 ? "down" : "up";
+      const abs = Math.abs(delta).toFixed(1);
+      if (delta < 0) {
+        insights.push({
+          icon: "trending-down-outline",
+          color: "#fb923c",
+          title: `Weight trending ${direction}`,
+          detail: `${abs} lost over your logged weeks (${Math.abs(pct).toFixed(1)}%). GLP-1 peptides can amplify fat-loss momentum when paired with protein & training.`,
+          peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "tesamorelin"],
+        });
+      } else {
+        insights.push({
+          icon: "trending-up-outline",
+          color: "#60a5fa",
+          title: `Weight trending ${direction}`,
+          detail: `${abs} gained over your logged weeks (${Math.abs(pct).toFixed(1)}%). If bulking, GH secretagogues support lean gains; if unintended, watch calorie drift.`,
+          peptideIds: ["cjc_ipa_blend", "ipamorelin", "mk677"],
+        });
+      }
+    }
+  }
+
   // Recovery issues
   if (avgRecovery < 6) {
     insights.push({
