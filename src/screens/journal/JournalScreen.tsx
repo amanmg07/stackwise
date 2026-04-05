@@ -92,7 +92,7 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
   const daySpan = weightEntries.length >= 2
     ? (new Date(weightEntries[weightEntries.length - 1].date).getTime() - new Date(weightEntries[0].date).getTime()) / 86400000
     : 0;
-  if (weightEntries.length >= 3 && daySpan >= 7) {
+  if (weightEntries.length >= 2 && daySpan >= 7) {
     const baselineCount = Math.min(3, Math.max(1, Math.floor(weightEntries.length / 3)));
     const baseline = weightEntries.slice(0, baselineCount);
     const recentWeight = weightEntries.slice(-baselineCount);
@@ -425,10 +425,17 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
   // Cap at 3 to avoid overwhelming the user.
   const priority = (i: Insight): number => {
     const t = i.title.toLowerCase();
-    if (t.includes("needs attention") || t.includes("lagging") || t.includes("high ") || t.includes("low ") || t.includes("could be better")) return 0;
-    if (t.includes("declining") || t.includes("trending down")) return 1;
-    if (t.includes("mentioned") || t.includes("noted") || t.includes("multi-benefit")) return 2;
-    return 3; // positives / improving trends
+    // Warnings (rapid weight loss, etc.) are top priority
+    if (t.includes("very fast") || t.includes("warning")) return 0;
+    // Weight/sleep-hours trend changes are explicit, user-actionable signals
+    if (t.includes("weight trending") || t.includes("not getting enough sleep")) return 1;
+    // Low metric scores
+    if (t.includes("needs attention") || t.includes("lagging") || t.includes("high ") || t.includes("low ") || t.includes("could be better")) return 2;
+    // Declining rating trends
+    if (t.includes("declining") || t.includes("trending down")) return 3;
+    // Note-based pattern matches
+    if (t.includes("mentioned") || t.includes("noted") || t.includes("multi-benefit")) return 4;
+    return 5; // positives / improving trends
   };
   insights.sort((a, b) => priority(a) - priority(b));
   return insights.slice(0, 3);
