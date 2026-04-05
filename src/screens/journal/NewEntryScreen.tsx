@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, PanResponder, LayoutChangeEvent } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { generateId } from "../../utils/id";
 import { format, parseISO } from "date-fns";
@@ -7,21 +7,52 @@ import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
 
+const THUMB_SIZE = 24;
+
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
+  const [trackWidth, setTrackWidth] = useState(0);
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const onLayout = (e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width);
+
+  const valueFromX = (x: number) => {
+    if (trackWidth <= 0) return valueRef.current;
+    // x is relative to sliderWrap; subtract horizontal padding to get track-relative x
+    const onTrack = Math.max(0, Math.min(trackWidth, x - THUMB_SIZE / 2));
+    const raw = (onTrack / trackWidth) * 9 + 1; // 1..10
+    return Math.round(raw);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (e) => {
+        const next = valueFromX(e.nativeEvent.locationX);
+        if (next !== valueRef.current) onChange(next);
+      },
+      onPanResponderMove: (e) => {
+        const next = valueFromX(e.nativeEvent.locationX);
+        if (next !== valueRef.current) onChange(next);
+      },
+    })
+  ).current;
+
+  const fillPct = ((value - 1) / 9) * 100;
+  const thumbLeft = trackWidth > 0 ? ((value - 1) / 9) * trackWidth : 0;
+
   return (
     <View style={styles.ratingContainer}>
       <View style={styles.ratingHeader}>
         <Text style={styles.ratingLabel}>{label}</Text>
         <Text style={styles.ratingValue}>{value}<Text style={styles.ratingValueMax}>/10</Text></Text>
       </View>
-      <View style={styles.ratingRow}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-          <TouchableOpacity
-            key={n}
-            style={[styles.ratingSeg, value >= n && styles.ratingSegActive]}
-            onPress={() => onChange(n)}
-          />
-        ))}
+      <View style={styles.sliderWrap} {...panResponder.panHandlers}>
+        <View style={styles.sliderTrack} onLayout={onLayout}>
+          <View style={[styles.sliderFill, { width: `${fillPct}%` }]} />
+        </View>
+        <View style={[styles.sliderThumb, { left: thumbLeft }]} pointerEvents="none" />
       </View>
       <View style={styles.ratingHints}>
         <Text style={styles.ratingHint}>{lowLabel}</Text>
@@ -149,14 +180,23 @@ const styles = StyleSheet.create({
   ratingLabel: { fontSize: 14, color: colors.text },
   ratingValue: { fontSize: 20, fontWeight: "800", color: colors.accent },
   ratingValueMax: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
-  ratingRow: { flexDirection: "row", gap: 4 },
-  ratingHints: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
+  ratingHints: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
   ratingHint: { fontSize: 10, color: colors.textSecondary },
-  ratingSeg: {
-    flex: 1, height: 10, backgroundColor: colors.surface, borderRadius: 3,
-    borderWidth: 1, borderColor: colors.border,
+  sliderWrap: {
+    height: THUMB_SIZE, justifyContent: "center",
+    paddingHorizontal: THUMB_SIZE / 2,
   },
-  ratingSegActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+  sliderTrack: {
+    height: 6, backgroundColor: colors.surface, borderRadius: 3,
+    borderWidth: 1, borderColor: colors.border, overflow: "hidden",
+  },
+  sliderFill: { height: "100%", backgroundColor: colors.accent },
+  sliderThumb: {
+    position: "absolute", width: THUMB_SIZE, height: THUMB_SIZE,
+    borderRadius: THUMB_SIZE / 2, backgroundColor: colors.accent,
+    borderWidth: 2, borderColor: colors.background,
+    left: THUMB_SIZE / 2,
+  },
   saveBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18, marginTop: 32,
