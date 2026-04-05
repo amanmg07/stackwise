@@ -84,7 +84,6 @@ export interface JournalEntry {
   energyLevel: number;
   recoveryScore: number;
   mood: number;
-  soreness: number;
   notes: string;
   createdAt: string;
   scaleV2?: boolean;

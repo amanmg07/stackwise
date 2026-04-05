@@ -58,21 +58,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCycles(c);
       setDoseLogs(d);
       // Migrate journal entries from 1-5 scale to 1-10 scale
-      const needsMigration = j.some((e) => !e.scaleV2);
+      const needsMigration = j.some((e: any) => !e.scaleV2 || e.soreness !== undefined);
       const migrated = needsMigration
-        ? j.map((e) =>
-            e.scaleV2
-              ? e
-              : {
-                  ...e,
-                  sleepQuality: Math.min(10, e.sleepQuality * 2),
-                  energyLevel: Math.min(10, e.energyLevel * 2),
-                  recoveryScore: Math.min(10, e.recoveryScore * 2),
-                  mood: Math.min(10, e.mood * 2),
-                  soreness: Math.min(10, e.soreness * 2),
-                  scaleV2: true,
-                }
-          )
+        ? j.map((e: any) => {
+            const { soreness, ...rest } = e;
+            if (e.scaleV2) return rest;
+            return {
+              ...rest,
+              sleepQuality: Math.min(10, e.sleepQuality * 2),
+              energyLevel: Math.min(10, e.energyLevel * 2),
+              recoveryScore: Math.min(10, e.recoveryScore * 2),
+              mood: Math.min(10, e.mood * 2),
+              scaleV2: true,
+            };
+          })
         : j;
       setJournal(migrated);
       if (needsMigration) appStorage.saveJournal(migrated);

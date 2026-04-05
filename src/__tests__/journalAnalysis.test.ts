@@ -15,7 +15,6 @@ function analyzeJournal(entries: JournalEntry[]) {
   const avgEnergy = avg((e) => e.energyLevel);
   const avgRecovery = avg((e) => e.recoveryScore);
   const avgMood = avg((e) => e.mood);
-  const avgSoreness = avg((e) => e.soreness);
 
   const insights: any[] = [];
 
@@ -24,10 +23,6 @@ function analyzeJournal(entries: JournalEntry[]) {
   }
   if (avgRecovery < 6) {
     insights.push({ title: "Recovery is lagging", peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu"] });
-  }
-  // soreness: 1=very sore, 10=no pain
-  if (avgSoreness <= 5) {
-    insights.push({ title: "High soreness levels", peptideIds: ["bpc157", "tb500", "kpv", "wolverine_blend"] });
   }
   if (avgEnergy < 6) {
     insights.push({ title: "Low energy levels", peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "tesamorelin"] });
@@ -46,7 +41,6 @@ function makeEntry(overrides: Partial<JournalEntry> & { date: string }): Journal
     energyLevel: 7,
     recoveryScore: 7,
     mood: 7,
-    soreness: 8,
     notes: "",
     createdAt: new Date().toISOString(),
     scaleV2: true,
@@ -94,16 +88,6 @@ describe("Journal Analysis", () => {
     expect(insights.some((i) => i.title === "Recovery is lagging")).toBe(true);
   });
 
-  it("should detect high soreness", () => {
-    const entries = [
-      makeEntry({ date: "2026-03-15", soreness: 3 }),
-      makeEntry({ date: "2026-03-14", soreness: 2 }),
-      makeEntry({ date: "2026-03-13", soreness: 4 }),
-    ];
-    const insights = analyzeJournal(entries);
-    expect(insights.some((i) => i.title === "High soreness levels")).toBe(true);
-  });
-
   it("should detect low mood", () => {
     const entries = [
       makeEntry({ date: "2026-03-15", mood: 2 }),
@@ -116,9 +100,9 @@ describe("Journal Analysis", () => {
 
   it("should return no insights when all metrics are good", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", sleepQuality: 8, energyLevel: 8, recoveryScore: 8, mood: 8, soreness: 9 }),
-      makeEntry({ date: "2026-03-14", sleepQuality: 9, energyLevel: 8, recoveryScore: 9, mood: 9, soreness: 10 }),
-      makeEntry({ date: "2026-03-13", sleepQuality: 8, energyLevel: 9, recoveryScore: 8, mood: 8, soreness: 8 }),
+      makeEntry({ date: "2026-03-15", sleepQuality: 8, energyLevel: 8, recoveryScore: 8, mood: 8 }),
+      makeEntry({ date: "2026-03-14", sleepQuality: 9, energyLevel: 8, recoveryScore: 9, mood: 9 }),
+      makeEntry({ date: "2026-03-13", sleepQuality: 8, energyLevel: 9, recoveryScore: 8, mood: 8 }),
     ];
     const insights = analyzeJournal(entries);
     expect(insights.length).toBe(0);
@@ -126,9 +110,9 @@ describe("Journal Analysis", () => {
 
   it("should recommend peptides for each insight", () => {
     const entries = [
-      makeEntry({ date: "2026-03-15", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2, soreness: 2 }),
-      makeEntry({ date: "2026-03-14", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2, soreness: 2 }),
-      makeEntry({ date: "2026-03-13", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2, soreness: 2 }),
+      makeEntry({ date: "2026-03-15", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2 }),
+      makeEntry({ date: "2026-03-14", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2 }),
+      makeEntry({ date: "2026-03-13", sleepQuality: 2, energyLevel: 2, recoveryScore: 2, mood: 2 }),
     ];
     const insights = analyzeJournal(entries);
     for (const insight of insights) {

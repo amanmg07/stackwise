@@ -32,7 +32,6 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
   const avgEnergy = avg((e) => e.energyLevel);
   const avgRecovery = avg((e) => e.recoveryScore);
   const avgMood = avg((e) => e.mood);
-  const avgSoreness = avg((e) => e.soreness);
 
   // Check trends (only if enough data for meaningful comparison)
   let sleepTrend = 0, energyTrend = 0, recoveryTrend = 0;
@@ -90,17 +89,6 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
     });
   }
 
-  // High soreness (low score = more sore, since 1=very sore, 10=no pain)
-  if (avgSoreness <= 5) {
-    insights.push({
-      icon: "fitness-outline",
-      color: "#f87171",
-      title: "High soreness levels",
-      detail: `Avg soreness: ${avgSoreness.toFixed(1)}/10. BPC-157 reduces inflammatory markers. KPV is a potent anti-inflammatory fragment that targets NF-kB pathways.`,
-      peptideIds: ["bpc157", "tb500", "kpv", "wolverine_blend"],
-    });
-  }
-
   // Low energy
   if (avgEnergy < 6) {
     insights.push({
@@ -150,12 +138,12 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
       peptideIds: [],
     });
   }
-  if (avgRecovery >= 8 && avgSoreness >= 7) {
+  if (avgRecovery >= 8) {
     insights.push({
       icon: "fitness-outline",
       color: "#4ade80",
       title: "Recovery is dialed in",
-      detail: `Avg recovery ${avgRecovery.toFixed(1)}/10 with low soreness. Your body is bouncing back fast — keep pushing.`,
+      detail: `Avg recovery ${avgRecovery.toFixed(1)}/10 — your body is bouncing back fast. Keep pushing.`,
       peptideIds: [],
     });
   }
@@ -355,7 +343,7 @@ function analyzeJournal(entries: JournalEntry[]): Insight[] {
 
   // Everything is great
   if (insights.length === 0 && recent.length >= 1) {
-    const allGood = avgSleep >= 7 && avgEnergy >= 7 && avgRecovery >= 7 && avgMood >= 7 && avgSoreness >= 6;
+    const allGood = avgSleep >= 7 && avgEnergy >= 7 && avgRecovery >= 7 && avgMood >= 7;
     if (allGood) {
       insights.push({
         icon: "checkmark-circle-outline",
@@ -524,13 +512,12 @@ const METRICS = [
   { key: "energyLevel" as const, label: "Energy", color: "#facc15" },
   { key: "recoveryScore" as const, label: "Recovery", color: "#4ade80" },
   { key: "mood" as const, label: "Mood", color: "#f472b6" },
-  { key: "soreness" as const, label: "Soreness", color: "#f87171" },
 ];
 
 const screenWidth = Dimensions.get("window").width;
 
 function TrendChart({ entries }: { entries: JournalEntry[] }) {
-  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sleepQuality", "energyLevel", "recoveryScore", "mood", "soreness"]);
+  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sleepQuality", "energyLevel", "recoveryScore", "mood"]);
 
   const chartEntries = [...entries]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -617,7 +604,6 @@ function MetricSummary({ entry }: { entry: JournalEntry }) {
     { label: "Energy", value: entry.energyLevel },
     { label: "Recovery", value: entry.recoveryScore },
     { label: "Mood", value: entry.mood },
-    { label: "Soreness", value: entry.soreness },
   ];
   const avg = dots.reduce((s, d) => s + d.value, 0) / dots.length;
   const avgColor = dotColor(avg);
