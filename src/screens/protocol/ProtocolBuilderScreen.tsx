@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing, safeTop } from "../../theme";
-import { Goal, AdministrationRoute } from "../../types";
+import { AdministrationRoute } from "../../types";
 
 const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: "subcutaneous", label: "Subcutaneous Injection", icon: "medkit-outline" },
@@ -13,30 +13,24 @@ const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ioni
   { key: "topical", label: "Topical", icon: "hand-left-outline" },
 ];
 
-const GOALS: { key: Goal; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
-  { key: "recovery", label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
-  { key: "fat_loss", label: "Fat Loss", icon: "flame-outline", color: "#f87171" },
-  { key: "muscle_gain", label: "Muscle Gain", icon: "barbell-outline", color: "#60a5fa" },
-  { key: "anti_aging", label: "Anti-Aging", icon: "sparkles-outline", color: "#c084fc" },
-  { key: "sleep", label: "Sleep", icon: "moon-outline", color: "#818cf8" },
-  { key: "cognitive", label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
-  { key: "immune", label: "Immune Health", icon: "shield-checkmark-outline", color: "#2dd4bf" },
-  { key: "sexual_health", label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
-];
+const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  recovery: { label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
+  fat_loss: { label: "Fat Loss", icon: "flame-outline", color: "#f87171" },
+  muscle_gain: { label: "Muscle Gain", icon: "barbell-outline", color: "#60a5fa" },
+  anti_aging: { label: "Anti-Aging", icon: "sparkles-outline", color: "#c084fc" },
+  sleep: { label: "Sleep", icon: "moon-outline", color: "#818cf8" },
+  cognitive: { label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
+  immune: { label: "Immune Health", icon: "shield-checkmark-outline", color: "#2dd4bf" },
+  sexual_health: { label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
+};
 
 export default function ProtocolBuilderScreen({ navigation }: any) {
-  const { cycles } = useApp();
+  const { cycles, settings } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
-  const [selectedGoals, setSelectedGoals] = useState<Goal[]>([]);
+  const userGoals = settings.goals || [];
   const [selectedRoutes, setSelectedRoutes] = useState<AdministrationRoute[]>(
     ROUTES.map((r) => r.key)
   );
-
-  const toggleGoal = (goal: Goal) => {
-    setSelectedGoals((prev) =>
-      prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
-    );
-  };
 
   const toggleRoute = (route: AdministrationRoute) => {
     setSelectedRoutes((prev) =>
@@ -76,32 +70,30 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </TouchableOpacity>
       )}
 
-      {/* Goals */}
-      <Text style={styles.sectionTitle}>What are your goals?</Text>
-      <Text style={styles.sectionDesc}>Select one or more to get personalized recommendations</Text>
-      <View style={styles.goalsGrid}>
-        {GOALS.map((g) => {
-          const selected = selectedGoals.includes(g.key);
-          return (
-            <TouchableOpacity
-              key={g.key}
-              style={[styles.goalCard, selected && { borderColor: g.color, backgroundColor: g.color + "15" }]}
-              onPress={() => toggleGoal(g.key)}
-            >
-              <Ionicons name={g.icon} size={28} color={selected ? g.color : colors.textSecondary} />
-              <Text style={[styles.goalLabel, selected && { color: g.color }]}>{g.label}</Text>
-              {selected && (
-                <View style={[styles.goalCheck, { backgroundColor: g.color }]}>
-                  <Ionicons name="checkmark" size={12} color="#fff" />
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {/* Your Goals (from profile) */}
+      <Text style={styles.sectionTitle}>Your Goals</Text>
+      {userGoals.length > 0 ? (
+        <View style={styles.goalsGrid}>
+          {userGoals.map((g) => {
+            const info = GOAL_DISPLAY[g];
+            if (!info) return null;
+            return (
+              <View key={g} style={[styles.goalCard, { borderColor: info.color, backgroundColor: info.color + "15" }]}>
+                <Ionicons name={info.icon} size={28} color={info.color} />
+                <Text style={[styles.goalLabel, { color: info.color }]}>{info.label}</Text>
+              </View>
+            );
+          })}
+        </View>
+      ) : (
+        <TouchableOpacity style={styles.setGoalsBtn} onPress={() => navigation.navigate("Profile")}>
+          <Ionicons name="settings-outline" size={16} color={colors.accent} />
+          <Text style={styles.setGoalsBtnText}>Set your goals in Profile</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Route preferences */}
-      {selectedGoals.length > 0 && (
+      {userGoals.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Preferred administration</Text>
           <Text style={styles.sectionDesc}>Deselect any methods you want to avoid</Text>
@@ -129,9 +121,9 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
       )}
 
       <TouchableOpacity
-        style={[styles.buildBtn, (selectedGoals.length === 0 || selectedRoutes.length === 0) && styles.buildBtnDisabled]}
-        disabled={selectedGoals.length === 0 || selectedRoutes.length === 0}
-        onPress={() => navigation.navigate("ProtocolResult", { goals: selectedGoals, routes: selectedRoutes })}
+        style={[styles.buildBtn, (userGoals.length === 0 || selectedRoutes.length === 0) && styles.buildBtnDisabled]}
+        disabled={userGoals.length === 0 || selectedRoutes.length === 0}
+        onPress={() => navigation.navigate("ProtocolResult", { goals: userGoals, routes: selectedRoutes })}
       >
         <Ionicons name="flash" size={20} color={colors.background} />
         <Text style={styles.buildBtnText}>View Recommended Protocols</Text>
@@ -202,10 +194,12 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: colors.border,
   },
   goalLabel: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
-  goalCheck: {
-    position: "absolute", top: 8, right: 8,
-    width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center",
+  setGoalsBtn: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: 24,
   },
+  setGoalsBtnText: { fontSize: 14, fontWeight: "600", color: colors.accent },
   routeList: { gap: 8, marginBottom: 24 },
   routeRow: {
     flexDirection: "row", alignItems: "center", gap: 12,

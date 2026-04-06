@@ -55,6 +55,13 @@ export default function ProfileScreen({ navigation }: any) {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Profile Header — demographics */}
       <View style={styles.profileHeader}>
+        <TouchableOpacity
+          style={styles.editProfileBtn}
+          onPress={() => navigation.navigate("EditDemographics")}
+        >
+          <Ionicons name="create-outline" size={16} color={colors.accent} />
+          <Text style={styles.editProfileText}>Edit</Text>
+        </TouchableOpacity>
         <View style={styles.avatarCircle}>
           <Ionicons name="person" size={36} color={colors.accent} />
         </View>
@@ -213,7 +220,14 @@ export default function ProfileScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   // Profile header
-  profileHeader: { alignItems: "center", paddingVertical: 20, marginBottom: 8 },
+  profileHeader: { alignItems: "center", paddingVertical: 20, marginBottom: 8, position: "relative" },
+  editProfileBtn: {
+    position: "absolute", top: 20, right: 0, flexDirection: "row", alignItems: "center", gap: 4,
+    paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8,
+    backgroundColor: colors.accent + "15", borderWidth: 1, borderColor: colors.accent + "30",
+    zIndex: 1,
+  },
+  editProfileText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   avatarCircle: {
     width: 72, height: 72, borderRadius: 36,
     backgroundColor: colors.accent + "12", borderWidth: 2, borderColor: colors.accent + "30",

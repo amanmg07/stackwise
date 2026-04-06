@@ -35,14 +35,22 @@ interface Props {
     experienceLevel?: ExperienceLevel;
     analyticsConsent: boolean;
   }) => void;
+  initialValues?: {
+    age?: number;
+    gender?: Gender;
+    goals?: Goal[];
+    experienceLevel?: ExperienceLevel;
+    analyticsConsent?: boolean;
+  };
+  isEditing?: boolean;
 }
 
-export default function DemographicsScreen({ onComplete }: Props) {
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState<Gender | undefined>();
-  const [goals, setGoals] = useState<Set<Goal>>(new Set());
-  const [experience, setExperience] = useState<ExperienceLevel | undefined>();
-  const [analyticsConsent, setAnalyticsConsent] = useState(true);
+export default function DemographicsScreen({ onComplete, initialValues, isEditing }: Props) {
+  const [age, setAge] = useState(initialValues?.age?.toString() || "");
+  const [gender, setGender] = useState<Gender | undefined>(initialValues?.gender);
+  const [goals, setGoals] = useState<Set<Goal>>(new Set(initialValues?.goals || []));
+  const [experience, setExperience] = useState<ExperienceLevel | undefined>(initialValues?.experienceLevel);
+  const [analyticsConsent, setAnalyticsConsent] = useState(initialValues?.analyticsConsent ?? true);
 
   const toggleGoal = (g: Goal) => {
     setGoals((prev) => {
@@ -63,9 +71,11 @@ export default function DemographicsScreen({ onComplete }: Props) {
       <View style={styles.headerIcon}>
         <Ionicons name="person-circle" size={48} color={colors.accent} />
       </View>
-      <Text style={styles.title}>About You</Text>
+      <Text style={styles.title}>{isEditing ? "Edit Profile" : "About You"}</Text>
       <Text style={styles.subtitle}>
-        Help us personalize your experience and contribute to peptide research.
+        {isEditing
+          ? "Update your details to keep your recommendations accurate."
+          : "Help us personalize your experience and contribute to peptide research."}
       </Text>
 
       {/* Age + Gender row */}
@@ -177,7 +187,7 @@ export default function DemographicsScreen({ onComplete }: Props) {
           });
         }}
       >
-        <Text style={styles.btnText}>Continue</Text>
+        <Text style={styles.btnText}>{isEditing ? "Save Changes" : "Continue"}</Text>
         <Ionicons name="arrow-forward" size={18} color={colors.background} />
       </TouchableOpacity>
 
