@@ -87,6 +87,15 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
     if (existing) {
       updateJournalEntry(entry);
+      trackJournalEntry({
+        sleepQuality,
+        energyLevel,
+        recoveryScore,
+        mood,
+        weight: parsedWeight,
+        activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
+        sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
+      });
       showToast("Entry updated!");
     } else {
       addJournalEntry(entry);

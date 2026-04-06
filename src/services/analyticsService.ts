@@ -73,6 +73,10 @@ export function trackDoseLogged(peptideId: string, amount: number, unit: "mcg" |
   trackEvent("dose_logged", { peptide_id: peptideId, amount, unit });
 }
 
+export function trackCycleUpdated(peptideIds: string[]) {
+  trackEvent("cycle_updated", { peptide_ids: peptideIds });
+}
+
 export function trackCycleEnded(data: {
   peptideIds: string[];
   durationDays: number;
