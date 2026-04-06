@@ -108,15 +108,26 @@ export interface ProtocolTemplate {
   notes: string;
 }
 
+export type Gender = "male" | "female" | "other";
+export type ExperienceLevel = "new" | "some" | "experienced";
+
 export interface UserSettings {
   weightUnit: "lbs" | "kg";
   notificationsEnabled: boolean;
   reminderTimes: string[];
   savedPeptides: string[];
   onboardingDone: boolean;
+  demographicsDone: boolean;
   disclaimerAccepted: boolean;
   displayName: string;
   profileImage: string | null;
+  // Demographics
+  age?: number;
+  gender?: Gender;
+  goals?: Goal[];
+  experienceLevel?: ExperienceLevel;
+  // Analytics
+  analyticsConsent: boolean;
 }
 
 export interface ScanObservation {

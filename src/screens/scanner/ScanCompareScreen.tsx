@@ -8,6 +8,7 @@ import { ScanComparison } from "../../types";
 import { peptides as peptideDB } from "../../data/peptides";
 import { compareScans } from "../../services/scanCompareService";
 import { CATEGORY_INFO } from "./scanConstants";
+import { trackScanCompared } from "../../services/analyticsService";
 
 const DIRECTION_STYLES: Record<string, { color: string; icon: keyof typeof Ionicons.glyphMap; label: string }> = {
   improved: { color: colors.success, icon: "trending-up", label: "Improved" },
@@ -31,6 +32,14 @@ export default function ScanCompareScreen({ route, navigation }: any) {
       try {
         const result = await compareScans(earlier, later, activeCycle);
         setComparison(result);
+        trackScanCompared({
+          daysBetween,
+          changesImproved: result.changes.filter((c) => c.direction === "improved").length,
+          changesWorsened: result.changes.filter((c) => c.direction === "worsened").length,
+          changesUnchanged: result.changes.filter((c) => c.direction === "unchanged").length,
+          workingPeptideIds: result.workingPeptides.map((wp) => wp.peptideId),
+          recommendedCategories: result.newRecommendations.map((r) => r.category),
+        });
       } catch (e: any) {
         Alert.alert("Error", e.message || "Failed to compare scans.");
         navigation.goBack();

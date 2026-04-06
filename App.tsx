@@ -7,7 +7,9 @@ import { AppProvider, useApp } from "./src/context/AppContext";
 import { ToastProvider } from "./src/context/ToastContext";
 import RootNavigator from "./src/navigation/RootNavigator";
 import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
+import DemographicsScreen from "./src/screens/onboarding/DemographicsScreen";
 import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
+import { syncUserProfile } from "./src/services/analyticsService";
 import { colors } from "./src/theme";
 
 const navTheme = {
@@ -43,6 +45,31 @@ function AppContent() {
   if (!settings.onboardingDone) {
     return (
       <OnboardingScreen onComplete={() => updateSettings({ onboardingDone: true })} />
+    );
+  }
+
+  if (!settings.demographicsDone) {
+    return (
+      <DemographicsScreen
+        onComplete={(data) => {
+          updateSettings({
+            demographicsDone: true,
+            age: data.age,
+            gender: data.gender,
+            goals: data.goals,
+            experienceLevel: data.experienceLevel,
+            analyticsConsent: data.analyticsConsent,
+          });
+          if (data.analyticsConsent) {
+            syncUserProfile({
+              age: data.age,
+              gender: data.gender,
+              goals: data.goals,
+              experienceLevel: data.experienceLevel,
+            });
+          }
+        }}
+      />
     );
   }
 

@@ -7,6 +7,7 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
 import { AdministrationRoute } from "../../types";
+import { trackDoseLogged } from "../../services/analyticsService";
 
 const SITES = ["Left Delt", "Right Delt", "Left Abdomen", "Right Abdomen", "Left Glute", "Right Glute", "Left Thigh", "Right Thigh"];
 
@@ -65,6 +66,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
       site: site || undefined,
       notes: notes || undefined,
     });
+    trackDoseLogged(initPeptideId);
     showToast("Dose logged!");
     navigation.goBack();
   };

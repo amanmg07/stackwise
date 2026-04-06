@@ -16,9 +16,11 @@ const DEFAULT_SETTINGS: UserSettings = {
   reminderTimes: ["08:00", "20:00"],
   savedPeptides: [],
   onboardingDone: false,
+  demographicsDone: false,
   disclaimerAccepted: false,
   displayName: "",
   profileImage: null,
+  analyticsConsent: false,
 };
 
 async function load<T>(key: string, fallback: T): Promise<T> {

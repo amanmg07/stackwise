@@ -8,6 +8,7 @@ import { format, addWeeks, differenceInWeeks, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { protocolTemplates } from "../../data/protocolTemplates";
+import { trackCycleCreated } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing } from "../../theme";
 import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
@@ -164,6 +165,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         notes: template ? `Based on ${template.name} protocol` : "",
         createdAt: new Date().toISOString(),
       });
+      trackCycleCreated(cyclePeptides.map((p) => p.peptideId));
     }
 
     navigation.goBack();

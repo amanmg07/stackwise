@@ -13,6 +13,7 @@ import { saveScanImage } from "../../utils/scanImages";
 import { colors, spacing, safeTop } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
+import { trackScanCompleted } from "../../services/analyticsService";
 
 const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
 
@@ -260,6 +261,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             },
           });
           setImageUri(savedPath);
+          trackScanCompleted(parsed.recommendedCategories || []);
         } catch (e) {
           console.warn("Failed to save scan:", e);
         }

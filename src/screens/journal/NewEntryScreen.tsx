@@ -7,6 +7,7 @@ import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
+import { trackJournalEntry } from "../../services/analyticsService";
 
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
   return (
@@ -70,6 +71,13 @@ export default function NewEntryScreen({ route, navigation }: any) {
       showToast("Entry updated!");
     } else {
       addJournalEntry(entry);
+      trackJournalEntry({
+        sleepQuality,
+        energyLevel,
+        recoveryScore,
+        mood,
+        activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
+      });
       showToast("Entry saved!");
     }
     navigation.goBack();
