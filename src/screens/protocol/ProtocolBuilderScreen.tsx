@@ -70,26 +70,34 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
       )}
 
       {/* Your Goals (from profile) */}
-      <Text style={styles.sectionTitle}>Your Goals</Text>
-      {userGoals.length > 0 ? (
-        <View style={styles.goalsGrid}>
-          {userGoals.map((g) => {
-            const info = GOAL_DISPLAY[g];
-            if (!info) return null;
-            return (
-              <View key={g} style={[styles.goalCard, { borderColor: info.color, backgroundColor: info.color + "15" }]}>
-                <Ionicons name={info.icon} size={28} color={info.color} />
-                <Text style={[styles.goalLabel, { color: info.color }]}>{info.label}</Text>
-              </View>
-            );
-          })}
+      <TouchableOpacity onPress={() => navigation.navigate("EditDemographics")} activeOpacity={0.7}>
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle}>Your Goals</Text>
+          <View style={styles.editHint}>
+            <Ionicons name="create-outline" size={14} color={colors.accent} />
+            <Text style={styles.editHintText}>Edit</Text>
+          </View>
         </View>
-      ) : (
-        <TouchableOpacity style={styles.setGoalsBtn} onPress={() => navigation.navigate("Profile")}>
-          <Ionicons name="settings-outline" size={16} color={colors.accent} />
-          <Text style={styles.setGoalsBtnText}>Set your goals in Profile</Text>
-        </TouchableOpacity>
-      )}
+        {userGoals.length > 0 ? (
+          <View style={styles.goalsGrid}>
+            {userGoals.map((g) => {
+              const info = GOAL_DISPLAY[g];
+              if (!info) return null;
+              return (
+                <View key={g} style={[styles.goalCard, { borderColor: info.color, backgroundColor: info.color + "15" }]}>
+                  <Ionicons name={info.icon} size={28} color={info.color} />
+                  <Text style={[styles.goalLabel, { color: info.color }]}>{info.label}</Text>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.setGoalsBtn}>
+            <Ionicons name="add-circle-outline" size={16} color={colors.accent} />
+            <Text style={styles.setGoalsBtnText}>Tap to set your goals</Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
       {/* Route preferences */}
       {userGoals.length > 0 && (
@@ -186,8 +194,11 @@ const styles = StyleSheet.create({
   activeCycleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.success },
   activeCycleLabel: { fontSize: 11, color: colors.success, fontWeight: "600", textTransform: "uppercase" },
   activeCycleName: { fontSize: 16, fontWeight: "700", color: colors.text, marginTop: 2 },
+  sectionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
+  editHint: { flexDirection: "row", alignItems: "center", gap: 4 },
+  editHintText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   sectionTitle: {
-    fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 4,
+    fontSize: 20, fontWeight: "700", color: colors.text,
   },
   sectionDesc: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
   goalsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
