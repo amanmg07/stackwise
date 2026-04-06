@@ -578,6 +578,14 @@ export default function JournalScreen({ navigation }: any) {
                 )}
               </View>
               <MetricSummary entry={item} />
+              {item.sideEffects && item.sideEffects.length > 0 && (
+                <View style={styles.sideEffectsRow}>
+                  <Ionicons name="alert-circle-outline" size={13} color={colors.error} />
+                  <Text style={styles.sideEffectsText} numberOfLines={1}>
+                    {item.sideEffects.join(", ")}
+                  </Text>
+                </View>
+              )}
               {item.notes ? (
                 <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
               ) : null}
@@ -774,6 +782,8 @@ const styles = StyleSheet.create({
   },
   badgeLabel: { fontSize: 9, color: colors.textSecondary, marginBottom: 2 },
   badgeValue: { fontSize: 14, fontWeight: "700" },
+  sideEffectsRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 },
+  sideEffectsText: { fontSize: 12, color: colors.error, flex: 1 },
   notes: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
   deleteBtn: {
     backgroundColor: colors.error, justifyContent: "center", alignItems: "center",

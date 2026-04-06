@@ -1,10 +1,13 @@
 import React from "react";
+import { Alert } from "react-native";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { syncUserProfile } from "../../services/analyticsService";
 import DemographicsScreen from "../onboarding/DemographicsScreen";
 
 export default function EditDemographicsScreen({ navigation }: any) {
   const { settings, updateSettings } = useApp();
+  const { showToast } = useToast();
 
   return (
     <DemographicsScreen
@@ -16,7 +19,7 @@ export default function EditDemographicsScreen({ navigation }: any) {
         experienceLevel: settings.experienceLevel,
         analyticsConsent: settings.analyticsConsent,
       }}
-      onComplete={(data) => {
+      onComplete={async (data) => {
         updateSettings({
           age: data.age,
           gender: data.gender,
@@ -25,12 +28,15 @@ export default function EditDemographicsScreen({ navigation }: any) {
           analyticsConsent: data.analyticsConsent,
         });
         if (data.analyticsConsent) {
-          syncUserProfile({
+          const synced = await syncUserProfile({
             age: data.age,
             gender: data.gender,
             goals: data.goals,
             experienceLevel: data.experienceLevel,
           });
+          if (!synced) {
+            showToast("Profile saved locally. Sync will retry next time.");
+          }
         }
         navigation.goBack();
       }}

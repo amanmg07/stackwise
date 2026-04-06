@@ -37,23 +37,29 @@ export async function syncUserProfile(demographics: {
   gender?: string;
   goals?: string[];
   experienceLevel?: string;
-}) {
+}): Promise<boolean> {
   try {
     const settings = await appStorage.loadSettings();
-    if (!settings.analyticsConsent) return;
+    if (!settings.analyticsConsent) return true;
 
     const userId = await getCurrentUserId();
-    if (!userId) return;
+    if (!userId) return false;
 
-    await supabase.from("user_profiles").upsert({
+    const { error } = await supabase.from("user_profiles").upsert({
       anon_id: userId,
       age: demographics.age || null,
       gender: demographics.gender || null,
       goals: demographics.goals || [],
       experience_level: demographics.experienceLevel || null,
     });
+    if (error) {
+      console.warn("Profile sync failed:", error);
+      return false;
+    }
+    return true;
   } catch (e) {
     console.warn("Profile sync failed:", e);
+    return false;
   }
 }
 
