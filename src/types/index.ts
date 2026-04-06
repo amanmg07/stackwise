@@ -127,6 +127,7 @@ export interface UserSettings {
   gender?: Gender;
   goals?: Goal[];
   experienceLevel?: ExperienceLevel;
+  preferredRoutes?: AdministrationRoute[];
   // Analytics
   analyticsConsent: boolean;
 }

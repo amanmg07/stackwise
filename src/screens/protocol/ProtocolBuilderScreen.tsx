@@ -5,12 +5,12 @@ import { useApp } from "../../context/AppContext";
 import { colors, spacing, safeTop } from "../../theme";
 import { AdministrationRoute } from "../../types";
 
-const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: "subcutaneous", label: "Subcutaneous Injection", icon: "medkit-outline" },
-  { key: "intramuscular", label: "Intramuscular Injection", icon: "fitness-outline" },
-  { key: "oral", label: "Oral", icon: "nutrition-outline" },
-  { key: "nasal", label: "Nasal", icon: "water-outline" },
-  { key: "topical", label: "Topical", icon: "hand-left-outline" },
+const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
+  { key: "subcutaneous", label: "SubQ Injection", icon: "medkit-outline", color: "#4ade80" },
+  { key: "intramuscular", label: "IM Injection", icon: "fitness-outline", color: "#60a5fa" },
+  { key: "oral", label: "Oral", icon: "nutrition-outline", color: "#facc15" },
+  { key: "nasal", label: "Nasal", icon: "water-outline", color: "#c084fc" },
+  { key: "topical", label: "Topical", icon: "hand-left-outline", color: "#f472b6" },
 ];
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
@@ -25,17 +25,16 @@ const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.
 };
 
 export default function ProtocolBuilderScreen({ navigation }: any) {
-  const { cycles, settings } = useApp();
+  const { cycles, settings, updateSettings } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
   const userGoals = settings.goals || [];
-  const [selectedRoutes, setSelectedRoutes] = useState<AdministrationRoute[]>(
-    ROUTES.map((r) => r.key)
-  );
+  const selectedRoutes = settings.preferredRoutes ?? ROUTES.map((r) => r.key);
 
   const toggleRoute = (route: AdministrationRoute) => {
-    setSelectedRoutes((prev) =>
-      prev.includes(route) ? prev.filter((r) => r !== route) : [...prev, route]
-    );
+    const updated = selectedRoutes.includes(route)
+      ? selectedRoutes.filter((r) => r !== route)
+      : [...selectedRoutes, route];
+    updateSettings({ preferredRoutes: updated });
   };
 
   return (
@@ -96,23 +95,27 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
       {userGoals.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Preferred administration</Text>
-          <Text style={styles.sectionDesc}>Deselect any methods you want to avoid</Text>
-          <View style={styles.routeList}>
-            {ROUTES.map((r) => {
+          <Text style={styles.sectionDesc}>Tap to deselect any you want to avoid</Text>
+          <View style={styles.routeGrid}>
+            {ROUTES.map((r, i) => {
               const selected = selectedRoutes.includes(r.key);
+              const isInjection = i < 2;
               return (
                 <TouchableOpacity
                   key={r.key}
-                  style={[styles.routeRow, !selected && styles.routeRowOff]}
+                  style={[
+                    isInjection ? styles.routeChipLarge : styles.routeChipSmall,
+                    selected && { borderColor: r.color, backgroundColor: r.color + "15" },
+                  ]}
                   onPress={() => toggleRoute(r.key)}
                 >
-                  <Ionicons
-                    name={selected ? "checkbox" : "square-outline"}
-                    size={22}
-                    color={selected ? colors.accent : colors.textSecondary}
-                  />
-                  <Ionicons name={r.icon} size={18} color={selected ? colors.text : colors.textSecondary} />
-                  <Text style={[styles.routeLabel, !selected && styles.routeLabelOff]}>{r.label}</Text>
+                  <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary} />
+                  <Text style={[styles.routeLabel, selected && { color: r.color }]}>{r.label}</Text>
+                  {selected && (
+                    <View style={[styles.routeCheck, { backgroundColor: r.color }]}>
+                      <Ionicons name="checkmark" size={10} color="#fff" />
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -187,9 +190,9 @@ const styles = StyleSheet.create({
     fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 4,
   },
   sectionDesc: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
-  goalsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 24 },
+  goalsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
   goalCard: {
-    width: "47%", backgroundColor: colors.surface, borderRadius: 14,
+    width: "48.5%", backgroundColor: colors.surface, borderRadius: 14,
     padding: 18, alignItems: "center", gap: 8,
     borderWidth: 2, borderColor: colors.border,
   },
@@ -200,15 +203,20 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.accent + "30", marginBottom: 24,
   },
   setGoalsBtnText: { fontSize: 14, fontWeight: "600", color: colors.accent },
-  routeList: { gap: 8, marginBottom: 24 },
-  routeRow: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: colors.border,
+  routeGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
+  routeChipLarge: {
+    width: "48.5%", alignItems: "center", gap: 8, paddingVertical: 18, borderRadius: 14,
+    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, position: "relative",
   },
-  routeRowOff: { opacity: 0.5 },
-  routeLabel: { fontSize: 15, fontWeight: "600", color: colors.text },
-  routeLabelOff: { color: colors.textSecondary },
+  routeChipSmall: {
+    width: "32%", alignItems: "center", gap: 6, paddingVertical: 14, borderRadius: 14,
+    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, position: "relative",
+  },
+  routeLabel: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
+  routeCheck: {
+    position: "absolute", top: 6, right: 6,
+    width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center",
+  },
   buildBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18,

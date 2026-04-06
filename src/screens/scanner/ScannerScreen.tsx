@@ -310,16 +310,21 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
   if (!imageUri) {
     const hasHistory = scans.length > 0;
     return (
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-        <Text style={styles.title}>Self Scan</Text>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={hasHistory ? { paddingBottom: 40 } : { paddingBottom: 40, flexGrow: 1, justifyContent: "center" }}
+      >
+        {hasHistory && <Text style={styles.title}>Self Scan</Text>}
 
         {!hasHistory && (
           <View style={styles.scanIconWrap}>
             <Ionicons name="scan-outline" size={60} color={colors.accent} />
           </View>
         )}
-        <Text style={styles.landingDesc}>
-          Track visible changes over time. Take a scan regularly to see how your body and skin respond.
+        <Text style={[styles.landingDesc, !hasHistory && { textAlign: "center" }]}>
+          {hasHistory
+            ? "Track visible changes over time. Take a scan regularly to see how your body and skin respond."
+            : "Take your first scan to start tracking visible changes over time."}
         </Text>
 
         <TouchableOpacity style={styles.cameraBtn} onPress={() => pickImage(true)}>
