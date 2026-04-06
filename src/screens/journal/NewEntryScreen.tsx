@@ -9,6 +9,13 @@ import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
 import { trackJournalEntry } from "../../services/analyticsService";
 
+const SIDE_EFFECTS = [
+  "Nausea", "Headache", "Fatigue", "Dizziness",
+  "Injection site pain", "Flushing", "Water retention",
+  "Appetite change", "Insomnia", "Joint pain",
+  "Numbness/tingling", "Bloating",
+];
+
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
   return (
     <View style={styles.ratingContainer}>
@@ -48,19 +55,31 @@ export default function NewEntryScreen({ route, navigation }: any) {
   const [energyLevel, setEnergyLevel] = useState(existing?.energyLevel || 5);
   const [recoveryScore, setRecoveryScore] = useState(existing?.recoveryScore || 5);
   const [mood, setMood] = useState(existing?.mood || 5);
+  const [sideEffects, setSideEffects] = useState<Set<string>>(new Set(existing?.sideEffects || []));
   const [notes, setNotes] = useState(existing?.notes || "");
 
+  const toggleSideEffect = (effect: string) => {
+    setSideEffects((prev) => {
+      const next = new Set(prev);
+      if (next.has(effect)) next.delete(effect);
+      else next.add(effect);
+      return next;
+    });
+  };
+
   const save = () => {
+    const parsedWeight = weight ? parseFloat(weight) : undefined;
     const entry = {
       id: existing?.id || generateId(),
       cycleId: activeCycle?.id,
       date: existing?.date || format(new Date(), "yyyy-MM-dd"),
-      weight: weight ? parseFloat(weight) : undefined,
+      weight: parsedWeight,
       sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
       sleepQuality,
       energyLevel,
       recoveryScore,
       mood,
+      sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
       notes,
       createdAt: existing?.createdAt || new Date().toISOString(),
       scaleV2: true,
@@ -76,7 +95,9 @@ export default function NewEntryScreen({ route, navigation }: any) {
         energyLevel,
         recoveryScore,
         mood,
+        weight: parsedWeight,
         activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
+        sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
       });
       showToast("Entry saved!");
     }
@@ -115,6 +136,23 @@ export default function NewEntryScreen({ route, navigation }: any) {
       <RatingInput label="Energy Level" value={energyLevel} onChange={setEnergyLevel} lowLabel="Exhausted" highLabel="Fully charged" />
       <RatingInput label="Recovery" value={recoveryScore} onChange={setRecoveryScore} lowLabel="Beat up" highLabel="Fully recovered" />
       <RatingInput label="Mood" value={mood} onChange={setMood} lowLabel="Low" highLabel="Great" />
+
+      <Text style={styles.sectionTitle}>Side Effects</Text>
+      <Text style={styles.sideEffectHint}>Tap any you experienced today</Text>
+      <View style={styles.sideEffectRow}>
+        {SIDE_EFFECTS.map((e) => {
+          const active = sideEffects.has(e);
+          return (
+            <TouchableOpacity
+              key={e}
+              style={[styles.sideEffectChip, active && styles.sideEffectChipActive]}
+              onPress={() => toggleSideEffect(e)}
+            >
+              <Text style={[styles.sideEffectText, active && styles.sideEffectTextActive]}>{e}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       <Text style={styles.label}>Notes</Text>
       <TextInput
@@ -160,6 +198,15 @@ const styles = StyleSheet.create({
   ratingHints: { flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
   ratingHint: { fontSize: 10, color: colors.textSecondary },
   slider: { width: "100%", height: 40 },
+  sideEffectHint: { fontSize: 12, color: colors.textSecondary, marginBottom: 10 },
+  sideEffectRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  sideEffectChip: {
+    paddingVertical: 8, paddingHorizontal: 14, borderRadius: 10,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  sideEffectChipActive: { backgroundColor: colors.error + "18", borderColor: colors.error + "50" },
+  sideEffectText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
+  sideEffectTextActive: { color: colors.error },
   saveBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18, marginTop: 32,

@@ -63,8 +63,16 @@ export function trackCycleCreated(peptideIds: string[], goal?: string) {
   trackEvent("cycle_created", { peptide_ids: peptideIds, goal });
 }
 
-export function trackDoseLogged(peptideId: string) {
-  trackEvent("dose_logged", { peptide_id: peptideId });
+export function trackDoseLogged(peptideId: string, amount: number, unit: "mcg" | "mg" | "IU") {
+  trackEvent("dose_logged", { peptide_id: peptideId, amount, unit });
+}
+
+export function trackCycleEnded(data: {
+  peptideIds: string[];
+  durationDays: number;
+  reason: "completed" | "ended_early";
+}) {
+  trackEvent("cycle_ended", data);
 }
 
 export function trackScanCompleted(recommendedCategories: string[]) {
@@ -87,7 +95,9 @@ export function trackJournalEntry(metrics: {
   energyLevel: number;
   recoveryScore: number;
   mood: number;
+  weight?: number;
   activePeptideIds: string[];
+  sideEffects?: string[];
 }) {
   trackEvent("journal_entry", metrics);
 }

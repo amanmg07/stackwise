@@ -5,7 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
 import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
-import { format, differenceInDays, parseISO } from "date-fns";
+import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
+import { trackCycleEnded } from "../../services/analyticsService";
 
 export default function CycleTrackerScreen({ navigation }: any) {
   const { cycles, doseLogs, deleteCycle, deleteDoseLog, updateCycle } = useApp();
@@ -35,12 +36,10 @@ export default function CycleTrackerScreen({ navigation }: any) {
   const todayDate = new Date().toISOString().split("T")[0];
   const start = parseISO(activeCycle.startDate + "T00:00:00");
   const end = parseISO(activeCycle.endDate + "T00:00:00");
-  const today = parseISO(todayDate + "T00:00:00");
   const totalDays = differenceInDays(end, start);
 
-  const todayStr = todayDate;
   const todayLogs = doseLogs.filter(
-    (l) => l.cycleId === activeCycle.id && l.timestamp.startsWith(todayStr)
+    (l) => l.cycleId === activeCycle.id && l.timestamp.startsWith(todayDate)
   );
 
   // Count days where ALL peptides were logged
@@ -124,10 +123,20 @@ export default function CycleTrackerScreen({ navigation }: any) {
                   {
                     text: "End Cycle",
                     onPress: () => {
+                      const now = new Date();
+                      const endDate = now.toISOString().split("T")[0];
+                      const durationDays = differenceInCalendarDays(now, parseISO(activeCycle.startDate));
+                      const plannedEnd = parseISO(activeCycle.endDate + "T00:00:00");
+                      const reason: "completed" | "ended_early" = now < plannedEnd ? "ended_early" : "completed";
                       updateCycle({
                         ...activeCycle,
                         isActive: false,
-                        endDate: new Date().toISOString().split("T")[0],
+                        endDate,
+                      });
+                      trackCycleEnded({
+                        peptideIds: activeCycle.peptides.map((p) => p.peptideId),
+                        durationDays,
+                        reason,
                       });
                     },
                   },
