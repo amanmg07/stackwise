@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing, safeTop } from "../../theme";
 import { AdministrationRoute } from "../../types";
+import GlassCard from "../../components/GlassCard";
 
 const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
   { key: "subcutaneous", label: "SubQ Injection", icon: "medkit-outline", color: "#4ade80" },
@@ -56,16 +57,15 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
 
       {/* Active cycle quick card */}
       {activeCycle && (
-        <TouchableOpacity
-          style={styles.activeCycleCard}
-          onPress={() => navigation.navigate("CycleTab")}
-        >
-          <View style={styles.activeCycleDot} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.activeCycleLabel}>Active Cycle</Text>
-            <Text style={styles.activeCycleName}>{activeCycle.name}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        <TouchableOpacity onPress={() => navigation.navigate("CycleTab")} activeOpacity={0.7}>
+          <GlassCard style={styles.activeCycleCard}>
+            <View style={styles.activeCycleDot} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.activeCycleLabel}>Active Cycle</Text>
+              <Text style={styles.activeCycleName}>{activeCycle.name}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </GlassCard>
         </TouchableOpacity>
       )}
 
@@ -84,10 +84,10 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
               const info = GOAL_DISPLAY[g];
               if (!info) return null;
               return (
-                <View key={g} style={[styles.goalCard, { borderColor: info.color, backgroundColor: info.color + "15" }]}>
+                <GlassCard key={g} style={[styles.goalCard, { borderColor: info.color }]}>
                   <Ionicons name={info.icon} size={28} color={info.color} />
                   <Text style={[styles.goalLabel, { color: info.color }]}>{info.label}</Text>
-                </View>
+                </GlassCard>
               );
             })}
           </View>
@@ -111,19 +111,24 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
               return (
                 <TouchableOpacity
                   key={r.key}
-                  style={[
-                    isInjection ? styles.routeChipLarge : styles.routeChipSmall,
-                    selected && { borderColor: r.color, backgroundColor: r.color + "15" },
-                  ]}
+                  style={isInjection ? styles.routeWrapLarge : styles.routeWrapSmall}
                   onPress={() => toggleRoute(r.key)}
+                  activeOpacity={0.7}
                 >
-                  <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary} />
-                  <Text style={[styles.routeLabel, selected && { color: r.color }]}>{r.label}</Text>
-                  {selected && (
-                    <View style={[styles.routeCheck, { backgroundColor: r.color }]}>
-                      <Ionicons name="checkmark" size={10} color="#fff" />
-                    </View>
-                  )}
+                  <GlassCard
+                    style={[
+                      styles.routeChip,
+                      selected && { borderColor: r.color },
+                    ]}
+                  >
+                    <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary} />
+                    <Text style={[styles.routeLabel, selected && { color: r.color }]}>{r.label}</Text>
+                    {selected && (
+                      <View style={[styles.routeCheck, { backgroundColor: r.color }]}>
+                        <Ionicons name="checkmark" size={10} color="#fff" />
+                      </View>
+                    )}
+                  </GlassCard>
                 </TouchableOpacity>
               );
             })}
@@ -141,39 +146,36 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
       </TouchableOpacity>
 
       {/* Quick links */}
-      <Text style={[styles.sectionTitle, { marginTop: 32 }]}>Or explore on your own</Text>
-      <TouchableOpacity
-        style={styles.linkRow}
-        onPress={() => navigation.navigate("ExploreTab")}
-      >
-        <Ionicons name="compass-outline" size={20} color={colors.accent} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.linkTitle}>Explore Peptides</Text>
-          <Text style={styles.linkDesc}>Chat with AI or browse the full database</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+      <Text style={[styles.sectionTitle, { marginTop: 32, marginBottom: 16 }]}>Or explore on your own</Text>
+      <TouchableOpacity onPress={() => navigation.navigate("ExploreTab")} activeOpacity={0.7}>
+        <GlassCard style={styles.linkRow}>
+          <Ionicons name="compass-outline" size={20} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.linkTitle}>Explore Peptides</Text>
+            <Text style={styles.linkDesc}>Chat with AI or browse the full database</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        </GlassCard>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.linkRow}
-        onPress={() => navigation.navigate("NewCycle")}
-      >
-        <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.linkTitle}>Build Custom Cycle</Text>
-          <Text style={styles.linkDesc}>Skip recommendations and pick your own peptides</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+      <TouchableOpacity onPress={() => navigation.navigate("NewCycle")} activeOpacity={0.7}>
+        <GlassCard style={styles.linkRow}>
+          <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.linkTitle}>Build Custom Cycle</Text>
+            <Text style={styles.linkDesc}>Skip recommendations and pick your own peptides</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        </GlassCard>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.linkRow}
-        onPress={() => navigation.navigate("ReconCalculator")}
-      >
-        <Ionicons name="calculator-outline" size={20} color={colors.accent} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.linkTitle}>Dosing Calculator</Text>
-          <Text style={styles.linkDesc}>Calculate exactly how much to draw on your syringe</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+      <TouchableOpacity onPress={() => navigation.navigate("ReconCalculator")} activeOpacity={0.7}>
+        <GlassCard style={styles.linkRow}>
+          <Ionicons name="calculator-outline" size={20} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.linkTitle}>Dosing Calculator</Text>
+            <Text style={styles.linkDesc}>Calculate exactly how much to draw on your syringe</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        </GlassCard>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -188,8 +190,7 @@ const styles = StyleSheet.create({
   tagline: { fontSize: 14, color: colors.textSecondary, marginTop: 4, marginBottom: 24 },
   activeCycleCard: {
     flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: colors.success + "40", marginBottom: 24,
+    borderRadius: 14, padding: 16, marginBottom: 24,
   },
   activeCycleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.success },
   activeCycleLabel: { fontSize: 11, color: colors.success, fontWeight: "600", textTransform: "uppercase" },
@@ -203,9 +204,8 @@ const styles = StyleSheet.create({
   sectionDesc: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
   goalsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
   goalCard: {
-    width: "48.5%", backgroundColor: colors.surface, borderRadius: 14,
+    width: "48.5%", borderRadius: 14,
     padding: 18, alignItems: "center", gap: 8,
-    borderWidth: 2, borderColor: colors.border,
   },
   goalLabel: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
   setGoalsBtn: {
@@ -215,13 +215,11 @@ const styles = StyleSheet.create({
   },
   setGoalsBtnText: { fontSize: 14, fontWeight: "600", color: colors.accent },
   routeGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
-  routeChipLarge: {
-    width: "48.5%", alignItems: "center", gap: 8, paddingVertical: 18, borderRadius: 14,
-    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, position: "relative",
-  },
-  routeChipSmall: {
-    width: "32%", alignItems: "center", gap: 6, paddingVertical: 14, borderRadius: 14,
-    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, position: "relative",
+  routeWrapLarge: { width: "48.5%" },
+  routeWrapSmall: { width: "32%" },
+  routeChip: {
+    alignItems: "center", gap: 6, paddingVertical: 16, borderRadius: 14,
+    position: "relative",
   },
   routeLabel: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
   routeCheck: {
@@ -236,8 +234,7 @@ const styles = StyleSheet.create({
   buildBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
   linkRow: {
     flexDirection: "row", alignItems: "center", gap: 14,
-    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: colors.border, marginBottom: 8,
+    borderRadius: 14, padding: 16, marginBottom: 8,
   },
   linkTitle: { fontSize: 15, fontWeight: "600", color: colors.text },
   linkDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
