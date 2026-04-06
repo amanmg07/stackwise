@@ -119,6 +119,50 @@ export interface UserSettings {
   profileImage: string | null;
 }
 
+export interface ScanObservation {
+  category: PeptideCategory;
+  observation: string;
+  confidence: "high" | "medium" | "low";
+}
+
+export interface ScanResultData {
+  strengths: ScanObservation[];
+  improvements: ScanObservation[];
+  recommendedCategories: PeptideCategory[];
+  summary: string;
+}
+
+export interface ScanChange {
+  category: PeptideCategory;
+  change: string;
+  direction: "improved" | "worsened" | "unchanged";
+}
+
+export interface WorkingPeptide {
+  peptideId: string;
+  reason: string;
+}
+
+export interface ScanRecommendation {
+  category: PeptideCategory;
+  observation: string;
+  suggestedPeptideIds: string[];
+}
+
+export interface ScanComparison {
+  summary: string;
+  changes: ScanChange[];
+  workingPeptides: WorkingPeptide[];
+  newRecommendations: ScanRecommendation[];
+}
+
+export interface ScanRecord {
+  id: string;
+  date: string; // ISO timestamp
+  imagePath: string; // file:// URI in documentDirectory
+  result: ScanResultData;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";

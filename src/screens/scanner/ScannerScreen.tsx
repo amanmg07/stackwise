@@ -5,42 +5,18 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
-import { format, addWeeks } from "date-fns";
+import { format, addWeeks, parseISO } from "date-fns";
 import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
+import { saveScanImage } from "../../utils/scanImages";
 import { colors, spacing, safeTop } from "../../theme";
-import { PeptideCategory, AdministrationRoute } from "../../types";
+import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
+import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 
 const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
 
-interface Observation {
-  category: PeptideCategory;
-  observation: string;
-  confidence: "high" | "medium" | "low";
-}
-
-interface ScanResult {
-  strengths: Observation[];
-  improvements: Observation[];
-  recommendedCategories: PeptideCategory[];
-  summary: string;
-  error?: string;
-}
-
-const CATEGORY_INFO: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-  recovery: { label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
-  fat_loss: { label: "Fat Loss", icon: "flame-outline", color: "#f87171" },
-  muscle_gain: { label: "Muscle Gain", icon: "barbell-outline", color: "#60a5fa" },
-  anti_aging: { label: "Anti-Aging", icon: "sparkles-outline", color: "#c084fc" },
-  sleep: { label: "Sleep", icon: "moon-outline", color: "#818cf8" },
-  cognitive: { label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
-  immune: { label: "Immune", icon: "shield-checkmark-outline", color: "#2dd4bf" },
-  sexual_health: { label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
-};
-
-const CONFIDENCE_LABELS: Record<string, string> = { high: "Clearly visible", medium: "Somewhat visible", low: "Subtle" };
-const CONFIDENCE_COLORS: Record<string, string> = { high: colors.success, medium: colors.warning, low: colors.textSecondary };
+type ScanResult = ScanResultData & { error?: string };
 
 function ShimmerBlock({ width, height, style }: { width: number | string; height: number; style?: any }) {
   const shimmer = useRef(new Animated.Value(0)).current;
@@ -118,7 +94,7 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
-  const { addCycle } = useApp();
+  const { addCycle, scans, addScan, deleteScan } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -268,6 +244,25 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
         setResult(null);
       } else {
         setResult(parsed);
+        // Persist scan to local storage (copy image + save metadata)
+        try {
+          const id = generateId();
+          const savedPath = saveScanImage(uri, id);
+          addScan({
+            id,
+            date: new Date().toISOString(),
+            imagePath: savedPath,
+            result: {
+              strengths: parsed.strengths || [],
+              improvements: parsed.improvements || [],
+              recommendedCategories: parsed.recommendedCategories || [],
+              summary: parsed.summary || "",
+            },
+          });
+          setImageUri(savedPath);
+        } catch (e) {
+          console.warn("Failed to save scan:", e);
+        }
       }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to analyze image. Please try again.");
@@ -296,6 +291,13 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
     return sorted.slice(0, 3);
   };
 
+  const confirmDeleteScan = (scanId: string) => {
+    Alert.alert("Delete Scan?", "This will permanently remove this scan and its photo from your device.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => deleteScan(scanId) },
+    ]);
+  };
+
   const reset = () => {
     setImageUri(null);
     setResult(null);
@@ -304,36 +306,85 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
 
   // Landing state — no image yet
   if (!imageUri) {
+    const hasHistory = scans.length > 0;
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <Text style={styles.title}>Self Scan</Text>
-        <View style={styles.landingContent}>
+
+        {!hasHistory && (
           <View style={styles.scanIconWrap}>
             <Ionicons name="scan-outline" size={60} color={colors.accent} />
           </View>
-          <Text style={styles.landingTitle}>Self Scan</Text>
-          <Text style={styles.landingDesc}>
-            Take a photo and our AI will analyze visible characteristics to recommend peptides tailored to your goals.
+        )}
+        <Text style={styles.landingDesc}>
+          Track visible changes over time. Take a scan regularly to see how your body and skin respond.
+        </Text>
+
+        <TouchableOpacity style={styles.cameraBtn} onPress={() => pickImage(true)}>
+          <Ionicons name="camera" size={22} color={colors.background} />
+          <Text style={styles.cameraBtnText}>{hasHistory ? "New Scan" : "Take Photo"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.galleryBtn} onPress={() => pickImage(false)}>
+          <Ionicons name="images-outline" size={20} color={colors.accent} />
+          <Text style={styles.galleryBtnText}>Choose from Gallery</Text>
+        </TouchableOpacity>
+
+        {scans.length >= 2 && (
+          <TouchableOpacity
+            style={styles.progressBtn}
+            onPress={() =>
+              navigation.navigate("ScanCompare", {
+                earlierScanId: scans[scans.length - 1].id,
+                laterScanId: scans[0].id,
+              })
+            }
+          >
+            <Ionicons name="analytics-outline" size={20} color={colors.accent} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.progressBtnTitle}>See Progress</Text>
+              <Text style={styles.progressBtnDesc}>Compare your first and latest scans with AI</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+          </TouchableOpacity>
+        )}
+
+        {hasHistory && (
+          <>
+            <Text style={styles.historyHeader}>Your Scans ({scans.length})</Text>
+            <View style={styles.grid}>
+              {scans.map((s) => (
+                <TouchableOpacity
+                  key={s.id}
+                  style={styles.historyCard}
+                  onPress={() => navigation.navigate("ScanDetail", { scanId: s.id })}
+                  onLongPress={() => confirmDeleteScan(s.id)}
+                >
+                  <Image source={{ uri: s.imagePath }} style={styles.historyThumb} />
+                  <TouchableOpacity
+                    style={styles.historyDeleteBtn}
+                    onPress={() => confirmDeleteScan(s.id)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="close" size={16} color={colors.text} />
+                  </TouchableOpacity>
+                  <View style={styles.historyInfo}>
+                    <Text style={styles.historyDate}>{format(parseISO(s.date), "MMM d, yyyy")}</Text>
+                    <Text style={styles.historyTime}>{format(parseISO(s.date), "h:mm a")}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
+        <View style={styles.disclaimer}>
+          <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
+          <Text style={styles.disclaimerText}>
+            Photos are stored only on this device. They never leave your phone except when sent to the AI for analysis, and are not kept on any server.
           </Text>
-
-          <TouchableOpacity style={styles.cameraBtn} onPress={() => pickImage(true)}>
-            <Ionicons name="camera" size={22} color={colors.background} />
-            <Text style={styles.cameraBtnText}>Take Photo</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.galleryBtn} onPress={() => pickImage(false)}>
-            <Ionicons name="images-outline" size={20} color={colors.accent} />
-            <Text style={styles.galleryBtnText}>Choose from Gallery</Text>
-          </TouchableOpacity>
-
-          <View style={styles.disclaimer}>
-            <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
-            <Text style={styles.disclaimerText}>
-              Your photos are not saved or stored in any database. All analysis is done in real-time and discarded immediately.
-            </Text>
-          </View>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
@@ -538,7 +589,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
           <View style={styles.disclaimer}>
             <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             <Text style={styles.disclaimerText}>
-              Your photos are not saved or stored in any database. All analysis is done in real-time and discarded immediately.
+              This scan is saved to your device so you can compare progress over time. Delete it anytime from the scan details.
             </Text>
           </View>
         </>
@@ -558,14 +609,38 @@ const styles = StyleSheet.create({
   },
   resetBtnText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   // Landing
-  landingContent: { flex: 1, justifyContent: "center", alignItems: "center", paddingBottom: 80 },
   scanIconWrap: {
     width: 120, height: 120, borderRadius: 60,
     backgroundColor: colors.accent + "12", alignItems: "center", justifyContent: "center",
     marginBottom: spacing.lg, borderWidth: 2, borderColor: colors.accent + "30",
+    alignSelf: "center",
   },
-  landingTitle: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 8 },
-  landingDesc: { fontSize: 15, color: colors.textSecondary, textAlign: "center", lineHeight: 22, marginBottom: spacing.xl, paddingHorizontal: 20 },
+  landingDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: spacing.lg },
+  progressBtn: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    backgroundColor: colors.accent + "12", borderRadius: 14, padding: 16,
+    borderWidth: 1, borderColor: colors.accent + "30", marginTop: spacing.md,
+  },
+  progressBtnTitle: { fontSize: 15, fontWeight: "700", color: colors.text },
+  progressBtnDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  historyHeader: {
+    fontSize: 13, fontWeight: "700", color: colors.textSecondary,
+    textTransform: "uppercase", letterSpacing: 1, marginTop: spacing.xl, marginBottom: spacing.sm,
+  },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  historyCard: {
+    width: "48%", backgroundColor: colors.surface, borderRadius: 12,
+    overflow: "hidden", borderWidth: 1, borderColor: colors.border, position: "relative",
+  },
+  historyDeleteBtn: {
+    position: "absolute", top: 6, right: 6,
+    width: 26, height: 26, borderRadius: 13,
+    backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center",
+  },
+  historyThumb: { width: "100%", aspectRatio: 3 / 4 },
+  historyInfo: { padding: 10 },
+  historyDate: { fontSize: 13, fontWeight: "700", color: colors.text },
+  historyTime: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
   cameraBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
     backgroundColor: colors.accent, borderRadius: 14, paddingVertical: 16, paddingHorizontal: 40,

@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Cycle, DoseLog, JournalEntry, UserSettings, ChatMessage } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, ChatMessage, ScanRecord } from "../types";
 
 const KEYS = {
   cycles: "@stackwise/cycles",
@@ -7,6 +7,7 @@ const KEYS = {
   journal: "@stackwise/journal",
   settings: "@stackwise/settings",
   chatMessages: "@stackwise/chat_messages",
+  scans: "@stackwise/scans",
 };
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -56,6 +57,13 @@ export const appStorage = {
   },
   async saveSettings(settings: UserSettings): Promise<void> {
     return save(KEYS.settings, settings);
+  },
+
+  async loadScans(): Promise<ScanRecord[]> {
+    return load(KEYS.scans, []);
+  },
+  async saveScans(scans: ScanRecord[]): Promise<void> {
+    return save(KEYS.scans, scans);
   },
 
   async loadChatMessages(): Promise<ChatMessage[]> {

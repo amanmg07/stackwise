@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Cycle, DoseLog, JournalEntry, UserSettings } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord } from "../types";
+import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
 import { ensureAuth } from "../utils/supabase";
 
@@ -7,6 +8,7 @@ interface AppState {
   cycles: Cycle[];
   doseLogs: DoseLog[];
   journal: JournalEntry[];
+  scans: ScanRecord[];
   settings: UserSettings;
   loading: boolean;
   userId: string | null;
@@ -21,6 +23,9 @@ interface AppState {
   addJournalEntry: (entry: JournalEntry) => void;
   updateJournalEntry: (entry: JournalEntry) => void;
   deleteJournalEntry: (id: string) => void;
+  // Scans
+  addScan: (scan: ScanRecord) => void;
+  deleteScan: (id: string) => void;
   // Settings
   updateSettings: (settings: Partial<UserSettings>) => void;
   // Data
@@ -33,6 +38,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
+  const [scans, setScans] = useState<ScanRecord[]>([]);
   const [settings, setSettings] = useState<UserSettings>({
     weightUnit: "lbs",
     notificationsEnabled: false,
@@ -49,14 +55,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Load local data first, then show the app immediately
     (async () => {
-      const [c, d, j, s] = await Promise.all([
+      const [c, d, j, s, sc] = await Promise.all([
         appStorage.loadCycles(),
         appStorage.loadDoseLogs(),
         appStorage.loadJournal(),
         appStorage.loadSettings(),
+        appStorage.loadScans(),
       ]);
       setCycles(c);
       setDoseLogs(d);
+      setScans(sc);
       // Migrate journal entries from 1-5 scale to 1-10 scale
       const needsMigration = j.some((e: any) => !e.scaleV2 || e.soreness !== undefined);
       const migrated = needsMigration
@@ -94,12 +102,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const persistCycles = useCallback((c: Cycle[]) => { setCycles(c); appStorage.saveCycles(c); }, []);
   const persistLogs = useCallback((l: DoseLog[]) => { setDoseLogs(l); appStorage.saveDoseLogs(l); }, []);
   const persistJournal = useCallback((j: JournalEntry[]) => { setJournal(j); appStorage.saveJournal(j); }, []);
+  const persistScans = useCallback((s: ScanRecord[]) => { setScans(s); appStorage.saveScans(s); }, []);
   const persistSettings = useCallback((s: UserSettings) => { setSettings(s); appStorage.saveSettings(s); }, []);
 
   const value: AppState = {
     cycles,
     doseLogs,
     journal,
+    scans,
     settings,
     loading,
     userId,
@@ -118,12 +128,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateJournalEntry: (entry) => persistJournal(journal.map((e) => (e.id === entry.id ? entry : e))),
     deleteJournalEntry: (id) => persistJournal(journal.filter((e) => e.id !== id)),
 
+    addScan: (scan) => persistScans([scan, ...scans]),
+    deleteScan: (id) => {
+      const scan = scans.find((s) => s.id === id);
+      if (scan) {
+        try {
+          const file = new File(scan.imagePath);
+          if (file.exists) file.delete();
+        } catch (e) {
+          console.warn("Failed to delete scan image:", e);
+        }
+      }
+      persistScans(scans.filter((s) => s.id !== id));
+    },
+
     updateSettings: (partial) => persistSettings({ ...settings, ...partial }),
 
     clearAllData: () => {
+      // Best-effort cleanup of scan images from disk
+      for (const s of scans) {
+        try {
+          const file = new File(s.imagePath);
+          if (file.exists) file.delete();
+        } catch {}
+      }
       persistCycles([]);
       persistLogs([]);
       persistJournal([]);
+      persistScans([]);
       appStorage.clearAll();
     },
   };

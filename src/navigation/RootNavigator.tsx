@@ -19,6 +19,8 @@ import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
 import InteractionCheckerScreen from "../screens/research/InteractionCheckerScreen";
 import CompareScreen from "../screens/research/CompareScreen";
 import ScannerScreen from "../screens/scanner/ScannerScreen";
+import ScanDetailScreen from "../screens/scanner/ScanDetailScreen";
+import ScanCompareScreen from "../screens/scanner/ScanCompareScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -88,6 +90,8 @@ function ScannerNavigator() {
   return (
     <ScannerStack.Navigator screenOptions={screenOptions}>
       <ScannerStack.Screen name="ScannerHome" component={ScannerScreen} options={{ headerShown: false }} />
+      <ScannerStack.Screen name="ScanDetail" component={ScanDetailScreen} options={{ headerShown: false }} />
+      <ScannerStack.Screen name="ScanCompare" component={ScanCompareScreen} options={{ headerShown: false }} />
       <ScannerStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
     </ScannerStack.Navigator>
   );
