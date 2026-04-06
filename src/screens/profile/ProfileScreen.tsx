@@ -1,10 +1,33 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing } from "../../theme";
+
+const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
+  fat_loss: { label: "Fat Loss", icon: "flame", color: "#f87171" },
+  muscle_gain: { label: "Muscle", icon: "barbell", color: "#60a5fa" },
+  anti_aging: { label: "Anti-Aging", icon: "sparkles", color: "#c084fc" },
+  sleep: { label: "Sleep", icon: "moon", color: "#818cf8" },
+  cognitive: { label: "Cognitive", icon: "bulb", color: "#facc15" },
+  immune: { label: "Immune", icon: "shield-checkmark", color: "#2dd4bf" },
+  sexual_health: { label: "Sexual Health", icon: "heart", color: "#f472b6" },
+  hormone: { label: "Hormone", icon: "pulse", color: "#fb923c" },
+};
+
+const GENDER_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  male: { label: "Male", icon: "male", color: "#60a5fa" },
+  female: { label: "Female", icon: "female", color: "#f472b6" },
+  other: { label: "Other", icon: "person", color: "#c084fc" },
+};
+
+const EXP_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  new: { label: "Beginner", icon: "leaf", color: "#4ade80" },
+  some: { label: "Intermediate", icon: "trending-up", color: "#facc15" },
+  experienced: { label: "Advanced", icon: "trophy", color: "#f87171" },
+};
 
 export default function ProfileScreen({ navigation }: any) {
   const { cycles, doseLogs, journal, settings, updateSettings, clearAllData, userId } = useApp();
@@ -14,22 +37,8 @@ export default function ProfileScreen({ navigation }: any) {
   const totalDoses = doseLogs.length;
   const totalEntries = journal.length;
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow photo access to set a profile picture.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-    if (!result.canceled && result.assets[0]) {
-      updateSettings({ profileImage: result.assets[0].uri });
-    }
-  };
+  const genderInfo = settings.gender ? GENDER_DISPLAY[settings.gender] : null;
+  const expInfo = settings.experienceLevel ? EXP_DISPLAY[settings.experienceLevel] : null;
 
   const confirmClear = () => {
     Alert.alert(
@@ -44,37 +53,45 @@ export default function ProfileScreen({ navigation }: any) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      {/* Profile Header */}
+      {/* Profile Header — demographics */}
       <View style={styles.profileHeader}>
-        <TouchableOpacity onPress={pickImage} style={styles.avatarWrap}>
-          {settings.profileImage ? (
-            <>
-              <Image source={{ uri: settings.profileImage }} style={styles.avatar} />
-              <View style={styles.editPhotoBadge}>
-                <Ionicons name="add-circle-outline" size={24} color={colors.accent} />
-              </View>
-            </>
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Ionicons name="add-circle-outline" size={32} color={colors.accent} />
-              <Text style={styles.addPhotoText}>Add Photo</Text>
+        <View style={styles.avatarCircle}>
+          <Ionicons name="person" size={36} color={colors.accent} />
+        </View>
+        <View style={styles.demoBadges}>
+          {settings.age && (
+            <View style={styles.demoBadge}>
+              <Ionicons name="calendar" size={14} color={colors.accent} />
+              <Text style={styles.demoBadgeText}>{settings.age} years old</Text>
             </View>
           )}
-        </TouchableOpacity>
-
-        <View style={styles.nameBtn}>
-          <Ionicons name="create-outline" size={16} color={colors.accent} />
-          <TextInput
-            style={styles.nameInput}
-            value={settings.displayName || ""}
-            onChangeText={(text) => updateSettings({ displayName: text })}
-            placeholder="Set your name"
-            placeholderTextColor={colors.textSecondary}
-            returnKeyType="done"
-            maxLength={40}
-          />
+          {genderInfo && (
+            <View style={[styles.demoBadge, { borderColor: genderInfo.color + "40" }]}>
+              <Ionicons name={genderInfo.icon} size={14} color={genderInfo.color} />
+              <Text style={[styles.demoBadgeText, { color: genderInfo.color }]}>{genderInfo.label}</Text>
+            </View>
+          )}
+          {expInfo && (
+            <View style={[styles.demoBadge, { borderColor: expInfo.color + "40" }]}>
+              <Ionicons name={expInfo.icon} size={14} color={expInfo.color} />
+              <Text style={[styles.demoBadgeText, { color: expInfo.color }]}>{expInfo.label}</Text>
+            </View>
+          )}
         </View>
-        <Text style={styles.nameHint}>This shows on your feed posts</Text>
+        {settings.goals && settings.goals.length > 0 && (
+          <View style={styles.goalChips}>
+            {settings.goals.map((g) => {
+              const info = GOAL_DISPLAY[g];
+              if (!info) return null;
+              return (
+                <View key={g} style={[styles.goalChip, { backgroundColor: info.color + "15", borderColor: info.color + "30" }]}>
+                  <Ionicons name={info.icon} size={14} color={info.color} />
+                  <Text style={[styles.goalChipText, { color: info.color }]}>{info.label}</Text>
+                </View>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       <View style={styles.statsRow}>
@@ -197,29 +214,25 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
   // Profile header
   profileHeader: { alignItems: "center", paddingVertical: 20, marginBottom: 8 },
-  avatarWrap: { marginBottom: 14 },
-  avatar: { width: 88, height: 88, borderRadius: 44 },
-  avatarPlaceholder: {
-    width: 88, height: 88, borderRadius: 44,
-    backgroundColor: colors.accent + "10", borderWidth: 2, borderColor: colors.accent + "40",
-    borderStyle: "dashed",
-    alignItems: "center", justifyContent: "center",
+  avatarCircle: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: colors.accent + "12", borderWidth: 2, borderColor: colors.accent + "30",
+    alignItems: "center", justifyContent: "center", marginBottom: 14,
   },
-  addPhotoText: { fontSize: 11, fontWeight: "600", color: colors.textSecondary, marginTop: 4 },
-  editPhotoBadge: {
-    position: "absolute", bottom: 0, right: -4,
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
-    borderWidth: 2, borderColor: colors.background,
+  demoBadges: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8, marginBottom: 12 },
+  demoBadge: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingVertical: 6, paddingHorizontal: 12, borderRadius: 10,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
   },
-  nameBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    marginTop: 8,
+  demoBadgeText: { fontSize: 13, fontWeight: "600", color: colors.text },
+  goalChips: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 },
+  goalChip: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingVertical: 6, paddingHorizontal: 10, borderRadius: 10,
+    borderWidth: 1,
   },
-  nameHint: { fontSize: 12, color: colors.textSecondary, textAlign: "center", marginTop: 6 },
-  nameInput: {
-    fontSize: 18, fontWeight: "700", color: colors.text, textAlign: "center",
-  },
+  goalChipText: { fontSize: 12, fontWeight: "700" },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 24 },
   statBox: {
     flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 14,
