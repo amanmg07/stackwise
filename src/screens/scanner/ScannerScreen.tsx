@@ -164,7 +164,7 @@ ${genderCtx}
 CATEGORY MAPPING — assign observations to ALL relevant categories:
 
 recovery: injuries, scars, bruises, swelling, joint redness, post-surgical marks, muscle strain signs, poor posture suggesting chronic pain
-fat_loss: higher body fat percentage, round face, double chin, excess weight visible in arms/midsection
+fat_loss: notably elevated body fat percentage, visible excess weight in midsection/arms, double chin (do NOT recommend fat_loss for people who are at a normal/healthy weight — slightly soft is not a problem worth flagging)
 muscle_gain: visibly underdeveloped musculature, significant room for muscle development (do NOT flag a lean/toned frame as needing muscle — being lean is not a problem)
 anti_aging: wrinkles, fine lines, crow's feet, forehead lines, nasolabial folds, sun damage, age spots, skin laxity, dull/uneven skin tone, acne, acne scars, skin texture issues, thinning skin, hair thinning, receding hairline
 sleep: dark circles under eyes, puffy eyes, bags under eyes, tired/fatigued appearance, pallid complexion
