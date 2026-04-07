@@ -118,16 +118,11 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
                   <GlassCard
                     style={[
                       styles.routeChip,
-                      selected && { borderColor: r.color },
+                      selected ? { borderColor: r.color, borderWidth: 1.5 } : styles.routeChipInactive,
                     ]}
                   >
-                    <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary} />
-                    <Text style={[styles.routeLabel, selected && { color: r.color }]}>{r.label}</Text>
-                    {selected && (
-                      <View style={[styles.routeCheck, { backgroundColor: r.color }]}>
-                        <Ionicons name="checkmark" size={10} color="#fff" />
-                      </View>
-                    )}
+                    <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary + "60"} />
+                    <Text style={[styles.routeLabel, selected ? { color: r.color } : styles.routeLabelInactive]}>{r.label}</Text>
                   </GlassCard>
                 </TouchableOpacity>
               );
@@ -222,10 +217,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   routeLabel: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
-  routeCheck: {
-    position: "absolute", top: 6, right: 6,
-    width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center",
-  },
+  routeChipInactive: { opacity: 0.4 },
+  routeLabelInactive: { color: colors.textSecondary + "60" },
   buildBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18,
