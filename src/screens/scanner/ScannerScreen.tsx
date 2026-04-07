@@ -151,7 +151,12 @@ export default function ScannerScreen({ navigation }: any) {
       const ext = uri.split(".").pop()?.toLowerCase();
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
-      const genderCtx = settings.gender ? `\nThe user is ${settings.gender}. Tailor your observations and recommendations accordingly — consider sex-specific factors like hormonal profiles, typical body composition patterns, skin aging differences, and gender-appropriate peptide priorities.\n` : "";
+      const genderCtx = settings.gender ? `\nThe user is ${settings.gender}. Tailor your observations and recommendations accordingly:
+- Consider sex-specific hormonal profiles, body composition patterns, and skin aging differences
+- Do NOT default to recommending muscle_gain for women just because they have a lean frame — a lean/toned physique is often the goal, not a problem
+- Only recommend muscle_gain for women if there are clear signs they would benefit AND it aligns with typical female fitness goals (e.g. glute/leg toning, not "add mass")
+- For women, prioritize skin health, anti-aging, recovery, and hormonal balance observations when relevant
+- For men, muscle definition and mass observations are more commonly relevant\n` : "";
 
       const systemPrompt = `You are an expert peptide advisor analyzing a photo to recommend peptide categories. Be thorough — most people will benefit from multiple categories.
 ${genderCtx}
@@ -160,7 +165,7 @@ CATEGORY MAPPING — assign observations to ALL relevant categories:
 
 recovery: injuries, scars, bruises, swelling, joint redness, post-surgical marks, muscle strain signs, poor posture suggesting chronic pain
 fat_loss: higher body fat percentage, round face, double chin, excess weight visible in arms/midsection
-muscle_gain: lean frame that could add mass, average build that could benefit from more definition, room for muscle development
+muscle_gain: visibly underdeveloped musculature, significant room for muscle development (do NOT flag a lean/toned frame as needing muscle — being lean is not a problem)
 anti_aging: wrinkles, fine lines, crow's feet, forehead lines, nasolabial folds, sun damage, age spots, skin laxity, dull/uneven skin tone, acne, acne scars, skin texture issues, thinning skin, hair thinning, receding hairline
 sleep: dark circles under eyes, puffy eyes, bags under eyes, tired/fatigued appearance, pallid complexion
 cognitive: (recommend alongside sleep if person looks fatigued or stressed)
