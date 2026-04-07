@@ -28,3 +28,30 @@ export async function getCurrentUserId(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user?.id || null;
 }
+
+/** Call Groq via the Supabase Edge Function proxy. */
+export async function callGroqProxy(body: Record<string, any>): Promise<any> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/groq-proxy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("Rate limit reached. Wait a moment and try again.");
+    }
+    const errText = await response.text();
+    console.error("Groq proxy error:", response.status, errText);
+    throw new Error("AI request failed. Please try again.");
+  }
+
+  return response.json();
+}

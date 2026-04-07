@@ -1,10 +1,8 @@
-import Constants from "expo-constants";
 import { File } from "expo-file-system";
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { peptides as peptideDB } from "../data/peptides";
 import { Cycle, ScanComparison, ScanRecord } from "../types";
-
-const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
+import { callGroqProxy } from "../utils/supabase";
 
 function buildPeptideContext(activeCycle: Cycle | null): string {
   if (!activeCycle || activeCycle.peptides.length === 0) {
@@ -78,41 +76,25 @@ Respond with ONLY valid JSON:
 If the photos are unclear, of different people, or you cannot make a reliable comparison, return:
 {"summary": "Could not reliably compare these photos.", "changes": [], "workingPeptides": [], "newRecommendations": []}`;
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: [
-        { role: "system", content: systemPrompt },
-        {
-          role: "user",
-          content: [
-            { type: "image_url", image_url: { url: `data:${earlierMime};base64,${earlierB64}` } },
-            { type: "image_url", image_url: { url: `data:${laterMime};base64,${laterB64}` } },
-            {
-              type: "text",
-              text: `Photo 1 is from ${earlier.date.split("T")[0]}. Photo 2 is from ${later.date.split("T")[0]} (${daysBetween} days later). Compare them and respond with JSON only.`,
-            },
-          ],
-        },
-      ],
-      max_tokens: 1024,
-      temperature: 0.4,
-    }),
+  const data = await callGroqProxy({
+    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    messages: [
+      { role: "system", content: systemPrompt },
+      {
+        role: "user",
+        content: [
+          { type: "image_url", image_url: { url: `data:${earlierMime};base64,${earlierB64}` } },
+          { type: "image_url", image_url: { url: `data:${laterMime};base64,${laterB64}` } },
+          {
+            type: "text",
+            text: `Photo 1 is from ${earlier.date.split("T")[0]}. Photo 2 is from ${later.date.split("T")[0]} (${daysBetween} days later). Compare them and respond with JSON only.`,
+          },
+        ],
+      },
+    ],
+    max_tokens: 1024,
+    temperature: 0.4,
   });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error("Groq compare error:", response.status, errText);
-    if (response.status === 429) throw new Error("Rate limit reached. Wait a moment and try again.");
-    throw new Error("Comparison failed. Please try again.");
-  }
-
-  const data = await response.json();
   const text = data.choices?.[0]?.message?.content || "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("Could not parse comparison. Please try again.");

@@ -3,7 +3,6 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Animated, Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
 import { format, addWeeks, parseISO } from "date-fns";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -14,8 +13,7 @@ import { colors, spacing, safeTop } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 import { trackScanCompleted } from "../../services/analyticsService";
-
-const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
+import { callGroqProxy } from "../../utils/supabase";
 
 type ScanResult = ScanResultData & { error?: string };
 
@@ -200,45 +198,27 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
   CORRECT in improvements: "Visible acne scarring on cheeks" (actual problem)
   CORRECT in improvements: "Dark circles under eyes indicating poor sleep" (actual problem)`;
 
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image_url",
-                  image_url: { url: `data:${mediaType};base64,${base64}` },
-                },
-                {
-                  type: "text",
-                  text: "Analyze this person's photo and recommend peptide categories based on what you observe. Be respectful and positive. Respond with JSON only.",
-                },
-              ],
-            },
-          ],
-          max_tokens: 1024,
-          temperature: 0.5,
-        }),
+      const data = await callGroqProxy({
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: { url: `data:${mediaType};base64,${base64}` },
+              },
+              {
+                type: "text",
+                text: "Analyze this person's photo and recommend peptide categories based on what you observe. Be respectful and positive. Respond with JSON only.",
+              },
+            ],
+          },
+        ],
+        max_tokens: 1024,
+        temperature: 0.5,
       });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("Groq vision error:", response.status, errText);
-        if (response.status === 429) {
-          throw new Error("Rate limit reached. Wait a moment and try again.");
-        }
-        throw new Error("Analysis failed. Please try again.");
-      }
-
-      const data = await response.json();
       const text = data.choices?.[0]?.message?.content || "";
 
       // Extract JSON from response

@@ -35,8 +35,6 @@ export default {
     web: {
       favicon: "./assets/favicon.png",
     },
-    extra: {
-      groqApiKey: process.env.GROQ_API_KEY,
-    },
+    extra: {},
   },
 };

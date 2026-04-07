@@ -1,9 +1,6 @@
 import { peptides } from "../data/peptides";
 import { Cycle, JournalEntry, ChatMessage } from "../types";
-
-import Constants from "expo-constants";
-
-const GROQ_API_KEY = Constants.expoConfig?.extra?.groqApiKey || "";
+import { callGroqProxy } from "../utils/supabase";
 
 function findMentionedPeptides(messages: ChatMessage[]): string[] {
   const text = messages.map((m) => m.content).join(" ").toLowerCase();
@@ -109,28 +106,13 @@ export async function sendChatMessage(
     })),
   ];
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: groqMessages,
-      max_tokens: 1024,
-      temperature: 0.7,
-    }),
+  const data = await callGroqProxy({
+    model: "llama-3.3-70b-versatile",
+    messages: groqMessages,
+    max_tokens: 1024,
+    temperature: 0.7,
   });
 
-  if (!response.ok) {
-    if (response.status === 429) {
-      throw new Error("Rate limit reached. Wait a moment and try again.");
-    }
-    throw new Error(`AI service error: ${response.status}`);
-  }
-
-  const data = await response.json();
   const content =
     data.choices?.[0]?.message?.content ||
     "I couldn't generate a response. Please try again.";
