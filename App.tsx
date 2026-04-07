@@ -1,11 +1,12 @@
-import React from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Image, ActivityIndicator, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { AppProvider, useApp } from "./src/context/AppContext";
 import { ToastProvider } from "./src/context/ToastContext";
 import RootNavigator from "./src/navigation/RootNavigator";
+import SplashScreen from "./src/screens/SplashScreen";
 import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
 import DemographicsScreen from "./src/screens/onboarding/DemographicsScreen";
 import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
@@ -32,11 +33,12 @@ const navTheme = {
 
 function AppContent() {
   const { settings, updateSettings, loading } = useApp();
+  const [splashDone, setSplashDone] = useState(false);
 
   if (loading) {
     return (
       <View style={loadingStyles.container}>
-        <Text style={loadingStyles.logo}>StackWise</Text>
+        <Image source={require("./assets/logo.png")} style={loadingStyles.logo} />
         <ActivityIndicator size="small" color={colors.accent} style={loadingStyles.spinner} />
       </View>
     );
@@ -79,6 +81,10 @@ function AppContent() {
     );
   }
 
+  if (!splashDone) {
+    return <SplashScreen onFinish={() => setSplashDone(true)} />;
+  }
+
   return (
     <ToastProvider>
       <NavigationContainer theme={navTheme}>
@@ -97,10 +103,9 @@ const loadingStyles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: colors.accent,
-    letterSpacing: 1,
+    width: 180,
+    height: 180,
+    resizeMode: "contain" as const,
   },
   spinner: { marginTop: 20 },
 });

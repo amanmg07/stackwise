@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, spacing, safeTop } from "../../theme";
@@ -42,9 +42,10 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Welcome header */}
       <View style={styles.headerRow}>
-        <View>
+        <View style={{ width: 32 }} />
+        <View style={styles.headerCenter}>
+          <Image source={require("../../../assets/logo.png")} style={styles.headerLogo} />
           <Text style={styles.welcome}>StackWise</Text>
-          <Text style={styles.motto}>Stop Guessing, Start StackWising.</Text>
         </View>
         <TouchableOpacity
           style={styles.profileBtn}
@@ -53,7 +54,6 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           <Ionicons name="person-circle-outline" size={32} color={colors.accent} />
         </TouchableOpacity>
       </View>
-      <Text style={styles.tagline}>Your peptide journey starts here</Text>
 
       {/* Active cycle quick card */}
       {activeCycle && (
@@ -178,11 +178,11 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 8 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 8, marginBottom: 24 },
+  headerCenter: { alignItems: "center", flex: 1 },
+  headerLogo: { width: 100, height: 100, resizeMode: "contain" },
   profileBtn: { padding: 4 },
-  welcome: { fontSize: 36, fontWeight: "900", color: colors.accent, letterSpacing: -0.5 },
-  motto: { fontSize: 18, fontWeight: "700", color: colors.text, marginTop: 4 },
-  tagline: { fontSize: 14, color: colors.textSecondary, marginTop: 4, marginBottom: 24 },
+  welcome: { fontSize: 24, fontWeight: "900", color: colors.accent, letterSpacing: -0.5 },
   activeCycleCard: {
     flexDirection: "row", alignItems: "center", gap: 12,
     borderRadius: 14, padding: 16, marginBottom: 24,
