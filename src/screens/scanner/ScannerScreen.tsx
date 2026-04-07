@@ -182,7 +182,8 @@ IMPORTANT DISTINCTION:
 - ALWAYS include at least 1 strength — find something positive to highlight
 - Each observation needs: category, observation text, confidence ("high"/"medium"/"low")
 - recommendedCategories: ordered by relevance, include ALL that apply (from both strengths and improvements)
-- If photo is unclear or not a person: {"error":"Could not analyze photo. Please take a clear, well-lit photo."}
+- CRITICAL: If the photo does NOT clearly show a person's face or body (e.g. it's a wall, ceiling, blurry image, object, pet, or the person is fully clothed with no skin/face visible), you MUST return: {"error":"Could not analyze photo. Please take a clear, well-lit photo showing your face or body."}
+- Do NOT guess or fabricate observations. Every observation MUST be based on something you can actually see in the photo. If you cannot see enough to make a judgment about a category, do not include it.
 
 FINAL CHECK — before returning your JSON, review EVERY item in "improvements". For each one, ask: "Does my observation describe something that is ACTUALLY WRONG that I can see?" If your observation contains phrases like "no visible signs", "maintaining", "important to", "could benefit from prevention", or "proactive" — MOVE IT TO STRENGTHS. Examples of WRONG placement:
   WRONG in improvements: "No visible signs of aging, but maintaining skin health is important" → MOVE TO STRENGTHS
@@ -242,6 +243,9 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
 
       if (parsed.error) {
         Alert.alert("Analysis Issue", parsed.error);
+        setResult(null);
+      } else if (!parsed.strengths?.length && !parsed.improvements?.length) {
+        Alert.alert("Analysis Issue", "Could not detect enough detail. Please take a clearer photo showing your face or body.");
         setResult(null);
       } else {
         setResult(parsed);
