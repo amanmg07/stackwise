@@ -95,7 +95,7 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
-  const { addCycle, scans, addScan, deleteScan } = useApp();
+  const { addCycle, scans, addScan, deleteScan, settings } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -151,7 +151,10 @@ export default function ScannerScreen({ navigation }: any) {
       const ext = uri.split(".").pop()?.toLowerCase();
       const mediaType = ext === "png" ? "image/png" : "image/jpeg";
 
+      const genderCtx = settings.gender ? `\nThe user is ${settings.gender}. Tailor your observations and recommendations accordingly — consider sex-specific factors like hormonal profiles, typical body composition patterns, skin aging differences, and gender-appropriate peptide priorities.\n` : "";
+
       const systemPrompt = `You are an expert peptide advisor analyzing a photo to recommend peptide categories. Be thorough — most people will benefit from multiple categories.
+${genderCtx}
 
 CATEGORY MAPPING — assign observations to ALL relevant categories:
 

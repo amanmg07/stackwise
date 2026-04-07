@@ -18,7 +18,7 @@ const DIRECTION_STYLES: Record<string, { color: string; icon: keyof typeof Ionic
 
 export default function ScanCompareScreen({ route, navigation }: any) {
   const { earlierScanId, laterScanId } = route.params;
-  const { scans, cycles } = useApp();
+  const { scans, cycles, settings } = useApp();
   const earlier = scans.find((s) => s.id === earlierScanId);
   const later = scans.find((s) => s.id === laterScanId);
   const activeCycle = cycles.find((c) => c.isActive) || null;
@@ -30,7 +30,7 @@ export default function ScanCompareScreen({ route, navigation }: any) {
     if (!earlier || !later) return;
     (async () => {
       try {
-        const result = await compareScans(earlier, later, activeCycle);
+        const result = await compareScans(earlier, later, activeCycle, settings.gender);
         setComparison(result);
         trackScanCompared({
           daysBetween,

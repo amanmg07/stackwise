@@ -28,7 +28,8 @@ function extensionToMime(uri: string): string {
 export async function compareScans(
   earlier: ScanRecord,
   later: ScanRecord,
-  activeCycle: Cycle | null
+  activeCycle: Cycle | null,
+  gender?: string
 ): Promise<ScanComparison> {
   const earlierB64 = await new File(earlier.imagePath).base64();
   const laterB64 = await new File(later.imagePath).base64();
@@ -42,8 +43,10 @@ export async function compareScans(
     .map((p) => `${p.id}: ${p.name} (${p.categories.join(", ")})`)
     .join("\n");
 
-  const systemPrompt = `You are comparing two progress photos of the SAME person taken ${daysBetween} days apart to track visible changes.
+  const genderCtx = gender ? `The user is ${gender}. Tailor observations to sex-specific factors (hormonal profiles, body composition patterns, skin differences).\n` : "";
 
+  const systemPrompt = `You are comparing two progress photos of the SAME person taken ${daysBetween} days apart to track visible changes.
+${genderCtx}
 ${peptideContext}
 
 AVAILABLE PEPTIDES (use these exact ids in your response):
