@@ -260,7 +260,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
           setImageUri(savedPath);
           trackScanCompleted(parsed.recommendedCategories || []);
         } catch (e) {
-          console.warn("Failed to save scan:", e);
+          if (__DEV__) console.warn("Failed to save scan:", e);
         }
       }
     } catch (err: any) {

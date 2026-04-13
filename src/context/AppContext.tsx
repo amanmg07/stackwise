@@ -3,6 +3,7 @@ import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord } from "../types
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
 import { ensureAuth } from "../utils/supabase";
+import * as Sentry from "@sentry/react-native";
 
 interface AppState {
   cycles: Cycle[];
@@ -95,7 +96,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const uid = await ensureAuth();
         setUserId(uid);
       } catch (e) {
-        console.warn("Auth failed:", e);
+        Sentry.captureException(e);
       }
     })();
   }, []);
@@ -138,7 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const file = new File(scan.imagePath);
           if (file.exists) file.delete();
         } catch (e) {
-          console.warn("Failed to delete scan image:", e);
+          if (__DEV__) console.warn("Failed to delete scan image:", e);
         }
       }
       persistScans(scans.filter((s) => s.id !== id));

@@ -3,6 +3,7 @@ import { View, Text, Image, ActivityIndicator, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
+import * as Sentry from "@sentry/react-native";
 import { AppProvider, useApp } from "./src/context/AppContext";
 import { ToastProvider } from "./src/context/ToastContext";
 import RootNavigator from "./src/navigation/RootNavigator";
@@ -13,6 +14,12 @@ import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
 import { syncUserProfile } from "./src/services/analyticsService";
 import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
+
+Sentry.init({
+  dsn: "", // TODO: Add DSN from sentry.io
+  enabled: !__DEV__,
+  tracesSampleRate: 0.2,
+});
 
 const navTheme = {
   dark: true,
@@ -111,7 +118,7 @@ const loadingStyles = StyleSheet.create({
   spinner: { marginTop: 20 },
 });
 
-export default function App() {
+function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
@@ -123,3 +130,5 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(App);

@@ -1,5 +1,6 @@
 import { supabase, getCurrentUserId } from "../utils/supabase";
 import { appStorage } from "../utils/storage";
+import * as Sentry from "@sentry/react-native";
 
 /**
  * Send an anonymized analytics event to Supabase.
@@ -24,7 +25,7 @@ export async function trackEvent(
     });
   } catch (e) {
     // Analytics should never crash the app
-    console.warn("Analytics event failed:", e);
+    Sentry.captureException(e);
   }
 }
 
@@ -53,12 +54,12 @@ export async function syncUserProfile(demographics: {
       experience_level: demographics.experienceLevel || null,
     });
     if (error) {
-      console.warn("Profile sync failed:", error);
+      Sentry.captureException(error);
       return false;
     }
     return true;
   } catch (e) {
-    console.warn("Profile sync failed:", e);
+    Sentry.captureException(e);
     return false;
   }
 }

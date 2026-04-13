@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Sentry from "@sentry/react-native";
 
 const SUPABASE_URL = "https://criicsyjvafvgovqlyfq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_6dTbsxk9pihCtDg9UeRv7A_enUqKseV";
@@ -63,7 +64,9 @@ export async function callGroqProxy(body: Record<string, any>): Promise<any> {
       throw new Error("Rate limit reached. Wait a moment and try again.");
     }
     const errText = await response.text();
-    console.error("Groq proxy error:", response.status, errText);
+    Sentry.captureException(new Error(`Groq proxy error: ${response.status}`), {
+      extra: { status: response.status, body: errText },
+    });
     throw new Error("AI request failed. Please try again.");
   }
 

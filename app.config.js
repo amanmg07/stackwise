@@ -35,6 +35,7 @@ export default {
     web: {
       favicon: "./assets/favicon.png",
     },
+    plugins: ["@sentry/react-native"],
     extra: {},
   },
 };
