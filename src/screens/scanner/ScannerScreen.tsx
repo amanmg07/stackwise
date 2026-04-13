@@ -227,7 +227,12 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
         throw new Error("Could not parse analysis. Please try again.");
       }
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        throw new Error("We couldn't understand the analysis response. Please try again.");
+      }
 
       if (parsed.error) {
         Alert.alert("Analysis Issue", parsed.error);

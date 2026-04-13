@@ -12,6 +12,7 @@ import DemographicsScreen from "./src/screens/onboarding/DemographicsScreen";
 import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
 import { syncUserProfile } from "./src/services/analyticsService";
 import { colors } from "./src/theme";
+import ErrorBoundary from "./src/components/ErrorBoundary";
 
 const navTheme = {
   dark: true,
@@ -115,7 +116,9 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
         <StatusBar style="light" />
-        <AppContent />
+        <ErrorBoundary>
+          <AppContent />
+        </ErrorBoundary>
       </AppProvider>
     </GestureHandlerRootView>
   );

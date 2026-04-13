@@ -29,6 +29,14 @@ export default function LogDoseScreen({ route, navigation }: any) {
   const [site, setSite] = useState("");
   const [notes, setNotes] = useState("");
 
+  if (!cycle) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#999', fontSize: 16 }}>Cycle not found</Text>
+      </View>
+    );
+  }
+
   const switchUnit = (newUnit: "mcg" | "mg" | "IU") => {
     const current = parseFloat(amount) || 0;
     if (newUnit === unit) return;
