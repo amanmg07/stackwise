@@ -112,3 +112,15 @@ export function trackJournalEntry(metrics: {
 }) {
   trackEvent("journal_entry", metrics);
 }
+
+export function trackPeptideViewed(peptideId: string) {
+  trackEvent("peptide_viewed", { peptide_id: peptideId });
+}
+
+export function trackPeptideBookmarked(peptideId: string, action: "saved" | "removed") {
+  trackEvent("peptide_bookmarked", { peptide_id: peptideId, action });
+}
+
+export function trackChatQuestion(questionLength: number, activePeptideIds: string[]) {
+  trackEvent("chat_question", { question_length: questionLength, active_peptide_ids: activePeptideIds });
+}

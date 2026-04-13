@@ -11,6 +11,7 @@ import { generateId } from "../../utils/id";
 import { colors, spacing } from "../../theme";
 import { ChatMessage } from "../../types";
 import { appStorage } from "../../utils/storage";
+import { trackChatQuestion } from "../../services/analyticsService";
 
 const STARTERS = [
   "What peptides help with recovery?",
@@ -76,6 +77,9 @@ export default function ChatView({ navigation }: Props) {
       content: text.trim(),
       timestamp: new Date().toISOString(),
     };
+
+    const activePeptideIds = activeCycle?.peptides.map((p) => p.peptideId) || [];
+    trackChatQuestion(text.trim().length, activePeptideIds);
 
     const updated = [...messages, userMsg];
     setMessages(updated);

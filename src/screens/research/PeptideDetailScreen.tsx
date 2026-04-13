@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
@@ -6,6 +6,7 @@ import { getSourcesForPeptide } from "../../data/peptideSources";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { colors, spacing } from "../../theme";
+import { trackPeptideViewed, trackPeptideBookmarked } from "../../services/analyticsService";
 
 const CATEGORY_COLORS: Record<string, string> = {
   recovery: "#4ade80",
@@ -28,12 +29,17 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
   const [showStorage, setShowStorage] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
 
+  useEffect(() => {
+    trackPeptideViewed(peptideId);
+  }, [peptideId]);
+
   const isSaved = settings.savedPeptides?.includes(peptideId);
   const toggleSave = () => {
     const saved = settings.savedPeptides || [];
     updateSettings({
       savedPeptides: isSaved ? saved.filter((id) => id !== peptideId) : [...saved, peptideId],
     });
+    trackPeptideBookmarked(peptideId, isSaved ? "removed" : "saved");
     showToast(isSaved ? "Removed from saved" : "Saved for later!");
   };
 
