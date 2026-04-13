@@ -172,6 +172,9 @@ export default function NewCycleScreen({ route, navigation }: any) {
     navigation.goBack();
   };
 
+  const parsedWeeks = parseInt(durationWeeks) || 0;
+  const canSave = name.trim().length > 0 && cyclePeptides.length > 0 && parsedWeeks >= 1 && parsedWeeks <= 52;
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -422,7 +425,11 @@ export default function NewCycleScreen({ route, navigation }: any) {
         multiline
       />
 
-      <TouchableOpacity style={styles.saveBtn} onPress={saveCycle}>
+      <TouchableOpacity
+        style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
+        onPress={saveCycle}
+        disabled={!canSave}
+      >
         <Text style={styles.saveBtnText}>{editCycle ? "Save Changes" : "Start Cycle"}</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -515,5 +522,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent, borderRadius: 14, padding: 18,
     alignItems: "center", marginTop: 24,
   },
+  saveBtnDisabled: { opacity: 0.4 },
   saveBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
 });

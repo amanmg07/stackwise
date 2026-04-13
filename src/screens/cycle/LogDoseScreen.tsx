@@ -147,7 +147,11 @@ export default function LogDoseScreen({ route, navigation }: any) {
         placeholderTextColor={colors.textSecondary}
       />
 
-      <TouchableOpacity style={styles.saveBtn} onPress={save}>
+      <TouchableOpacity
+        style={[styles.saveBtn, !(parseFloat(amount) > 0) && styles.saveBtnDisabled]}
+        onPress={save}
+        disabled={!(parseFloat(amount) > 0)}
+      >
         <Ionicons name="checkmark" size={20} color={colors.background} />
         <Text style={styles.saveBtnText}>Log Dose</Text>
       </TouchableOpacity>
@@ -196,5 +200,6 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18, marginTop: 32,
   },
+  saveBtnDisabled: { opacity: 0.4 },
   saveBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
 });

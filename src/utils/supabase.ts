@@ -34,15 +34,29 @@ export async function callGroqProxy(body: Record<string, any>): Promise<any> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/groq-proxy`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify(body),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${SUPABASE_URL}/functions/v1/groq-proxy`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (err: any) {
+    // fetch throws TypeError on network failure (airplane mode, no Wi-Fi, etc.)
+    if (
+      err instanceof TypeError ||
+      /network/i.test(err?.message ?? "")
+    ) {
+      throw new Error(
+        "No internet connection. Please check your network and try again."
+      );
+    }
+    throw err;
+  }
 
   if (!response.ok) {
     if (response.status === 429) {

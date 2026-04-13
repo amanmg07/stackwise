@@ -66,6 +66,7 @@ export default function EditDemographicsScreen({ navigation }: any) {
       experienceLevel: experience,
       analyticsConsent,
     });
+    showToast("Profile saved");
 
     if (analyticsConsent) {
       const synced = await syncUserProfile({
