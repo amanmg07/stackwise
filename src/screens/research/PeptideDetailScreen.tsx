@@ -289,7 +289,9 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
                 </TouchableOpacity>
               ))}
               <Text style={styles.sourceDisclaimer}>
-                Sold as research chemicals. Not medical advice — consult a healthcare provider.
+                {peptide.compoundType === "supplement"
+                  ? "Sold as dietary supplements. Not medical advice."
+                  : "Sold as research chemicals. Not medical advice — consult a healthcare provider."}
               </Text>
             </View>
           </>

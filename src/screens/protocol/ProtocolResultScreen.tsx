@@ -27,11 +27,13 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
     .filter((s) => s.score > 0)
     .filter((s) => {
       // If route preferences provided, only show protocols where every peptide
-      // has at least one route matching the user's preferences
+      // has at least one route matching the user's preferences.
+      // Supplements (oral) are always allowed regardless of route preference.
       if (!preferredRoutes || preferredRoutes.length === 0) return true;
       return s.template.peptides.every((tp) => {
         const pep = peptideDB.find((p) => p.id === tp.peptideId);
         if (!pep) return true;
+        if (pep.compoundType === "supplement") return true;
         return pep.routes.some((r) => preferredRoutes.includes(r));
       });
     })
@@ -80,13 +82,23 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
             ))}
           </View>
 
-          <Text style={styles.sectionLabel}>Peptides</Text>
+          <Text style={styles.sectionLabel}>
+            {t.peptides.every((tp) => peptideDB.find((p) => p.id === tp.peptideId)?.compoundType === "supplement")
+              ? "Supplements"
+              : t.peptides.some((tp) => peptideDB.find((p) => p.id === tp.peptideId)?.compoundType === "supplement")
+              ? "Peptides & Supplements"
+              : "Peptides"}
+          </Text>
           {t.peptides.map((tp) => {
             const pep = peptideDB.find((p) => p.id === tp.peptideId);
+            const isSupplement = pep?.compoundType === "supplement";
             return (
               <View key={tp.peptideId} style={styles.pepRow}>
                 <View style={styles.pepInfo}>
-                  <Text style={styles.pepName}>{pep?.name || tp.peptideId}</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={styles.pepName}>{pep?.name || tp.peptideId}</Text>
+                    {isSupplement && <Ionicons name="leaf-outline" size={13} color="#4ade80" />}
+                  </View>
                   <Text style={styles.pepRole}>{tp.role}</Text>
                 </View>
                 <View>
@@ -109,13 +121,20 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
           <TouchableOpacity
             style={styles.startBtn}
             onPress={() => {
+              const parseDoseUnit = (s?: string): "mcg" | "mg" | "g" | "IU" => {
+                if (!s) return "mg";
+                if (/\biu\b/i.test(s)) return "IU";
+                if (/\bmcg\b/i.test(s) || /\bμg\b/.test(s)) return "mcg";
+                if (/\bg\b/i.test(s) && !/\bmg\b/i.test(s)) return "g";
+                return "mg";
+              };
               const peptidesList = t.peptides.map((tp) => {
                 const pep = peptideDB.find((p) => p.id === tp.peptideId);
-                const doseMatch = tp.suggestedDose.match(/([\d.]+)/);
+                const doseMatch = tp.suggestedDose.match(/([\d.,]+)/);
                 return {
                   peptideId: tp.peptideId,
-                  doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
-                  doseUnit: "mg" as const,
+                  doseAmount: doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25,
+                  doseUnit: parseDoseUnit(tp.suggestedDose),
                   frequency: tp.suggestedFrequency,
                   route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
                   timeOfDay: ["morning"] as string[],

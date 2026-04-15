@@ -45,7 +45,7 @@ export default function CycleDetailScreen({ route }: any) {
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statNum}>{cycle.peptides.length}</Text>
-              <Text style={styles.statLabel}>Peptides</Text>
+              <Text style={styles.statLabel}>Compounds</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statNum}>{cycleLogs.length}</Text>
@@ -61,7 +61,12 @@ export default function CycleDetailScreen({ route }: any) {
             return (
               <View key={cp.peptideId} style={styles.peptideRow}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.peptideName}>{pep?.name || cp.peptideId}</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={styles.peptideName}>{pep?.name || cp.peptideId}</Text>
+                    {pep?.compoundType === "supplement" && (
+                      <Ionicons name="leaf-outline" size={13} color="#4ade80" />
+                    )}
+                  </View>
                   <Text style={styles.peptideDose}>
                     {cp.doseAmount} {cp.doseUnit} · {cp.frequency} · {cp.route}
                   </Text>
@@ -96,7 +101,12 @@ export default function CycleDetailScreen({ route }: any) {
         return (
           <View style={styles.logRow}>
             <View>
-              <Text style={styles.logName}>{pep?.name || item.peptideId}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <Text style={styles.logName}>{pep?.name || item.peptideId}</Text>
+                {pep?.compoundType === "supplement" && (
+                  <Ionicons name="leaf-outline" size={12} color="#4ade80" />
+                )}
+              </View>
               <Text style={styles.logMeta}>
                 {item.amount} {item.unit} · {item.route}
                 {item.site ? ` · ${item.site}` : ""}

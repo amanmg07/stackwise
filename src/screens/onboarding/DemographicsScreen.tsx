@@ -23,9 +23,9 @@ const GOAL_OPTIONS: { value: Goal; label: string; icon: keyof typeof Ionicons.gl
 ];
 
 const EXPERIENCE_OPTIONS: { value: ExperienceLevel; label: string; desc: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
-  { value: "new", label: "Beginner", desc: "Haven't used peptides", icon: "leaf", color: "#4ade80" },
-  { value: "some", label: "Intermediate", desc: "Tried a few peptides", icon: "trending-up", color: "#facc15" },
-  { value: "experienced", label: "Advanced", desc: "Regular peptide user", icon: "trophy", color: "#f87171" },
+  { value: "new", label: "Beginner", desc: "New to peptides & supplements", icon: "leaf", color: "#4ade80" },
+  { value: "some", label: "Intermediate", desc: "Tried a few compounds", icon: "trending-up", color: "#facc15" },
+  { value: "experienced", label: "Advanced", desc: "Regular user", icon: "trophy", color: "#f87171" },
 ];
 
 interface Props {
@@ -76,7 +76,7 @@ export default function DemographicsScreen({ onComplete, initialValues, isEditin
       <Text style={styles.subtitle}>
         {isEditing
           ? "Update your details to keep your recommendations accurate."
-          : "Help us personalize your experience and contribute to peptide research."}
+          : "Help us personalize your experience and contribute to peptide & supplement research."}
       </Text>
 
       {/* Age + Gender row */}

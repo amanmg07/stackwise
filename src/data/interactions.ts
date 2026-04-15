@@ -237,6 +237,144 @@ export const interactions: PeptideInteraction[] = [
     title: "Khavinson bioregulator protocol",
     detail: "The classic Russian longevity combo. Thymalin restores immune function while Epithalon supports telomeres. In long-term studies, this combination reduced mortality by 50%.",
   },
+
+  // ── Supplement interactions ──
+
+  // Supplement-supplement
+  {
+    peptideIds: ["ashwagandha", "rhodiola"],
+    severity: "caution",
+    title: "Both are adaptogens",
+    detail: "Ashwagandha and rhodiola are both adaptogens. While safe to combine, they can have opposing effects — ashwagandha is calming while rhodiola is stimulating. Monitor how you feel and adjust timing (rhodiola AM, ashwagandha PM).",
+  },
+  {
+    peptideIds: ["ashwagandha", "l_theanine"],
+    severity: "info",
+    title: "Calm & focus synergy",
+    detail: "Ashwagandha lowers cortisol while L-theanine promotes alpha brain waves. Great combo for reducing anxiety without drowsiness.",
+  },
+  {
+    peptideIds: ["magnesium_glycinate", "zinc_magnesium"],
+    severity: "caution",
+    title: "Overlapping magnesium",
+    detail: "ZMA already contains magnesium. Adding extra magnesium glycinate may exceed recommended daily intake and cause digestive issues. Use one or the other, not both.",
+  },
+  {
+    peptideIds: ["alpha_gpc", "bacopa"],
+    severity: "info",
+    title: "Cholinergic + memory synergy",
+    detail: "Alpha-GPC provides choline for acetylcholine production while bacopa enhances memory consolidation. Complementary mechanisms for cognitive enhancement.",
+  },
+  {
+    peptideIds: ["creatine_mono", "beta_alanine"],
+    severity: "info",
+    title: "Proven performance stack",
+    detail: "The most well-researched supplement combo for athletic performance. Creatine boosts power output, beta-alanine buffers acid for endurance. No interaction concerns.",
+  },
+  {
+    peptideIds: ["vitamin_c", "collagen"],
+    severity: "info",
+    title: "Essential pairing",
+    detail: "Vitamin C is required for collagen synthesis. Taking them together maximizes collagen production for skin, joints, and connective tissue. Always pair these.",
+  },
+  {
+    peptideIds: ["omega3", "coq10"],
+    severity: "info",
+    title: "Heart & energy synergy",
+    detail: "Omega-3 supports cardiovascular function while CoQ10 powers mitochondrial energy production. Both are fat-soluble — take together with a meal for better absorption.",
+  },
+  {
+    peptideIds: ["tongkat_ali", "ashwagandha"],
+    severity: "info",
+    title: "Testosterone support stack",
+    detail: "Tongkat ali increases free testosterone while ashwagandha reduces cortisol (which suppresses testosterone). Complementary mechanisms for hormonal balance.",
+  },
+  {
+    peptideIds: ["tongkat_ali", "fadogia"],
+    severity: "caution",
+    title: "Both raise testosterone",
+    detail: "Both stimulate testosterone through different mechanisms (tongkat via SHBG reduction, fadogia via LH signaling). Combined use may amplify effects — start with one, add the other at lower doses. Monitor for signs of excess androgens.",
+  },
+  {
+    peptideIds: ["dhea", "dim"],
+    severity: "info",
+    title: "Hormone balance pairing",
+    detail: "DHEA provides the raw hormonal precursor. DIM supports healthy estrogen metabolism, preventing DHEA from converting to excess estrogen. Good combination for hormonal balance.",
+  },
+  {
+    peptideIds: ["lions_mane", "alpha_gpc"],
+    severity: "info",
+    title: "Neurotropic stack",
+    detail: "Lion's mane stimulates nerve growth factor (NGF) for long-term brain health. Alpha-GPC provides choline for immediate cognitive function. Excellent daily nootropic pairing.",
+  },
+  {
+    peptideIds: ["nmn", "coq10"],
+    severity: "info",
+    title: "Mitochondrial longevity stack",
+    detail: "NMN boosts NAD+ for cellular repair while CoQ10 supports the electron transport chain. Both target mitochondrial health through complementary pathways.",
+  },
+  {
+    peptideIds: ["magnesium_glycinate", "apigenin"],
+    severity: "info",
+    title: "Sleep support synergy",
+    detail: "Magnesium promotes muscle relaxation and GABA activity. Apigenin binds benzodiazepine receptors for calming effects. The Huberman-recommended sleep stack.",
+  },
+
+  // Supplement-peptide interactions
+  {
+    peptideIds: ["ashwagandha", "dsip"],
+    severity: "info",
+    title: "Comprehensive sleep support",
+    detail: "Ashwagandha reduces cortisol and anxiety while DSIP promotes delta-wave deep sleep. Together they address both the mental and physiological barriers to quality sleep.",
+  },
+  {
+    peptideIds: ["creatine_mono", "cjc1295_nodac"],
+    severity: "info",
+    title: "Muscle growth synergy",
+    detail: "Creatine provides immediate energy for training while CJC-1295 boosts GH for recovery and lean mass. A strong combination for body composition goals.",
+  },
+  {
+    peptideIds: ["collagen", "ghkcu"],
+    severity: "info",
+    title: "Skin repair powerhouse",
+    detail: "GHK-Cu signals your body to produce new collagen while collagen supplements provide the raw amino acid building blocks. The complete skin rejuvenation approach.",
+  },
+  {
+    peptideIds: ["glutamine", "bpc157"],
+    severity: "info",
+    title: "Gut healing synergy",
+    detail: "BPC-157 heals gut lining through angiogenesis and anti-inflammatory action. Glutamine is the primary fuel source for intestinal cells. Excellent combination for gut repair.",
+  },
+  {
+    peptideIds: ["omega3", "bpc157"],
+    severity: "info",
+    title: "Anti-inflammatory synergy",
+    detail: "BPC-157 provides targeted anti-inflammatory peptide action. Omega-3 reduces systemic inflammation via EPA/DHA pathways. Complementary for recovery and healing.",
+  },
+  {
+    peptideIds: ["lions_mane", "semax"],
+    severity: "info",
+    title: "Neurotropic powerhouse",
+    detail: "Lion's mane promotes NGF for long-term nerve health. Semax boosts BDNF for immediate cognitive enhancement. Both support neuroplasticity through different growth factors.",
+  },
+  {
+    peptideIds: ["ashwagandha", "selank"],
+    severity: "info",
+    title: "Anxiolytic combination",
+    detail: "Ashwagandha reduces cortisol naturally. Selank modulates GABA and serotonin. Together they provide comprehensive anxiety relief through complementary mechanisms.",
+  },
+  {
+    peptideIds: ["tongkat_ali", "gonadorelin"],
+    severity: "info",
+    title: "Hormonal axis support",
+    detail: "Gonadorelin stimulates LH/FSH from the pituitary. Tongkat ali reduces SHBG to increase free testosterone. Synergistic support for the full HPG axis.",
+  },
+  {
+    peptideIds: ["vitamin_c", "thymosin_a1"],
+    severity: "info",
+    title: "Immune defense stack",
+    detail: "Thymosin Alpha-1 trains immune cells while vitamin C supports immune cell function and acts as an antioxidant. Strong combination during illness or immune stress.",
+  },
 ];
 
 export function getInteractions(peptideIds: string[]): PeptideInteraction[] {

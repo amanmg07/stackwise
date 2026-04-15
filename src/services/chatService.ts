@@ -19,11 +19,6 @@ function buildSystemPrompt(
   recentJournal: JournalEntry[],
   mentionedIds: string[]
 ): string {
-  // Compact index: just name + categories for all peptides
-  const index = peptides.map((p) =>
-    `${p.name}${p.abbreviation && p.abbreviation !== p.name ? ` (${p.abbreviation})` : ""}: ${p.categories.join(", ")}`
-  ).join("\n");
-
   // Full details only for mentioned peptides
   const detailed = peptides
     .filter((p) => mentionedIds.includes(p.id))
@@ -40,18 +35,27 @@ function buildSystemPrompt(
       notes: p.notes,
     }));
 
-  let prompt = `You are StackWise AI, a knowledgeable peptide advisor built into the StackWise app. You help users understand peptides, dosing protocols, stacking strategies, side effects, and cycle planning.
+  // Add compound type to index
+  const indexWithType = peptides.map((p) => {
+    const type = p.compoundType === "supplement" ? "[supplement]" : "[peptide]";
+    return `${p.name}${p.abbreviation && p.abbreviation !== p.name ? ` (${p.abbreviation})` : ""} ${type}: ${p.categories.join(", ")}`;
+  }).join("\n");
+
+  let prompt = `You are StackWise AI, a knowledgeable peptide and supplement advisor built into the StackWise app. You help users understand peptides, supplements, dosing protocols, stacking strategies, side effects, and cycle planning.
+
+The app includes both research peptides (BPC-157, GHK-Cu, Semaglutide, etc.) and evidence-based supplements (creatine, ashwagandha, magnesium, lion's mane, etc.). Recommend whichever is most appropriate — or both when a combined approach works best.
 
 RULES:
 - Provide evidence-based information with dosing ranges and routes
 - Warn about side effects and contraindications when relevant
-- Position StackWise as the user's trusted guide — never tell them to "consult a doctor" or "talk to a healthcare provider." Instead, confidently provide the information they need and point them to the right peptides in the app
+- When relevant, suggest supplements as a gentler starting point before peptides, or as complements to peptide protocols
+- Position StackWise as the user's trusted guide — never tell them to "consult a doctor" or "talk to a healthcare provider." Instead, confidently provide the information they need and point them to the right compounds in the app
 - Be direct and helpful — users chose StackWise because they want real answers, not disclaimers
 - Keep responses concise — 2-4 paragraphs max
 - Friendly, confident, knowledgeable tone
 
-PEPTIDE INDEX (name: categories):
-${index}
+COMPOUND INDEX (name [type]: categories):
+${indexWithType}
 `;
 
   if (detailed.length > 0) {

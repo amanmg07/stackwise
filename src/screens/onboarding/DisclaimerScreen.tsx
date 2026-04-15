@@ -18,7 +18,7 @@ export default function DisclaimerScreen({ onAccept }: Props) {
         <Text style={styles.title}>Built for People{"\n"}Who Do Their Research</Text>
 
         <Text style={styles.body}>
-          StackWise gives you the same peptide knowledge that clinics, researchers, and experienced users rely on — dosing protocols, mechanisms, stacking strategies, side effects, and more.
+          StackWise gives you the same peptide and supplement knowledge that clinics, researchers, and experienced users rely on — dosing protocols, mechanisms, stacking strategies, side effects, and more.
         </Text>
 
         <View style={styles.card}>
@@ -43,17 +43,17 @@ export default function DisclaimerScreen({ onAccept }: Props) {
           <View style={styles.cardRow}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.cardText}>
-              <Text style={styles.bold}>AI advisor</Text> trained on the full peptide database for instant, specific answers
+              <Text style={styles.bold}>AI advisor</Text> trained on the full peptide & supplement database for instant, specific answers
             </Text>
           </View>
         </View>
 
         <Text style={styles.body}>
-          StackWise is an educational and tracking tool. The information here is thoroughly researched, but individual responses to peptides vary. You are responsible for your own health decisions.
+          StackWise is an educational and tracking tool. The information here is thoroughly researched, but individual responses to peptides and supplements vary. You are responsible for your own health decisions.
         </Text>
 
         <Text style={styles.finePrint}>
-          This app provides peptide information for educational purposes. It is not a substitute for professional medical advice, diagnosis, or treatment. By continuing, you acknowledge that you understand this and take full responsibility for how you use this information.
+          This app provides peptide and supplement information for educational purposes. It is not a substitute for professional medical advice, diagnosis, or treatment. By continuing, you acknowledge that you understand this and take full responsibility for how you use this information.
         </Text>
       </ScrollView>
 

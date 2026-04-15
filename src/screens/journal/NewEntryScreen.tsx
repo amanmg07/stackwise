@@ -13,7 +13,8 @@ const SIDE_EFFECTS = [
   "Nausea", "Headache", "Fatigue", "Dizziness",
   "Injection site pain", "Flushing", "Water retention",
   "Appetite change", "Insomnia", "Joint pain",
-  "Numbness/tingling", "Bloating",
+  "Numbness/tingling", "Bloating", "Stomach upset",
+  "Skin tingling", "Jitters", "Dry mouth",
 ];
 
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {

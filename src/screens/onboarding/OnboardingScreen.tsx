@@ -11,22 +11,22 @@ const SLIDES = [
   {
     icon: "flask-outline" as const,
     title: "Welcome to StackWise",
-    subtitle: "Your all-in-one peptide guide. Browse peptides, build protocols, and get personalized recommendations.",
+    subtitle: "Your all-in-one peptide & supplement guide. Browse compounds, build protocols, and get personalized recommendations.",
   },
   {
     icon: "chatbubbles-outline" as const,
     title: "AI-Powered Advice",
-    subtitle: "Ask StackWise AI anything about peptides — dosing, stacking, side effects. Get real answers, not disclaimers.",
+    subtitle: "Ask StackWise AI anything about peptides and supplements — dosing, stacking, side effects. Get real answers, not disclaimers.",
   },
   {
     icon: "scan-outline" as const,
     title: "Self Scan",
-    subtitle: "Snap a photo and our AI analyzes your appearance to recommend peptides tailored to you. Your photos are never saved or stored.",
+    subtitle: "Snap a photo and our AI recommends peptides and supplements tailored to you. Your photos are never saved or stored.",
   },
   {
     icon: "bar-chart-outline" as const,
     title: "Track & Optimize",
-    subtitle: "Log daily metrics in your journal. StackWise spots trends and recommends peptides based on how you feel.",
+    subtitle: "Log daily metrics in your journal. StackWise spots trends and recommends peptides & supplements based on how you feel.",
   },
 ];
 

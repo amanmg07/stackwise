@@ -57,16 +57,16 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
       icon: "moon-outline",
       color: "#818cf8",
       title: "Sleep needs attention",
-      detail: `Avg sleep quality: ${avgSleep.toFixed(1)}/10. DSIP promotes delta-wave deep sleep. Ipamorelin triggers GH release during sleep, improving sleep architecture.`,
-      peptideIds: ["dsip", "sleep_blend", "ipamorelin", "mk677"],
+      detail: `Avg sleep quality: ${avgSleep.toFixed(1)}/10. DSIP promotes delta-wave deep sleep. Magnesium glycinate and apigenin help you fall asleep faster and stay asleep.`,
+      peptideIds: ["dsip", "magnesium_glycinate", "apigenin", "glycine_sleep", "sleep_blend"],
     });
   } else if (sleepTrend < -TREND_THRESHOLD) {
     insights.push({
       icon: "trending-down-outline",
       color: "#818cf8",
       title: "Sleep quality declining",
-      detail: `Your sleep has been trending down recently. DSIP is a natural sleep-regulating peptide that restores healthy sleep cycles.`,
-      peptideIds: ["dsip", "sleep_blend"],
+      detail: `Your sleep has been trending down recently. DSIP restores healthy sleep cycles. Magnesium and L-theanine can help calm your nervous system.`,
+      peptideIds: ["dsip", "magnesium_glycinate", "l_theanine", "sleep_blend"],
     });
   }
 
@@ -79,8 +79,8 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
         icon: "bed-outline",
         color: "#818cf8",
         title: "Not getting enough sleep",
-        detail: `Avg ${avgHours.toFixed(1)} hrs/night. Most adults need 7-9. Short sleep hits recovery, GH output, and body comp.`,
-        peptideIds: ["dsip", "sleep_blend", "ipamorelin"],
+        detail: `Avg ${avgHours.toFixed(1)} hrs/night. Most adults need 7-9. Short sleep hits recovery, GH output, and body comp. Try magnesium + apigenin before bed.`,
+        peptideIds: ["dsip", "magnesium_glycinate", "apigenin", "sleep_blend"],
       });
     }
   }
@@ -120,8 +120,8 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
             icon: "trending-down-outline",
             color: "#fb923c",
             title: "Weight trending down",
-            detail: `Down ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pct).toFixed(1)}%). GLP-1 peptides can amplify fat-loss momentum when paired with protein & training.`,
-            peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "tesamorelin"],
+            detail: `Down ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pct).toFixed(1)}%). GLP-1 peptides amplify fat loss. Creatine preserves muscle during a cut.`,
+            peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "creatine_mono"],
           });
         }
       } else {
@@ -129,8 +129,8 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
           icon: "trending-up-outline",
           color: "#60a5fa",
           title: "Weight trending up",
-          detail: `Up ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pct).toFixed(1)}%). If bulking, GH secretagogues support lean gains; if unintended, watch calorie drift.`,
-          peptideIds: ["cjc_ipa_blend", "ipamorelin", "mk677"],
+          detail: `Up ${abs} ${weightUnit} over ${spanLabel} (${Math.abs(pct).toFixed(1)}%). If bulking, creatine and GH peptides support lean gains; if unintended, watch calorie drift.`,
+          peptideIds: ["creatine_mono", "cjc_ipa_blend", "ipamorelin", "hmb"],
         });
       }
     }
@@ -142,16 +142,16 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
       icon: "bandage-outline",
       color: "#4ade80",
       title: "Recovery is lagging",
-      detail: `Avg recovery: ${avgRecovery.toFixed(1)}/10. BPC-157 accelerates tissue repair via angiogenesis. TB-500 reduces inflammation and promotes cell migration to injury sites.`,
-      peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu"],
+      detail: `Avg recovery: ${avgRecovery.toFixed(1)}/10. BPC-157 accelerates tissue repair. Glutamine and omega-3 support muscle recovery and reduce inflammation.`,
+      peptideIds: ["bpc157", "tb500", "glutamine", "omega3", "wolverine_blend"],
     });
   } else if (recoveryTrend < -TREND_THRESHOLD) {
     insights.push({
       icon: "trending-down-outline",
       color: "#4ade80",
       title: "Recovery trending down",
-      detail: `Recovery scores dropping — could indicate overtraining. BPC-157 and TB-500 support systemic healing and reduce inflammation.`,
-      peptideIds: ["bpc157", "tb500", "klow_blend"],
+      detail: `Recovery scores dropping — could indicate overtraining. BPC-157 and TB-500 support healing. Creatine and glutamine aid muscle recovery.`,
+      peptideIds: ["bpc157", "tb500", "creatine_mono", "glutamine"],
     });
   }
 
@@ -161,16 +161,16 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
       icon: "flash-outline",
       color: "#facc15",
       title: "Low energy levels",
-      detail: `Avg energy: ${avgEnergy.toFixed(1)}/10. CJC-1295 + Ipamorelin boost GH output, which improves energy, metabolism, and body composition over 4-6 weeks.`,
-      peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "tesamorelin"],
+      detail: `Avg energy: ${avgEnergy.toFixed(1)}/10. CoQ10 supports mitochondrial energy. Creatine fuels both muscles and brain. GH peptides improve energy over 4-6 weeks.`,
+      peptideIds: ["coq10", "creatine_mono", "rhodiola", "cjc1295_nodac", "ipamorelin"],
     });
   } else if (energyTrend < -TREND_THRESHOLD) {
     insights.push({
       icon: "trending-down-outline",
       color: "#facc15",
       title: "Energy declining",
-      detail: `Your energy has been dropping. GH-boosting peptides raise IGF-1 levels, which supports cellular energy production and vitality.`,
-      peptideIds: ["cjc_ipa_blend", "mk677"],
+      detail: `Your energy has been dropping. Rhodiola fights fatigue and stress. CoQ10 powers your mitochondria. Ashwagandha supports adrenal function.`,
+      peptideIds: ["rhodiola", "coq10", "ashwagandha", "cjc_ipa_blend"],
     });
   }
 
@@ -180,8 +180,8 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
       icon: "sad-outline",
       color: "#f472b6",
       title: "Mood could be better",
-      detail: `Avg mood: ${avgMood.toFixed(1)}/10. Selank modulates GABA and serotonin for anxiolytic effects. Semax boosts BDNF, supporting mood and cognitive resilience.`,
-      peptideIds: ["selank", "semax", "cognitive_blend"],
+      detail: `Avg mood: ${avgMood.toFixed(1)}/10. Ashwagandha lowers cortisol and improves mood. L-theanine promotes calm focus. Selank and Semax boost BDNF and serotonin.`,
+      peptideIds: ["ashwagandha", "l_theanine", "selank", "semax", "omega3"],
     });
   }
 
@@ -263,88 +263,96 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
       icon: "bandage-outline",
       color: "#f87171",
       title: "You mentioned pain or injury",
-      detail: "Based on your notes, healing peptides could accelerate recovery from tissue damage.",
-      peptideIds: ["bpc157", "tb500", "wolverine_blend", "ghkcu", "kpv"],
+      detail: "Healing peptides accelerate tissue repair. Collagen and omega-3 support joint and connective tissue recovery.",
+      peptideIds: ["bpc157", "tb500", "collagen", "omega3", "wolverine_blend", "ghkcu"],
     },
     {
       keywords: ["anxiety", "anxious", "stress", "stressed", "nervous", "panic", "overwhelm", "worry", "tense"],
       icon: "leaf-outline",
       color: "#c084fc",
       title: "Stress & anxiety mentioned",
-      detail: "Your notes suggest elevated stress. Anxiolytic peptides may support mental calm.",
-      peptideIds: ["selank", "dsip", "cognitive_blend"],
+      detail: "Ashwagandha lowers cortisol. L-theanine promotes calm without drowsiness. Selank provides anxiolytic peptide support.",
+      peptideIds: ["ashwagandha", "l_theanine", "selank", "rhodiola", "dsip"],
     },
     {
       keywords: ["brain fog", "focus", "concentration", "memory", "forgetful", "mental clarity", "foggy", "scatter", "distracted", "cognitive"],
       icon: "bulb-outline",
       color: "#facc15",
       title: "Cognitive concerns noted",
-      detail: "You mentioned focus or cognitive issues. Nootropic peptides may sharpen mental performance.",
-      peptideIds: ["semax", "selank", "dihexa", "cognitive_blend"],
+      detail: "Lion's mane promotes nerve growth factor. Alpha-GPC boosts acetylcholine for focus. Semax enhances BDNF.",
+      peptideIds: ["lions_mane", "alpha_gpc", "semax", "bacopa", "selank"],
     },
     {
       keywords: ["fat", "weight", "belly", "overweight", "lose weight", "stubborn fat", "body fat", "visceral", "cutting", "lean", "slim"],
       icon: "flame-outline",
       color: "#fb923c",
       title: "Weight & fat loss goals noted",
-      detail: "Based on your notes, fat-targeting peptides could complement your efforts.",
-      peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "aod9604", "tesamorelin", "fat_burner_blend"],
+      detail: "GLP-1 peptides reduce appetite. Creatine preserves muscle during a deficit. Green tea and CLA may support fat oxidation.",
+      peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "creatine_mono", "aod9604", "tesamorelin"],
     },
     {
       keywords: ["appetite", "hunger", "cravings", "eating too much", "binge", "snacking", "overeating"],
       icon: "restaurant-outline",
       color: "#fb923c",
       title: "Appetite concerns noted",
-      detail: "GLP-1 agonists can help regulate appetite and reduce cravings.",
-      peptideIds: ["retatrutide", "semaglutide", "tirzepatide"],
+      detail: "GLP-1 agonists regulate appetite. Ashwagandha helps with stress-driven cravings.",
+      peptideIds: ["retatrutide", "semaglutide", "tirzepatide", "ashwagandha"],
     },
     {
       keywords: ["insomnia", "can't sleep", "waking up", "restless", "trouble sleeping", "sleep issues", "tossing", "turning"],
       icon: "moon-outline",
       color: "#818cf8",
       title: "Sleep issues mentioned in notes",
-      detail: "Your notes describe sleep difficulties. Sleep-promoting peptides may help.",
-      peptideIds: ["dsip", "sleep_blend", "ipamorelin"],
+      detail: "Magnesium glycinate and apigenin help you fall asleep. DSIP promotes deep sleep cycles. Glycine lowers core body temperature for sleep.",
+      peptideIds: ["magnesium_glycinate", "apigenin", "glycine_sleep", "dsip", "l_theanine"],
     },
     {
       keywords: ["aging", "wrinkles", "skin", "hair loss", "hair thin", "grey", "gray", "old", "longevity", "anti-aging", "telomere"],
       icon: "sparkles-outline",
       color: "#c084fc",
       title: "Anti-aging goals noted",
-      detail: "Your notes mention aging concerns. Longevity peptides may help at the cellular level.",
-      peptideIds: ["epithalon", "ghkcu", "foxo4dri", "humanin", "motsc", "glow_blend"],
+      detail: "NMN boosts NAD+ for cellular repair. Collagen rebuilds skin structure. GHK-Cu and Epithalon work at the peptide level.",
+      peptideIds: ["nmn", "collagen", "vitamin_c", "epithalon", "ghkcu", "coq10"],
     },
     {
       keywords: ["muscle", "gains", "bulk", "strength", "hypertrophy", "lifting", "gym", "mass", "growth hormone"],
       icon: "barbell-outline",
       color: "#60a5fa",
       title: "Muscle & strength goals noted",
-      detail: "GH-boosting peptides can support lean mass and recovery from training.",
-      peptideIds: ["cjc1295_nodac", "ipamorelin", "cjc_ipa_blend", "mk677", "hexarelin", "triple_gh_blend"],
+      detail: "Creatine is the most proven muscle supplement. GH peptides boost lean mass. Ashwagandha supports testosterone and recovery.",
+      peptideIds: ["creatine_mono", "cjc1295_nodac", "ipamorelin", "ashwagandha", "beta_alanine", "citrulline"],
     },
     {
       keywords: ["sick", "cold", "flu", "immune", "infection", "virus", "covid", "illness", "fever", "gut", "bloat", "digest", "ibs"],
       icon: "shield-checkmark-outline",
       color: "#2dd4bf",
       title: "Immune or gut health mentioned",
-      detail: "Your notes suggest immune or digestive concerns. These peptides support immune function and gut healing.",
-      peptideIds: ["thymosin_a1", "kpv", "ll37", "bpc157", "klow_blend"],
+      detail: "Vitamin C and D3 support immune defense. Glutamine repairs gut lining. BPC-157 and KPV heal gut inflammation.",
+      peptideIds: ["vitamin_c", "vitamin_d3k2", "glutamine", "thymosin_a1", "bpc157", "kpv"],
     },
     {
       keywords: ["libido", "sex", "erectile", "arousal", "intimacy", "desire", "performance"],
       icon: "heart-outline",
       color: "#f472b6",
       title: "Sexual health mentioned",
-      detail: "Peptides targeting sexual function may help with desire and performance.",
-      peptideIds: ["pt141", "kisspeptin", "gonadorelin"],
+      detail: "PT-141 boosts desire centrally. Tongkat ali and ashwagandha support testosterone and libido naturally.",
+      peptideIds: ["pt141", "tongkat_ali", "ashwagandha", "kisspeptin", "fenugreek"],
     },
     {
       keywords: ["inflammation", "inflamed", "swollen", "swelling", "redness", "chronic pain", "autoimmune", "arthritis"],
       icon: "flame-outline",
       color: "#f87171",
       title: "Inflammation mentioned",
-      detail: "Anti-inflammatory peptides can help reduce systemic and localized inflammation.",
-      peptideIds: ["bpc157", "kpv", "ll37", "thymosin_a1", "ss31"],
+      detail: "Omega-3 and taurine fight systemic inflammation. BPC-157 and KPV provide targeted anti-inflammatory peptide support.",
+      peptideIds: ["omega3", "taurine", "bpc157", "kpv", "ll37"],
+    },
+    {
+      keywords: ["hormone", "testosterone", "estrogen", "cortisol", "thyroid", "pcos", "menopause", "androgen"],
+      icon: "pulse-outline",
+      color: "#fb923c",
+      title: "Hormonal concerns noted",
+      detail: "Ashwagandha and tongkat ali support natural testosterone. DIM helps estrogen metabolism. Boron increases free testosterone.",
+      peptideIds: ["ashwagandha", "tongkat_ali", "dim", "boron", "gonadorelin", "dhea"],
     },
   ];
 
@@ -379,6 +387,11 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
     bpc157: "healing", tb500: "healing", wolverine_blend: "healing", ghkcu: "skin & healing",
     cjc1295_nodac: "energy & GH", cjc_ipa_blend: "energy & GH", mk677: "GH & appetite",
     tesamorelin: "fat loss & GH", selank: "mood & calm", semax: "focus",
+    magnesium_glycinate: "sleep", apigenin: "sleep", l_theanine: "calm & sleep",
+    ashwagandha: "stress & hormones", rhodiola: "energy & stress", coq10: "energy",
+    creatine_mono: "muscle & energy", omega3: "inflammation & mood", glutamine: "recovery & gut",
+    lions_mane: "cognitive", alpha_gpc: "focus", collagen: "skin & joints",
+    tongkat_ali: "hormones", vitamin_c: "immune & skin", vitamin_d3k2: "immune",
   };
   for (const insight of insights) {
     for (const id of insight.peptideIds) {
@@ -401,7 +414,7 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
     insights.push({
       icon: "star-outline",
       color: colors.accent,
-      title: "Multi-benefit peptides for you",
+      title: "Multi-benefit recommendations",
       detail: `These address multiple concerns from your journal:\n${lines.join("\n")}`,
       peptideIds: multiBenefit.map(([id]) => id),
     });
@@ -483,6 +496,9 @@ export default function JournalScreen({ navigation }: any) {
                       })}
                     >
                       <Text style={styles.recChipText}>{pep.name}</Text>
+                      {pep.compoundType === "supplement" && (
+                        <Ionicons name="leaf-outline" size={11} color="#4ade80" style={{ marginLeft: 4 }} />
+                      )}
                     </TouchableOpacity>
                   );
                 })}
@@ -515,7 +531,7 @@ export default function JournalScreen({ navigation }: any) {
         ListHeaderComponent={<>
           <Text style={styles.journalTitle}>Journal</Text>
           {sorted.length === 0 && (
-            <Text style={styles.journalSubtitle}>Log how you feel daily — StackWise will spot trends and recommend peptides based on your metrics.</Text>
+            <Text style={styles.journalSubtitle}>Log how you feel daily — StackWise will spot trends and recommend peptides & supplements based on your metrics.</Text>
           )}
           {header()}
           {sorted.length >= 3 && <TrendChart entries={sorted} />}
@@ -532,7 +548,7 @@ export default function JournalScreen({ navigation }: any) {
             </View>
             <Text style={emptyStateStyle.title}>No Entries Yet</Text>
             <Text style={emptyStateStyle.subtitle}>
-              Start logging your daily metrics — after a few entries, StackWise will analyze your trends and recommend peptides tailored to you.
+              Start logging your daily metrics — after a few entries, StackWise will analyze your trends and recommend peptides & supplements tailored to you.
             </Text>
           </View>
         }
@@ -753,6 +769,7 @@ const styles = StyleSheet.create({
   recRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 6, marginTop: 10 },
   recLabel: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   recChip: {
+    flexDirection: "row", alignItems: "center",
     backgroundColor: colors.accent + "15", borderRadius: 8,
     paddingHorizontal: 10, paddingVertical: 5,
     borderWidth: 1, borderColor: colors.accent + "30",
