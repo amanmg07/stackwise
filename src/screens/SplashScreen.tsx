@@ -39,7 +39,7 @@ export default function SplashScreen({ onFinish }: Props) {
     <Animated.View style={[styles.container, { opacity }]}>
       <Animated.Image
         source={require("../../assets/logo.png")}
-        style={[styles.logo, { transform: [{ translateY: -20 }, { rotate: rotation }, { translateY: 20 }] }]}
+        style={[styles.logo, { transform: [{ rotate: rotation }] }]}
       />
     </Animated.View>
   );
