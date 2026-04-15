@@ -22,6 +22,7 @@ const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof I
   { key: "cognitive", label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
   { key: "immune", label: "Immune Health", icon: "shield-checkmark-outline", color: "#2dd4bf" },
   { key: "sexual_health", label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
+  { key: "hormone", label: "Hormonal Support", icon: "pulse-outline", color: "#fb923c" },
 ];
 
 export default function NewCycleScreen({ route, navigation }: any) {
@@ -297,14 +298,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
 
       {showPicker ? (
         <View style={styles.pickerCard}>
-          <Text style={styles.pickerTitle}>Select Peptide</Text>
+          <Text style={styles.pickerTitle}>Add to Cycle</Text>
 
           {/* Search bar */}
           <View style={styles.pickerSearchBar}>
             <Ionicons name="search" size={16} color={colors.textSecondary} />
             <TextInput
               style={styles.pickerSearchInput}
-              placeholder="Search peptides..."
+              placeholder="Search peptides & supplements..."
               placeholderTextColor={colors.textSecondary}
               value={pickerSearch}
               onChangeText={setPickerSearch}
@@ -330,6 +331,9 @@ export default function NewCycleScreen({ route, navigation }: any) {
                 <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => { addPeptide(p.id); setPickerSearch(""); }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
                     <Text style={styles.pickerName}>{p.name}</Text>
+                    {p.compoundType === "supplement" && (
+                      <Ionicons name="leaf-outline" size={13} color="#4ade80" />
+                    )}
                     {settings.savedPeptides.includes(p.id) && (
                       <Ionicons name="bookmark" size={14} color={colors.accent} />
                     )}
@@ -391,6 +395,9 @@ export default function NewCycleScreen({ route, navigation }: any) {
                   <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => addPeptide(p.id)}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
                       <Text style={styles.pickerName}>{p.name}</Text>
+                      {p.compoundType === "supplement" && (
+                        <Ionicons name="leaf-outline" size={13} color="#4ade80" />
+                      )}
                       {settings.savedPeptides.includes(p.id) && (
                         <Ionicons name="bookmark" size={14} color={colors.accent} />
                       )}
@@ -411,7 +418,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
       ) : (
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowPicker(true)}>
           <Ionicons name="add" size={20} color={colors.accent} />
-          <Text style={styles.addBtnText}>Add Peptide</Text>
+          <Text style={styles.addBtnText}>Add Peptide / Supplement</Text>
         </TouchableOpacity>
       )}
 

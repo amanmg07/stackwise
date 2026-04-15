@@ -125,107 +125,76 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         )}
       </View>
 
+      {/* Type filter */}
+      <View style={styles.chipsWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContent}>
+          {TYPE_FILTERS.map((tf) => {
+            const active = tf.key === selectedType;
+            return (
+            <TouchableOpacity key={tf.key} style={[styles.chip, active && styles.chipActive]} onPress={() => setSelectedType(tf.key)}>
+              <Ionicons name={tf.icon} size={12} color={active ? colors.background : colors.textSecondary} />
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{tf.label}</Text>
+            </TouchableOpacity>
+          );})}
+        </ScrollView>
+      </View>
+
+      {/* Category chips */}
+      <View style={styles.chipsWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContent}>
+          {CATEGORIES.map((cat) => {
+            const active = cat.key === "all" ? selectedCats.length === 0 : selectedCats.includes(cat.key as PeptideCategory);
+            return (
+            <TouchableOpacity key={cat.key} style={[styles.chip, active && styles.chipActive]} onPress={() => toggleCat(cat.key)}>
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{cat.label}</Text>
+            </TouchableOpacity>
+          );})}
+        </ScrollView>
+      </View>
+
+      {/* Route filter chips */}
+      <View style={styles.chipsWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContent}>
+          {ROUTE_FILTERS.map((rf) => {
+            const active = rf.key === "all" ? selectedRoutes.length === 0 : selectedRoutes.includes(rf.key as AdministrationRoute);
+            return (
+            <TouchableOpacity key={rf.key} style={[styles.chip, active && styles.chipActive]} onPress={() => toggleRoute(rf.key)}>
+              <Ionicons name={rf.icon} size={12} color={active ? colors.background : colors.textSecondary} />
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{rf.label}</Text>
+            </TouchableOpacity>
+          );})}
+        </ScrollView>
+      </View>
+
+      {/* Tools row */}
+      <View style={styles.toolsRow}>
+        <TouchableOpacity
+          style={styles.toolBtn}
+          onPress={() => navigation.navigate("InteractionChecker")}
+        >
+          <Ionicons name="git-compare-outline" size={16} color={colors.accent} />
+          <Text style={styles.toolBtnText}>Interactions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.toolBtn}
+          onPress={() => navigation.navigate("Compare")}
+        >
+          <Ionicons name="swap-horizontal-outline" size={16} color={colors.accent} />
+          <Text style={styles.toolBtnText}>Compare</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Result count */}
+      <Text style={[styles.resultCount, { paddingHorizontal: spacing.md, marginBottom: 6 }]}>
+        {filtered.length} {filtered.length === 1 ? "result" : "results"}
+      </Text>
+
       {/* Peptide list */}
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 40 }}
         ListHeaderComponent={
-          <>
-          {/* Type filter (Peptides / Supplements) */}
-          <View style={styles.chipsWrapper}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipsContent}
-            >
-              {TYPE_FILTERS.map((tf) => {
-                const active = tf.key === selectedType;
-                return (
-                <TouchableOpacity
-                  key={tf.key}
-                  style={[styles.chip, active && styles.chipActive]}
-                  onPress={() => setSelectedType(tf.key)}
-                >
-                  <Ionicons name={tf.icon} size={13} color={active ? colors.background : colors.textSecondary} />
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                    {tf.label}
-                  </Text>
-                </TouchableOpacity>
-              );})}
-            </ScrollView>
-          </View>
-
-          {/* Category chips */}
-          <View style={styles.chipsWrapper}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipsContent}
-            >
-              {CATEGORIES.map((cat) => {
-                const active = cat.key === "all" ? selectedCats.length === 0 : selectedCats.includes(cat.key as PeptideCategory);
-                return (
-                <TouchableOpacity
-                  key={cat.key}
-                  style={[styles.chip, active && styles.chipActive]}
-                  onPress={() => toggleCat(cat.key)}
-                >
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              );})}
-            </ScrollView>
-          </View>
-
-          {/* Route filter chips */}
-          <View style={styles.chipsWrapper}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipsContent}
-            >
-              {ROUTE_FILTERS.map((rf) => {
-                const active = rf.key === "all" ? selectedRoutes.length === 0 : selectedRoutes.includes(rf.key as AdministrationRoute);
-                return (
-                <TouchableOpacity
-                  key={rf.key}
-                  style={[styles.chip, active && styles.chipActive]}
-                  onPress={() => toggleRoute(rf.key)}
-                >
-                  <Ionicons name={rf.icon} size={13} color={active ? colors.background : colors.textSecondary} />
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                    {rf.label}
-                  </Text>
-                </TouchableOpacity>
-              );})}
-            </ScrollView>
-          </View>
-
-          {/* Tools row */}
-          <View style={styles.toolsRow}>
-            <TouchableOpacity
-              style={styles.toolBtn}
-              onPress={() => navigation.navigate("InteractionChecker")}
-            >
-              <Ionicons name="git-compare-outline" size={16} color={colors.accent} />
-              <Text style={styles.toolBtnText}>Interactions</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.toolBtn}
-              onPress={() => navigation.navigate("Compare")}
-            >
-              <Ionicons name="swap-horizontal-outline" size={16} color={colors.accent} />
-              <Text style={styles.toolBtnText}>Compare</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Result count */}
-          <Text style={styles.resultCount}>
-            {filtered.length} {filtered.length === 1 ? "result" : "results"}
-          </Text>
-
           <TouchableOpacity
             style={styles.guideCard}
             onPress={() => setShowGuide(!showGuide)}
@@ -269,7 +238,6 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
               </View>
             )}
           </TouchableOpacity>
-          </>
         }
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -336,46 +304,49 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    margin: spacing.md,
-    marginBottom: spacing.sm,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 10,
+    borderRadius: 10,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
     borderWidth: 1,
     borderColor: colors.border,
   },
   searchInput: { flex: 1, fontSize: 15, color: colors.text },
-  chipsWrapper: { height: 44, marginBottom: 4 },
-  chipsContent: { paddingHorizontal: spacing.md, alignItems: "center", height: 44 },
+  chipsWrapper: { height: 36, marginBottom: 4 },
+  chipsContent: { paddingHorizontal: spacing.md, alignItems: "center", height: 36 },
   chip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 4,
     backgroundColor: colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    height: 36,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    height: 30,
     justifyContent: "center",
-    marginRight: 8,
+    marginRight: 6,
     borderWidth: 1,
     borderColor: colors.border,
   },
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  chipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
+  chipText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   chipTextActive: { color: colors.background },
+  subHeaderRow: {
+    paddingHorizontal: spacing.md, marginBottom: 6, marginTop: 2,
+  },
   toolsRow: {
-    flexDirection: "row", gap: 8, paddingHorizontal: spacing.md, marginBottom: 10,
+    flexDirection: "row", gap: 8, paddingHorizontal: spacing.md, marginBottom: 6, marginTop: 2,
   },
   toolBtn: {
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    backgroundColor: colors.accent + "12", borderRadius: 10, paddingVertical: 10,
+    backgroundColor: colors.accent + "12", borderRadius: 10, paddingVertical: 9,
     borderWidth: 1, borderColor: colors.accent + "25",
   },
   toolBtnText: { fontSize: 13, fontWeight: "600", color: colors.accent },
   resultCount: {
-    fontSize: 12, color: colors.textSecondary, paddingHorizontal: spacing.md,
-    marginBottom: 8,
+    fontSize: 12, color: colors.textSecondary,
   },
   card: {
     backgroundColor: colors.surface,
