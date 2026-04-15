@@ -156,7 +156,7 @@ export default function ScannerScreen({ navigation }: any) {
 - For women, prioritize skin health, anti-aging, recovery, and hormonal balance observations when relevant
 - For men, muscle definition and mass observations are more commonly relevant\n` : "";
 
-      const systemPrompt = `You are an expert peptide advisor analyzing a photo to recommend peptide categories. Be thorough — most people will benefit from multiple categories.
+      const systemPrompt = `You are an expert peptide & supplement advisor analyzing a photo to recommend peptide and supplement categories. Be thorough — most people will benefit from multiple categories. You can recommend both peptides (e.g., BPC-157, GHK-Cu) and supplements (e.g., creatine, ashwagandha, collagen, vitamin D) as appropriate.
 ${genderCtx}
 
 CATEGORY MAPPING — assign observations to ALL relevant categories:
@@ -168,6 +168,7 @@ anti_aging: wrinkles, fine lines, crow's feet, forehead lines, nasolabial folds,
 sleep: dark circles under eyes, puffy eyes, bags under eyes, tired/fatigued appearance, pallid complexion
 cognitive: (recommend alongside sleep if person looks fatigued or stressed)
 immune: acne, rosacea, eczema, psoriasis, skin inflammation, redness, irritation, breakouts, hives, fungal signs, slow-healing wounds
+hormone: signs of hormonal imbalance, hormonal acne, hair thinning patterns consistent with hormonal issues
 
 IMPORTANT:
 - Skin issues like acne should map to BOTH anti_aging AND immune (peptides like GHK-Cu help skin repair, BPC-157 reduces inflammation)
@@ -175,6 +176,7 @@ IMPORTANT:
 - Body composition observations should include both fat_loss AND muscle_gain when relevant
 - Dark circles/fatigue → both sleep AND cognitive
 - Always recommend anti_aging for any skin quality issues (acne, scars, texture, tone)
+- Consider both peptides AND supplements for each category — e.g., muscle_gain can benefit from creatine (supplement) alongside peptides
 
 HONESTY RULE: Be accurate and constructive. Don't exaggerate strengths that aren't there, but don't be harsh either. Frame improvements as opportunities, not criticisms. For example, say "room to add more muscle mass" instead of "underdeveloped muscles" or "lack of definition".
 
@@ -183,7 +185,7 @@ Respond ONLY with valid JSON:
 
 IMPORTANT DISTINCTION:
 - "strengths": things the person is GENUINELY doing well that you can clearly see — not generic compliments. Only list a strength if it's actually visible and notable. "Good skin" is only a strength if their skin actually looks good. Do NOT list "good muscle definition" unless you can genuinely see defined muscles.
-- "improvements": areas where there is a VISIBLE PROBLEM that peptides could fix — actual skin damage, actual excess body fat, actual dark circles, actual inflammation, etc.
+- "improvements": areas where there is a VISIBLE PROBLEM that peptides or supplements could address — actual skin damage, actual excess body fat, actual dark circles, actual inflammation, etc.
 - STRICT RULE: "improvements" is ONLY for things that are visibly WRONG right now. Preventive advice, maintenance suggestions, and "it's important to..." statements are NOT improvements. If the person looks fine in a category, it MUST go in "strengths" even if you think they could benefit from prevention. For example: "no visible signs of aging but maintaining skin health is important" = STRENGTHS, not improvements. "Clear skin with good complexion" = STRENGTHS. Only "visible wrinkles on forehead" or "acne scarring on cheeks" = IMPROVEMENTS.
 - ALWAYS include at least 1 strength — find something positive to highlight
 - Each observation needs: category, observation text, confidence ("high"/"medium"/"low")
@@ -211,7 +213,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
               },
               {
                 type: "text",
-                text: "Analyze this person's photo and recommend peptide categories based on what you observe. Be respectful and positive. Respond with JSON only.",
+                text: "Analyze this person's photo and recommend peptide and supplement categories based on what you observe. Be respectful and positive. Respond with JSON only.",
               },
             ],
           },
@@ -272,8 +274,13 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
 
   const PRIORITY_PEPTIDES: Partial<Record<PeptideCategory, string[]>> = {
     fat_loss: ["retatrutide", "semaglutide", "tirzepatide"],
-    muscle_gain: ["tesamorelin", "igf1_lr3"],
-    anti_aging: ["ghkcu", "klow_blend", "glow_blend"],
+    muscle_gain: ["tesamorelin", "igf1_lr3", "creatine"],
+    anti_aging: ["ghkcu", "klow_blend", "collagen"],
+    sleep: ["dsip", "magnesium_glycinate", "apigenin"],
+    cognitive: ["dihexa", "lions_mane", "alpha_gpc"],
+    immune: ["bpc157", "vitamin_c"],
+    hormone: ["kisspeptin", "ashwagandha", "tongkat_ali"],
+    recovery: ["bpc157", "tb500", "glutamine"],
   };
 
   const getPeptidesForCategory = (cat: PeptideCategory) => {
@@ -427,7 +434,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                 <Ionicons name="checkmark-circle" size={18} color={colors.success} />
                 <Text style={[styles.sectionTitle, { color: colors.success, marginBottom: 0 }]}>Keep It Up</Text>
               </View>
-              <Text style={styles.sectionDesc}>Peptides to maintain what you're doing well</Text>
+              <Text style={styles.sectionDesc}>Peptides & supplements to maintain what you're doing well</Text>
               {(() => {
                 const shown = new Set<string>();
                 return result.strengths.map((obs, i) => {
@@ -468,6 +475,9 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                                   onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
                                 >
                                   <Text style={styles.peptideChipText}>{p.name}</Text>
+                                  {p.compoundType === "supplement" && (
+                                    <Ionicons name="leaf-outline" size={13} color="#4ade80" />
+                                  )}
                                   <Ionicons name="chevron-forward" size={14} color={colors.accent} />
                                 </TouchableOpacity>
                               </View>
@@ -489,7 +499,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                 <Ionicons name="trending-up" size={18} color={colors.accent} />
                 <Text style={[styles.sectionTitle, { color: colors.accent, marginBottom: 0 }]}>Start Considering</Text>
               </View>
-              <Text style={styles.sectionDesc}>Areas where peptides could help</Text>
+              <Text style={styles.sectionDesc}>Areas where peptides & supplements could help</Text>
               {(() => {
                 const shown = new Set<string>();
                 // Collect already-shown peptide IDs from strengths
@@ -536,6 +546,9 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                                   onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
                                 >
                                   <Text style={styles.peptideChipText}>{p.name}</Text>
+                                  {p.compoundType === "supplement" && (
+                                    <Ionicons name="leaf-outline" size={13} color="#4ade80" />
+                                  )}
                                   <Ionicons name="chevron-forward" size={14} color={colors.accent} />
                                 </TouchableOpacity>
                               </View>
@@ -555,13 +568,21 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             <TouchableOpacity
               style={styles.addToCycleBtn}
               onPress={() => {
+                const parseDoseUnit = (s?: string): "mcg" | "mg" | "g" | "IU" => {
+                  if (!s) return "mg";
+                  if (/\biu\b/i.test(s)) return "IU";
+                  if (/\bmcg\b/i.test(s) || /\bμg\b/.test(s)) return "mcg";
+                  if (/\bg\b/i.test(s) && !/\bmg\b/i.test(s)) return "g";
+                  return "mg";
+                };
                 const cyclePeptides = [...selectedPeptides].map((id) => {
                   const p = peptideDB.find((pep) => pep.id === id)!;
-                  const doseMatch = p.dosingProtocols?.[0]?.doseRange?.match(/([\d.]+)/);
+                  const doseRange = p.dosingProtocols?.[0]?.doseRange;
+                  const doseMatch = doseRange?.match(/([\d.,]+)/);
                   return {
                     peptideId: p.id,
-                    doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
-                    doseUnit: "mg" as const,
+                    doseAmount: doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25,
+                    doseUnit: parseDoseUnit(doseRange),
                     frequency: p.dosingProtocols?.[0]?.frequency || "daily",
                     route: (p.routes?.[0] || "subcutaneous") as AdministrationRoute,
                     timeOfDay: ["morning"],

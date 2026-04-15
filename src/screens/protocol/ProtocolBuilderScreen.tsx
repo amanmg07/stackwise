@@ -103,7 +103,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
       {userGoals.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Preferred administration</Text>
-          <Text style={styles.sectionDesc}>Tap to deselect any you want to avoid</Text>
+          <Text style={styles.sectionDesc}>For peptides</Text>
           <View style={styles.routeGrid}>
             {ROUTES.map((r, i) => {
               const selected = selectedRoutes.includes(r.key);
