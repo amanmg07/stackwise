@@ -46,7 +46,7 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
   if (!peptide) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Peptide not found</Text>
+        <Text style={styles.errorText}>Not found</Text>
       </View>
     );
   }
@@ -70,6 +70,12 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
             />
           </TouchableOpacity>
         </View>
+        {peptide.compoundType === "supplement" && (
+          <View style={[styles.blendBadge, { backgroundColor: "#4ade80" + "15", borderColor: "#4ade80" + "30" }]}>
+            <Ionicons name="leaf-outline" size={12} color="#4ade80" />
+            <Text style={[styles.blendBadgeText, { color: "#4ade80" }]}>Supplement</Text>
+          </View>
+        )}
         {peptide.isBlend && (
           <View style={styles.blendBadge}>
             <Ionicons name="layers-outline" size={12} color={colors.accent} />
@@ -184,7 +190,7 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
       {/* Stacks With */}
       {stackPeptides.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>Stacks Well With</Text>
+          <Text style={styles.sectionTitle}>{peptide.compoundType === "supplement" ? "Pairs Well With" : "Stacks Well With"}</Text>
           <View style={styles.stackChipRow}>
             {stackPeptides.map((sp) => (
               <TouchableOpacity

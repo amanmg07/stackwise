@@ -238,7 +238,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
               <View style={styles.fieldHalf}>
                 <Text style={styles.fieldLabel}>Unit</Text>
                 <View style={styles.unitRow}>
-                  {(["mcg", "mg", "IU"] as const).map((u) => (
+                  {(["mcg", "mg", "g", "IU"] as const).map((u) => (
                     <TouchableOpacity
                       key={u}
                       style={[styles.unitBtn, cp.doseUnit === u && styles.unitBtnActive]}

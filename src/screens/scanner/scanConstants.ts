@@ -10,6 +10,7 @@ export const CATEGORY_INFO: Record<string, { label: string; icon: keyof typeof I
   cognitive: { label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
   immune: { label: "Immune", icon: "shield-checkmark-outline", color: "#2dd4bf" },
   sexual_health: { label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
+  hormone: { label: "Hormonal", icon: "pulse-outline", color: "#fb923c" },
 };
 
 export const CONFIDENCE_LABELS: Record<string, string> = {

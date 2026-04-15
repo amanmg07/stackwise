@@ -32,6 +32,8 @@ export async function getCurrentUserId(): Promise<string | null> {
 
 /** Call Groq via the Supabase Edge Function proxy. */
 export async function callGroqProxy(body: Record<string, any>): Promise<any> {
+  // Ensure we have a valid anonymous session before calling the proxy
+  await ensureAuth();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
@@ -64,6 +66,7 @@ export async function callGroqProxy(body: Record<string, any>): Promise<any> {
       throw new Error("Rate limit reached. Wait a moment and try again.");
     }
     const errText = await response.text();
+    if (__DEV__) console.error(`Groq proxy error ${response.status}:`, errText);
     Sentry.captureException(new Error(`Groq proxy error: ${response.status}`), {
       extra: { status: response.status, body: errText },
     });

@@ -82,8 +82,9 @@ Deno.serve(async (req) => {
       status: groqResponse.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+  } catch (e: any) {
+    console.error("groq-proxy error:", e?.message || e);
+    return new Response(JSON.stringify({ error: "Internal server error", detail: e?.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -5,7 +5,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
 import { colors, spacing, safeTop } from "../../theme";
-import { PeptideCategory, AdministrationRoute } from "../../types";
+import { PeptideCategory, AdministrationRoute, CompoundType } from "../../types";
 
 const CATEGORIES: { key: PeptideCategory | "all"; label: string }[] = [
   { key: "all", label: "All" },
@@ -59,10 +59,17 @@ const ROUTE_FILTERS: { key: AdministrationRoute | "all"; label: string; icon: ke
   { key: "topical", label: "Topical", icon: "hand-left-outline" },
 ];
 
+const TYPE_FILTERS: { key: "all" | CompoundType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: "all", label: "All", icon: "apps-outline" },
+  { key: "peptide", label: "Peptides", icon: "flask-outline" },
+  { key: "supplement", label: "Supplements", icon: "leaf-outline" },
+];
+
 export default function ResearchHubScreen({ navigation, embedded }: any) {
   const [search, setSearch] = useState("");
   const [selectedCats, setSelectedCats] = useState<PeptideCategory[]>([]);
   const [selectedRoutes, setSelectedRoutes] = useState<AdministrationRoute[]>([]);
+  const [selectedType, setSelectedType] = useState<"all" | CompoundType>("all");
   const [showGuide, setShowGuide] = useState(false);
 
   const toggleCat = (key: PeptideCategory | "all") => {
@@ -93,9 +100,10 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         (p.abbreviation?.toLowerCase().includes(search.toLowerCase()));
       const matchCat = selectedCats.length === 0 || selectedCats.some((c) => p.categories.includes(c));
       const matchRoute = selectedRoutes.length === 0 || selectedRoutes.some((r) => p.routes.includes(r));
-      return matchSearch && matchCat && matchRoute;
+      const matchType = selectedType === "all" || (p.compoundType || "peptide") === selectedType;
+      return matchSearch && matchCat && matchRoute && matchType;
     });
-  }, [search, selectedCats, selectedRoutes]);
+  }, [search, selectedCats, selectedRoutes, selectedType]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
@@ -105,7 +113,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         <Ionicons name="search" size={18} color={colors.textSecondary} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search peptides..."
+          placeholder="Search peptides & supplements..."
           placeholderTextColor={colors.textSecondary}
           value={search}
           onChangeText={setSearch}
@@ -117,82 +125,107 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         )}
       </View>
 
-      {/* Category chips */}
-      <View style={styles.chipsWrapper}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsContent}
-        >
-          {CATEGORIES.map((cat) => {
-            const active = cat.key === "all" ? selectedCats.length === 0 : selectedCats.includes(cat.key as PeptideCategory);
-            return (
-            <TouchableOpacity
-              key={cat.key}
-              style={[styles.chip, active && styles.chipActive]}
-              onPress={() => toggleCat(cat.key)}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {cat.label}
-              </Text>
-            </TouchableOpacity>
-          );})}
-        </ScrollView>
-      </View>
-
-      {/* Route filter chips */}
-      <View style={styles.chipsWrapper}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsContent}
-        >
-          {ROUTE_FILTERS.map((rf) => {
-            const active = rf.key === "all" ? selectedRoutes.length === 0 : selectedRoutes.includes(rf.key as AdministrationRoute);
-            return (
-            <TouchableOpacity
-              key={rf.key}
-              style={[styles.chip, active && styles.chipActive]}
-              onPress={() => toggleRoute(rf.key)}
-            >
-              <Ionicons name={rf.icon} size={13} color={active ? colors.background : colors.textSecondary} />
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {rf.label}
-              </Text>
-            </TouchableOpacity>
-          );})}
-        </ScrollView>
-      </View>
-
-      {/* Tools row */}
-      <View style={styles.toolsRow}>
-        <TouchableOpacity
-          style={styles.toolBtn}
-          onPress={() => navigation.navigate("InteractionChecker")}
-        >
-          <Ionicons name="git-compare-outline" size={16} color={colors.accent} />
-          <Text style={styles.toolBtnText}>Interactions</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.toolBtn}
-          onPress={() => navigation.navigate("Compare")}
-        >
-          <Ionicons name="swap-horizontal-outline" size={16} color={colors.accent} />
-          <Text style={styles.toolBtnText}>Compare</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Result count */}
-      <Text style={styles.resultCount}>
-        {filtered.length} {filtered.length === 1 ? "result" : "results"}
-      </Text>
-
       {/* Peptide list */}
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 40 }}
         ListHeaderComponent={
+          <>
+          {/* Type filter (Peptides / Supplements) */}
+          <View style={styles.chipsWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsContent}
+            >
+              {TYPE_FILTERS.map((tf) => {
+                const active = tf.key === selectedType;
+                return (
+                <TouchableOpacity
+                  key={tf.key}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => setSelectedType(tf.key)}
+                >
+                  <Ionicons name={tf.icon} size={13} color={active ? colors.background : colors.textSecondary} />
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    {tf.label}
+                  </Text>
+                </TouchableOpacity>
+              );})}
+            </ScrollView>
+          </View>
+
+          {/* Category chips */}
+          <View style={styles.chipsWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsContent}
+            >
+              {CATEGORIES.map((cat) => {
+                const active = cat.key === "all" ? selectedCats.length === 0 : selectedCats.includes(cat.key as PeptideCategory);
+                return (
+                <TouchableOpacity
+                  key={cat.key}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => toggleCat(cat.key)}
+                >
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              );})}
+            </ScrollView>
+          </View>
+
+          {/* Route filter chips */}
+          <View style={styles.chipsWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsContent}
+            >
+              {ROUTE_FILTERS.map((rf) => {
+                const active = rf.key === "all" ? selectedRoutes.length === 0 : selectedRoutes.includes(rf.key as AdministrationRoute);
+                return (
+                <TouchableOpacity
+                  key={rf.key}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => toggleRoute(rf.key)}
+                >
+                  <Ionicons name={rf.icon} size={13} color={active ? colors.background : colors.textSecondary} />
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    {rf.label}
+                  </Text>
+                </TouchableOpacity>
+              );})}
+            </ScrollView>
+          </View>
+
+          {/* Tools row */}
+          <View style={styles.toolsRow}>
+            <TouchableOpacity
+              style={styles.toolBtn}
+              onPress={() => navigation.navigate("InteractionChecker")}
+            >
+              <Ionicons name="git-compare-outline" size={16} color={colors.accent} />
+              <Text style={styles.toolBtnText}>Interactions</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.toolBtn}
+              onPress={() => navigation.navigate("Compare")}
+            >
+              <Ionicons name="swap-horizontal-outline" size={16} color={colors.accent} />
+              <Text style={styles.toolBtnText}>Compare</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Result count */}
+          <Text style={styles.resultCount}>
+            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          </Text>
+
           <TouchableOpacity
             style={styles.guideCard}
             onPress={() => setShowGuide(!showGuide)}
@@ -236,6 +269,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
               </View>
             )}
           </TouchableOpacity>
+          </>
         }
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -244,6 +278,12 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
           >
             <View style={styles.cardHeader}>
               <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
+              {item.compoundType === "supplement" && (
+                <View style={[styles.blendBadge, { backgroundColor: "#4ade80" + "15", borderColor: "#4ade80" + "30" }]}>
+                  <Ionicons name="leaf-outline" size={10} color="#4ade80" />
+                  <Text style={[styles.blendBadgeText, { color: "#4ade80" }]}>Supplement</Text>
+                </View>
+              )}
               {item.isBlend && (
                 <View style={styles.blendBadge}>
                   <Ionicons name="layers-outline" size={10} color={colors.accent} />
@@ -280,7 +320,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="flask-outline" size={40} color={colors.border} />
-            <Text style={styles.emptyText}>No peptides found</Text>
+            <Text style={styles.emptyText}>No results found</Text>
           </View>
         }
       />

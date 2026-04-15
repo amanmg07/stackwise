@@ -70,7 +70,7 @@ export function trackCycleCreated(peptideIds: string[], goal?: string) {
   trackEvent("cycle_created", { peptide_ids: peptideIds, goal });
 }
 
-export function trackDoseLogged(peptideId: string, amount: number, unit: "mcg" | "mg" | "IU") {
+export function trackDoseLogged(peptideId: string, amount: number, unit: "mcg" | "mg" | "g" | "IU") {
   trackEvent("dose_logged", { peptide_id: peptideId, amount, unit });
 }
 

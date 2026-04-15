@@ -24,7 +24,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
   const initAmount = cyclePeptide?.doseAmount || 0.25;
 
   const [amount, setAmount] = useState(String(initAmount));
-  const [unit, setUnit] = useState<"mcg" | "mg" | "IU">(initUnit);
+  const [unit, setUnit] = useState<"mcg" | "mg" | "g" | "IU">(initUnit);
   const [route_, setRoute] = useState<AdministrationRoute>(cyclePeptide?.route || "subcutaneous");
   const [site, setSite] = useState("");
   const [notes, setNotes] = useState("");
@@ -37,20 +37,22 @@ export default function LogDoseScreen({ route, navigation }: any) {
     );
   }
 
-  const switchUnit = (newUnit: "mcg" | "mg" | "IU") => {
+  const switchUnit = (newUnit: "mcg" | "mg" | "g" | "IU") => {
     const current = parseFloat(amount) || 0;
     if (newUnit === unit) return;
 
-    let converted = current;
-    // Convert current → mg first
-    const inMg = unit === "mcg" ? current / 1000 : unit === "mg" ? current : current;
-    // Then mg → target
-    if (newUnit === "mcg") converted = inMg * 1000;
-    else if (newUnit === "mg") converted = inMg;
-    else converted = current; // IU has no direct conversion, keep as-is
-
     // Don't convert to/from IU since it's not a weight unit
-    if (unit === "IU" || newUnit === "IU") converted = current;
+    if (unit === "IU" || newUnit === "IU") {
+      setUnit(newUnit);
+      return;
+    }
+
+    // Convert current → mg first
+    const inMg = unit === "mcg" ? current / 1000 : unit === "g" ? current * 1000 : current;
+    // Then mg → target
+    let converted = inMg;
+    if (newUnit === "mcg") converted = inMg * 1000;
+    else if (newUnit === "g") converted = inMg / 1000;
 
     const rounded = parseFloat(converted.toPrecision(4));
     setAmount(String(rounded));
@@ -93,7 +95,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
           keyboardType="decimal-pad"
         />
         <View style={styles.unitRow}>
-          {(["mcg", "mg", "IU"] as const).map((u) => (
+          {(["mcg", "mg", "g", "IU"] as const).map((u) => (
             <TouchableOpacity
               key={u}
               style={[styles.unitBtn, unit === u && styles.unitBtnActive]}

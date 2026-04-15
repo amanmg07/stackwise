@@ -1,6 +1,7 @@
 import { Peptide } from "../types";
+import { supplements } from "./supplements";
 
-export const peptides: Peptide[] = [
+const peptideData: Peptide[] = [
   {
     id: "bpc157",
     name: "BPC-157",
@@ -1436,3 +1437,5 @@ export const peptides: Peptide[] = [
         notes: "Procter & Gamble's clinical studies showed Matrixyl was nearly twice as effective as retinol for collagen production, with none of the irritation. Matrixyl 3000 is the enhanced version combining two peptides for anti-wrinkle + anti-inflammatory effects. Best combined with Argireline (muscle relaxation) and GHK-Cu (tissue remodeling) for a complete topical peptide stack.",
   },
 ];
+
+export const peptides: Peptide[] = [...peptideData, ...supplements];

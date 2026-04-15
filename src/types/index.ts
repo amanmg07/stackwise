@@ -11,6 +11,8 @@ export type PeptideCategory =
 
 export type AdministrationRoute = "subcutaneous" | "intramuscular" | "oral" | "topical" | "nasal";
 
+export type CompoundType = "peptide" | "supplement";
+
 export interface DosingProtocol {
   purpose: string;
   doseRange: string;
@@ -28,6 +30,7 @@ export interface Peptide {
   id: string;
   name: string;
   abbreviation?: string;
+  compoundType?: CompoundType; // "peptide" (default) or "supplement"
   categories: PeptideCategory[];
   description: string;
   mechanism: string;
@@ -44,7 +47,7 @@ export interface Peptide {
 export interface CyclePeptide {
   peptideId: string;
   doseAmount: number;
-  doseUnit: "mcg" | "mg" | "IU";
+  doseUnit: "mcg" | "mg" | "g" | "IU";
   frequency: string;
   route: AdministrationRoute;
   timeOfDay: string[];
@@ -66,7 +69,7 @@ export interface DoseLog {
   cycleId: string;
   peptideId: string;
   amount: number;
-  unit: "mcg" | "mg" | "IU";
+  unit: "mcg" | "mg" | "g" | "IU";
   route: AdministrationRoute;
   timestamp: string;
   site?: string;
