@@ -33,15 +33,25 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const editCycleId = route.params?.editCycleId;
   const editCycle = editCycleId ? cycles.find((c) => c.id === editCycleId) : null;
 
+  const parseDoseUnit = (doseStr?: string): "mcg" | "mg" | "g" | "IU" => {
+    if (!doseStr) return "mg";
+    const lower = doseStr.toLowerCase();
+    if (/\biu\b/i.test(doseStr)) return "IU";
+    if (/\bmcg\b/.test(lower) || /\bμg\b/.test(lower)) return "mcg";
+    if (/\bg\b/.test(lower) && !/\bmg\b/.test(lower)) return "g";
+    return "mg";
+  };
+
   const buildInitialPeptides = (): CyclePeptide[] => {
     if (template) {
       return template.peptides.map((tp) => {
         const pep = peptideDB.find((p) => p.id === tp.peptideId);
-        const doseMatch = tp.suggestedDose.match(/([\d.]+)/);
+        const doseMatch = tp.suggestedDose.match(/([\d.,]+)/);
+        const doseUnit = parseDoseUnit(tp.suggestedDose);
         return {
           peptideId: tp.peptideId,
-          doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
-          doseUnit: "mg" as const,
+          doseAmount: doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25,
+          doseUnit,
           frequency: tp.suggestedFrequency,
           route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
           timeOfDay: ["morning"],
@@ -51,11 +61,12 @@ export default function NewCycleScreen({ route, navigation }: any) {
     if (communityStack) {
       return communityStack.peptides.map((cp: any) => {
         const pep = peptideDB.find((p) => p.id === cp.peptideId);
-        const doseMatch = cp.dose?.match(/([\d.]+)/);
+        const doseMatch = cp.dose?.match(/([\d.,]+)/);
+        const doseUnit = parseDoseUnit(cp.dose);
         return {
           peptideId: cp.peptideId,
-          doseAmount: doseMatch ? parseFloat(doseMatch[1]) : 0.25,
-          doseUnit: "mg" as const,
+          doseAmount: doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25,
+          doseUnit,
           frequency: cp.frequency || "1x daily",
           route: (pep?.routes?.[0] || "subcutaneous") as AdministrationRoute,
           timeOfDay: ["morning"],
@@ -91,9 +102,10 @@ export default function NewCycleScreen({ route, navigation }: any) {
     const pep = peptideDB.find((p) => p.id === peptideId);
     const proto = pep?.dosingProtocols?.[0];
 
-    // Parse dose from first protocol's doseRange (e.g. "0.25-0.5 mg" → 0.25)
-    const doseMatch = proto?.doseRange?.match(/([\d.]+)/);
-    const doseAmount = doseMatch ? parseFloat(doseMatch[1]) : 0.25;
+    // Parse dose and unit from first protocol's doseRange (e.g. "3-5 g" → 3, "g")
+    const doseMatch = proto?.doseRange?.match(/([\d.,]+)/);
+    const doseAmount = doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25;
+    const doseUnit = parseDoseUnit(proto?.doseRange);
 
     // Parse frequency
     const freq = proto?.frequency || "1x daily";
@@ -106,7 +118,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
       {
         peptideId,
         doseAmount,
-        doseUnit: "mg",
+        doseUnit,
         frequency: freq,
         route,
         timeOfDay: ["morning"],

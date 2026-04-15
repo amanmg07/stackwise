@@ -23,6 +23,7 @@ const GOAL_OPTIONS: { value: Goal; label: string; icon: keyof typeof Ionicons.gl
   { value: "cognitive", label: "Cognitive", icon: "bulb", color: "#facc15" },
   { value: "immune", label: "Immune", icon: "shield-checkmark", color: "#2dd4bf" },
   { value: "sexual_health", label: "Sexual Health", icon: "heart", color: "#f472b6" },
+  { value: "hormone", label: "Hormonal", icon: "pulse", color: "#fb923c" },
 ];
 
 const EXPERIENCE_OPTIONS: { value: ExperienceLevel; label: string; desc: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
