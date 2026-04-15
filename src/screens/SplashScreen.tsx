@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Image, Animated, StyleSheet } from "react-native";
+import { View, Image, Animated, Easing, StyleSheet } from "react-native";
 import { colors } from "../theme";
 
 interface Props {
@@ -15,6 +15,7 @@ export default function SplashScreen({ onFinish }: Props) {
       Animated.timing(spin, {
         toValue: 1,
         duration: 2000,
+        easing: Easing.linear,
         useNativeDriver: true,
       })
     ).start();
