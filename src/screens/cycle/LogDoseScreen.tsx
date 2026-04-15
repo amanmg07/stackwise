@@ -174,9 +174,10 @@ const styles = StyleSheet.create({
     fontSize: 15, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
   amountRow: { flexDirection: "row", gap: 12, alignItems: "center" },
-  unitRow: { flexDirection: "row", gap: 6 },
+  unitRow: { flexDirection: "row", gap: 4 },
   unitBtn: {
-    backgroundColor: colors.surface, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10,
+    flex: 1, alignItems: "center",
+    backgroundColor: colors.surface, borderRadius: 8, paddingVertical: 10,
     borderWidth: 1, borderColor: colors.border,
   },
   unitBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },

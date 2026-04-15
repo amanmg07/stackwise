@@ -490,9 +490,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background, borderRadius: 8, padding: 10,
     fontSize: 14, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
-  unitRow: { flexDirection: "row", gap: 6 },
+  unitRow: { flexDirection: "row", gap: 4 },
   unitBtn: {
-    backgroundColor: colors.background, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8,
+    flex: 1, alignItems: "center",
+    backgroundColor: colors.background, borderRadius: 8, paddingVertical: 8,
     borderWidth: 1, borderColor: colors.border,
   },
   unitBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
