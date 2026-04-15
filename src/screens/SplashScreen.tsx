@@ -8,8 +8,17 @@ interface Props {
 
 export default function SplashScreen({ onFinish }: Props) {
   const opacity = useRef(new Animated.Value(1)).current;
+  const spin = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    Animated.loop(
+      Animated.timing(spin, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      })
+    ).start();
+
     const timer = setTimeout(() => {
       Animated.timing(opacity, {
         toValue: 0,
@@ -20,9 +29,17 @@ export default function SplashScreen({ onFinish }: Props) {
     return () => clearTimeout(timer);
   }, []);
 
+  const rotation = spin.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   return (
     <Animated.View style={[styles.container, { opacity }]}>
-      <Image source={require("../../assets/logo.png")} style={styles.logo} />
+      <Animated.Image
+        source={require("../../assets/logo.png")}
+        style={[styles.logo, { transform: [{ rotate: rotation }] }]}
+      />
     </Animated.View>
   );
 }
