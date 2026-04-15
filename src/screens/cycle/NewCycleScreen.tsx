@@ -77,7 +77,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(
     editCycle ? editCycle.peptides : buildInitialPeptides()
   );
-  const [showPicker, setShowPicker] = useState(false);
+  const [showPicker, setShowPicker] = useState<false | "peptide" | "supplement">(false);
   const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
   const [pickerSearch, setPickerSearch] = useState("");
 
@@ -298,14 +298,16 @@ export default function NewCycleScreen({ route, navigation }: any) {
 
       {showPicker ? (
         <View style={styles.pickerCard}>
-          <Text style={styles.pickerTitle}>Add to Cycle</Text>
+          <Text style={styles.pickerTitle}>
+            {showPicker === "peptide" ? "Select Peptide" : "Select Supplement"}
+          </Text>
 
           {/* Search bar */}
           <View style={styles.pickerSearchBar}>
             <Ionicons name="search" size={16} color={colors.textSecondary} />
             <TextInput
               style={styles.pickerSearchInput}
-              placeholder="Search peptides & supplements..."
+              placeholder={showPicker === "peptide" ? "Search peptides..." : "Search supplements..."}
               placeholderTextColor={colors.textSecondary}
               value={pickerSearch}
               onChangeText={setPickerSearch}
@@ -321,6 +323,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
           {/* Flat search results when searching */}
           {pickerSearch.length > 0 ? (
             peptideDB
+              .filter((p) => (p.compoundType || "peptide") === showPicker)
               .filter((p) => !cyclePeptides.some((cp) => cp.peptideId === p.id))
               .filter((p) =>
                 p.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
@@ -346,6 +349,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
           {/* Saved peptides section */}
           {settings.savedPeptides.length > 0 && (() => {
             const savedAvailable = peptideDB
+              .filter((p) => (p.compoundType || "peptide") === showPicker)
               .filter((p) => settings.savedPeptides.includes(p.id) && !cyclePeptides.some((cp) => cp.peptideId === p.id))
               .sort((a, b) => a.name.localeCompare(b.name));
             if (savedAvailable.length === 0) return null;
@@ -375,6 +379,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
           {/* Category sections */}
           {CATEGORY_INFO.map((cat) => {
             const catPeptides = peptideDB
+              .filter((p) => (p.compoundType || "peptide") === showPicker)
               .filter((p) => p.categories.includes(cat.key) && !cyclePeptides.some((cp) => cp.peptideId === p.id))
               .sort((a, b) => a.name.localeCompare(b.name));
             if (catPeptides.length === 0) return null;
@@ -416,10 +421,16 @@ export default function NewCycleScreen({ route, navigation }: any) {
           </TouchableOpacity>
         </View>
       ) : (
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowPicker(true)}>
-          <Ionicons name="add" size={20} color={colors.accent} />
-          <Text style={styles.addBtnText}>Add Peptide / Supplement</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <TouchableOpacity style={[styles.addBtn, { flex: 1 }]} onPress={() => setShowPicker("peptide")}>
+            <Ionicons name="flask-outline" size={18} color={colors.accent} />
+            <Text style={styles.addBtnText}>Add Peptide</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.addBtn, { flex: 1 }]} onPress={() => setShowPicker("supplement")}>
+            <Ionicons name="leaf-outline" size={18} color="#4ade80" />
+            <Text style={[styles.addBtnText, { color: "#4ade80" }]}>Add Supplement</Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       <Text style={styles.label}>Notes</Text>
