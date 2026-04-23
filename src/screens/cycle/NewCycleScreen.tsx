@@ -10,7 +10,7 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { protocolTemplates } from "../../data/protocolTemplates";
 import { trackCycleCreated, trackCycleUpdated } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
 
 const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
@@ -190,7 +190,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <Text style={styles.label}>Cycle Name</Text>
       <TextInput
         style={styles.input}

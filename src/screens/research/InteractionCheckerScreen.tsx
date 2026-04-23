@@ -5,7 +5,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { getInteractions, PeptideInteraction } from "../../data/interactions";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 
 const SEVERITY_CONFIG = {
   warning: { icon: "warning-outline" as const, color: colors.error, bg: colors.error + "15", label: "Warning" },
@@ -38,7 +38,7 @@ export default function InteractionCheckerScreen({ navigation }: any) {
   const synergies = interactions.filter((i) => i.severity === "info");
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <View style={styles.headerCard}>
         <Ionicons name="git-compare-outline" size={24} color={colors.accent} />
         <View style={{ flex: 1 }}>

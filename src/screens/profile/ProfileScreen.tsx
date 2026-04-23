@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "rea
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
@@ -52,7 +52,7 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       {/* Profile Header — demographics */}
       <View style={styles.profileHeader}>
         <TouchableOpacity

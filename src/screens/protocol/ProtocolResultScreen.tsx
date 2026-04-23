@@ -6,7 +6,7 @@ import { protocolTemplates } from "../../data/protocolTemplates";
 import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
-import { colors, spacing, emptyStateStyle } from "../../theme";
+import { colors, spacing, safeBottom, emptyStateStyle } from "../../theme";
 import { Goal, AdministrationRoute } from "../../types";
 
 const DIFFICULTY_COLORS = {
@@ -40,7 +40,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
     .sort((a, b) => b.score - a.score);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <Text style={styles.title}>Recommended Protocols</Text>
       <Text style={styles.subtitle}>
         Based on your selected goals

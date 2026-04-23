@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { AdministrationRoute } from "../../types";
 import GlassCard from "../../components/GlassCard";
 
@@ -39,7 +39,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       {/* Welcome header */}
       <View style={styles.headerRow}>
         <View style={{ width: 32 }} />
@@ -84,7 +84,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
               const info = GOAL_DISPLAY[g];
               if (!info) return null;
               return (
-                <GlassCard key={g} style={[styles.goalCard, { borderColor: info.color }]}>
+                <GlassCard key={g} style={[styles.goalCard, Platform.OS === "ios" ? { borderColor: info.color } : {}]}>
                   <Ionicons name={info.icon} size={28} color={info.color} />
                   <Text style={[styles.goalLabel, { color: info.color }]}>{info.label}</Text>
                 </GlassCard>

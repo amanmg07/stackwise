@@ -5,7 +5,7 @@ import { generateId } from "../../utils/id";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { useToast } from "../../context/ToastContext";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 import { AdministrationRoute } from "../../types";
 import { trackDoseLogged } from "../../services/analyticsService";
 
@@ -83,7 +83,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <Text style={styles.title}>{peptide?.name || initPeptideId}</Text>
 
       <Text style={styles.label}>Amount</Text>

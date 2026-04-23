@@ -6,7 +6,7 @@ import { generateId } from "../../utils/id";
 import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 import { trackJournalEntry } from "../../services/analyticsService";
 
 const SIDE_EFFECTS = [
@@ -116,7 +116,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <Text style={styles.dateText}>
         {existing ? format(parseISO(existing.date), "EEEE, MMMM d") : format(new Date(), "EEEE, MMMM d")}
       </Text>

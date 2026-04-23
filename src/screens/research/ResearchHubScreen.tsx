@@ -4,7 +4,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, CompoundType } from "../../types";
 
 const CATEGORIES: { key: PeptideCategory | "all"; label: string }[] = [
@@ -204,7 +204,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: safeBottom }}
         ListHeaderComponent={
           <TouchableOpacity
             style={styles.guideCard}

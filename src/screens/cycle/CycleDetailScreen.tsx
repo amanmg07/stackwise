@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { format, parseISO, differenceInDays } from "date-fns";
 
 export default function CycleDetailScreen({ route }: any) {
@@ -29,7 +29,7 @@ export default function CycleDetailScreen({ route }: any) {
   return (
     <FlatList
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: safeBottom }}
       data={cycleLogs}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={

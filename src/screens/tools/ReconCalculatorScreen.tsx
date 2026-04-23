@@ -4,7 +4,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 
 const SYRINGE_SIZES = [
   { label: "1 mL (100 units)", totalUnits: 100, totalMl: 1 },
@@ -58,7 +58,7 @@ export default function ReconCalculatorScreen({ route, navigation }: any) {
   }, [vialMg, waterMl, targetDoseMg, syringeIndex]);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <View style={styles.headerCard}>
         <Ionicons name="calculator-outline" size={24} color={colors.accent} />
         <View style={{ flex: 1 }}>

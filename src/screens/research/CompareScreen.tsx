@@ -4,7 +4,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 import { Peptide } from "../../types";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -48,7 +48,7 @@ export default function CompareScreen({ route, navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <View style={styles.headerCard}>
         <Ionicons name="swap-horizontal-outline" size={24} color={colors.accent} />
         <View style={{ flex: 1 }}>

@@ -4,7 +4,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
-import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
+import { colors, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
 import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
 import { trackCycleEnded } from "../../services/analyticsService";
 
@@ -60,7 +60,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
   return (
     <FlatList
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: safeBottom }}
       data={recentLogs}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={

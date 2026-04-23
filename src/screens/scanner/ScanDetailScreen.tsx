@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, Pla
 import { Ionicons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 
 export default function ScanDetailScreen({ route, navigation }: any) {
@@ -55,7 +55,7 @@ export default function ScanDetailScreen({ route, navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <View style={styles.headerRow}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={22} color={colors.accent} />

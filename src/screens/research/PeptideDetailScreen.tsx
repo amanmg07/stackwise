@@ -5,7 +5,7 @@ import { peptides } from "../../data/peptides";
 import { getSourcesForPeptide } from "../../data/peptideSources";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
-import { colors, spacing } from "../../theme";
+import { colors, spacing, safeBottom } from "../../theme";
 import { trackPeptideViewed, trackPeptideBookmarked } from "../../services/analyticsService";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -54,7 +54,7 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
   const stackPeptides = peptides.filter((p) => peptide.stacksWith.includes(p.id));
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.nameRow}>

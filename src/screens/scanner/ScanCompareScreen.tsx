@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, Pla
 import { Ionicons } from "@expo/vector-icons";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { useApp } from "../../context/AppContext";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { ScanComparison } from "../../types";
 import { peptides as peptideDB } from "../../data/peptides";
 import { compareScans } from "../../services/scanCompareService";
@@ -60,7 +60,7 @@ export default function ScanCompareScreen({ route, navigation }: any) {
   const daysBetween = differenceInCalendarDays(parseISO(later.date), parseISO(earlier.date));
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <View style={styles.headerRow}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={22} color={colors.accent} />

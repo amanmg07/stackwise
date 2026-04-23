@@ -9,7 +9,7 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
 import { saveScanImage } from "../../utils/scanImages";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 import { trackScanCompleted } from "../../services/analyticsService";
@@ -331,7 +331,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
     return (
       <ScrollView
         style={styles.container}
-        contentContainerStyle={hasHistory ? { paddingBottom: 40 } : { paddingBottom: 40, flexGrow: 1, justifyContent: "center" }}
+        contentContainerStyle={hasHistory ? { paddingBottom: safeBottom } : { paddingBottom: safeBottom, flexGrow: 1, justifyContent: "center" }}
       >
         {hasHistory && <Text style={styles.title}>Self Scan</Text>}
 
@@ -416,7 +416,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
 
   // Analyzing / Results state
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Self Scan</Text>
         <TouchableOpacity style={styles.resetBtn} onPress={reset}>
@@ -625,11 +625,17 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             </TouchableOpacity>
           )}
 
-          {/* Disclaimer */}
+          {/* Disclaimers */}
           <View style={styles.disclaimer}>
             <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             <Text style={styles.disclaimerText}>
               This scan is saved to your device so you can compare progress over time. Delete it anytime from the scan details.
+            </Text>
+          </View>
+          <View style={styles.disclaimer}>
+            <Ionicons name="school-outline" size={16} color={colors.textSecondary} />
+            <Text style={styles.disclaimerText}>
+              These recommendations are for educational purposes only. Individual responses to peptides and supplements vary.
             </Text>
           </View>
         </>
