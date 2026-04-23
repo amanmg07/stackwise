@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Animated, Alert,
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Animated, Alert, Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -126,17 +126,28 @@ export default function ScannerScreen({ navigation }: any) {
     const result = await pickerMethod({
       mediaTypes: ["images"],
       quality: 0.3,
-      allowsEditing: true,
-      aspect: [3, 4],
+      allowsEditing: Platform.OS === "ios",
+      ...(Platform.OS === "ios" ? { aspect: [3, 4] as [number, number] } : {}),
       base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
-      setImageUri(asset.uri);
+      // On Android, picker URIs can be temporary content:// URIs that expire.
+      // Save a persistent copy immediately so the image stays visible.
+      let displayUri = asset.uri;
+      if (Platform.OS === "android") {
+        try {
+          const persistId = generateId();
+          displayUri = saveScanImage(asset.uri, `tmp_${persistId}`);
+        } catch (e) {
+          // Fall back to original URI if copy fails
+        }
+      }
+      setImageUri(displayUri);
       setResult(null);
       if (asset.base64) {
-        analyzeImage(asset.base64, asset.uri);
+        analyzeImage(asset.base64, displayUri);
       } else {
         Alert.alert("Error", "Could not read image data. Please try again.");
       }
@@ -239,9 +250,11 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
       if (parsed.error) {
         Alert.alert("Analysis Issue", parsed.error);
         setResult(null);
+        setImageUri(null);
       } else if (!parsed.strengths?.length && !parsed.improvements?.length) {
         Alert.alert("Analysis Issue", "Could not detect enough detail. Please take a clearer photo showing your face or body.");
         setResult(null);
+        setImageUri(null);
       } else {
         setResult(parsed);
         // Persist scan to local storage (copy image + save metadata)
@@ -259,7 +272,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
               summary: parsed.summary || "",
             },
           });
-          setImageUri(savedPath);
+          if (Platform.OS === "ios") setImageUri(savedPath);
           trackScanCompleted(parsed.recommendedCategories || []);
         } catch (e) {
           if (__DEV__) console.warn("Failed to save scan:", e);
@@ -267,6 +280,8 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
       }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to analyze image. Please try again.");
+      setResult(null);
+      setImageUri(null);
     } finally {
       setLoading(false);
     }
@@ -412,7 +427,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
 
       {/* Photo preview */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUri }} style={styles.image} />
+        <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
       </View>
 
       {/* Skeleton while loading */}
@@ -680,7 +695,9 @@ const styles = StyleSheet.create({
   galleryBtnText: { fontSize: 16, fontWeight: "600", color: colors.accent },
   // Image
   imageContainer: { borderRadius: 16, overflow: "hidden", marginBottom: spacing.md, position: "relative" },
-  image: { width: "100%", aspectRatio: 3 / 4, borderRadius: 16 },
+  image: Platform.OS === "android"
+    ? { width: "100%", height: 400, borderRadius: 16 }
+    : { width: "100%", aspectRatio: 3 / 4, borderRadius: 16 },
   // Summary
   summaryCard: {
     flexDirection: "row", alignItems: "flex-start", gap: 10,
