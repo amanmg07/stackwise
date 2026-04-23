@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, ViewStyle } from "react-native";
+import { View, StyleSheet, ViewStyle, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 
 interface Props {
@@ -11,7 +11,11 @@ interface Props {
 export default function GlassCard({ children, style, intensity = 40 }: Props) {
   return (
     <View style={[styles.wrapper, style]}>
-      <BlurView intensity={intensity} tint="dark" style={StyleSheet.absoluteFill} />
+      {Platform.OS === "ios" ? (
+        <BlurView intensity={intensity} tint="dark" style={StyleSheet.absoluteFill} />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.08)" }]} />
+      )}
       <View style={styles.innerBorder} />
       {children}
     </View>

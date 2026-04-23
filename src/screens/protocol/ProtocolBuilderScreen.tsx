@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   routeLabel: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
-  routeChipInactive: { opacity: 0.4 },
-  routeLabelInactive: { color: colors.textSecondary + "60" },
+  routeChipInactive: {},
+  routeLabelInactive: { color: colors.textSecondary },
   buildBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18,
