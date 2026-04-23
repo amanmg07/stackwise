@@ -121,7 +121,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
                       selected ? { borderColor: r.color, borderWidth: 1.5 } : styles.routeChipInactive,
                     ]}
                   >
-                    <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary + "60"} />
+                    <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary} />
                     <Text style={[styles.routeLabel, selected ? { color: r.color } : styles.routeLabelInactive]}>{r.label}</Text>
                   </GlassCard>
                 </TouchableOpacity>

@@ -601,7 +601,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   createdAt: new Date().toISOString(),
                 });
                 Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
-                  { text: "View Cycle", onPress: () => navigation.navigate("CycleTab") },
+                  { text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) },
                 ]);
               }}
             >

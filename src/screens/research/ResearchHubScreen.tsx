@@ -72,6 +72,15 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
   const [selectedType, setSelectedType] = useState<"all" | CompoundType>("all");
   const [showGuide, setShowGuide] = useState(false);
 
+  const isSupplements = selectedType === "supplement";
+
+  const handleTypeChange = (key: "all" | CompoundType) => {
+    setSelectedType(key);
+    if (key === "supplement") {
+      setSelectedRoutes([]);
+    }
+  };
+
   const toggleCat = (key: PeptideCategory | "all") => {
     if (key === "all") {
       setSelectedCats([]);
@@ -131,7 +140,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
           {TYPE_FILTERS.map((tf) => {
             const active = tf.key === selectedType;
             return (
-            <TouchableOpacity key={tf.key} style={[styles.chip, active && styles.chipActive]} onPress={() => setSelectedType(tf.key)}>
+            <TouchableOpacity key={tf.key} style={[styles.chip, active && styles.chipActive]} onPress={() => handleTypeChange(tf.key)}>
               <Ionicons name={tf.icon} size={12} color={active ? colors.background : colors.textSecondary} />
               <Text style={[styles.chipText, active && styles.chipTextActive]}>{tf.label}</Text>
             </TouchableOpacity>
@@ -152,7 +161,8 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         </ScrollView>
       </View>
 
-      {/* Route filter chips */}
+      {/* Route filter chips — hidden when Supplements is selected */}
+      {!isSupplements && (
       <View style={styles.chipsWrapper}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContent}>
           {ROUTE_FILTERS.map((rf) => {
@@ -165,6 +175,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
           );})}
         </ScrollView>
       </View>
+      )}
 
       {/* Tools row */}
       <View style={styles.toolsRow}>

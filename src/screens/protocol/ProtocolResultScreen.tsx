@@ -153,7 +153,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 createdAt: new Date().toISOString(),
               });
               Alert.alert("Cycle Started", `${t.name} is now active!`, [
-                { text: "View Cycle", onPress: () => navigation.navigate("CycleTab") },
+                { text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) },
               ]);
             }}
           >
