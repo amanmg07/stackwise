@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
@@ -70,7 +70,7 @@ export default function ScanDetailScreen({ route, navigation }: any) {
       <Text style={styles.timeText}>{format(parseISO(scan.date), "h:mm a")}</Text>
 
       <View style={styles.imageContainer}>
-        <Image source={{ uri: scan.imagePath }} style={styles.image} />
+        <Image source={{ uri: scan.imagePath }} style={styles.image} resizeMode="cover" />
       </View>
 
       {previousScan && (
@@ -131,7 +131,9 @@ const styles = StyleSheet.create({
   dateText: { fontSize: 22, fontWeight: "800", color: colors.text },
   timeText: { fontSize: 13, color: colors.textSecondary, marginBottom: spacing.md },
   imageContainer: { borderRadius: 16, overflow: "hidden", marginBottom: spacing.md },
-  image: { width: "100%", aspectRatio: 3 / 4, borderRadius: 16 },
+  image: Platform.OS === "android"
+    ? { width: "100%", height: 400, borderRadius: 16 }
+    : { width: "100%", aspectRatio: 3 / 4, borderRadius: 16 },
   compareBtn: {
     flexDirection: "row", alignItems: "center", gap: 10,
     backgroundColor: colors.accent + "12", borderRadius: 14, padding: 16,

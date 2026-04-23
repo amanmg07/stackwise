@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { useApp } from "../../context/AppContext";
@@ -76,12 +76,12 @@ export default function ScanCompareScreen({ route, navigation }: any) {
       {/* Photos side by side */}
       <View style={styles.photosRow}>
         <View style={styles.photoCol}>
-          <Image source={{ uri: earlier.imagePath }} style={styles.photo} />
+          <Image source={{ uri: earlier.imagePath }} style={styles.photo} resizeMode="cover" />
           <Text style={styles.photoLabel}>Before</Text>
           <Text style={styles.photoDate}>{format(parseISO(earlier.date), "MMM d, yyyy")}</Text>
         </View>
         <View style={styles.photoCol}>
-          <Image source={{ uri: later.imagePath }} style={styles.photo} />
+          <Image source={{ uri: later.imagePath }} style={styles.photo} resizeMode="cover" />
           <Text style={styles.photoLabel}>After</Text>
           <Text style={styles.photoDate}>{format(parseISO(later.date), "MMM d, yyyy")}</Text>
         </View>
@@ -214,7 +214,9 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, color: colors.textSecondary, marginBottom: spacing.md },
   photosRow: { flexDirection: "row", gap: 10, marginBottom: spacing.md },
   photoCol: { flex: 1 },
-  photo: { width: "100%", aspectRatio: 3 / 4, borderRadius: 12, backgroundColor: colors.surface },
+  photo: Platform.OS === "android"
+    ? { width: "100%", height: 250, borderRadius: 12, backgroundColor: colors.surface }
+    : { width: "100%", aspectRatio: 3 / 4, borderRadius: 12, backgroundColor: colors.surface },
   photoLabel: { fontSize: 12, fontWeight: "700", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 1, marginTop: 8 },
   photoDate: { fontSize: 13, fontWeight: "600", color: colors.text, marginTop: 2 },
   loadingCard: {

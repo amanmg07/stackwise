@@ -386,7 +386,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   onPress={() => navigation.navigate("ScanDetail", { scanId: s.id })}
                   onLongPress={() => confirmDeleteScan(s.id)}
                 >
-                  <Image source={{ uri: s.imagePath }} style={styles.historyThumb} />
+                  <Image source={{ uri: s.imagePath }} style={styles.historyThumb} resizeMode="cover" />
                   <TouchableOpacity
                     style={styles.historyDeleteBtn}
                     onPress={() => confirmDeleteScan(s.id)}
@@ -677,7 +677,9 @@ const styles = StyleSheet.create({
     width: 26, height: 26, borderRadius: 13,
     backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center",
   },
-  historyThumb: { width: "100%", aspectRatio: 3 / 4 },
+  historyThumb: Platform.OS === "android"
+    ? { width: "100%", height: 200 }
+    : { width: "100%", aspectRatio: 3 / 4 },
   historyInfo: { padding: 10 },
   historyDate: { fontSize: 13, fontWeight: "700", color: colors.text },
   historyTime: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
