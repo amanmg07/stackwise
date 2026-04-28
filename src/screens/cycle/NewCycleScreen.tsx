@@ -11,7 +11,9 @@ import { protocolTemplates } from "../../data/protocolTemplates";
 import { trackCycleCreated, trackCycleUpdated } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
-import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
+import { CyclePeptide, AdministrationRoute, PeptideCategory, PlanId } from "../../types";
+import { canCreateCycle } from "../../services/planService";
+import UpgradePrompt from "../../components/UpgradePrompt";
 
 const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
   { key: "recovery", label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
@@ -91,6 +93,9 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const [nameManuallyEdited, setNameManuallyEdited] = useState(
     !!(editCycle?.name || template?.name || communityStack?.name)
   );
+  const [upgradeVisible, setUpgradeVisible] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState("");
+  const [upgradePlan, setUpgradePlan] = useState<PlanId>("pro");
   const [showPicker, setShowPicker] = useState<false | "peptide" | "supplement">(false);
   const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
   const [pickerSearch, setPickerSearch] = useState("");
@@ -172,7 +177,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
     );
   };
 
-  const saveCycle = () => {
+  const saveCycle = async () => {
     if (!name.trim()) {
       Alert.alert("Name required", "Give your cycle a name");
       return;
@@ -185,6 +190,18 @@ export default function NewCycleScreen({ route, navigation }: any) {
     if (weeks < 1 || weeks > 52) {
       Alert.alert("Invalid duration", "Cycle duration must be between 1 and 52 weeks");
       return;
+    }
+
+    // Check plan limit for new cycles (not edits)
+    if (!editCycle) {
+      const activeCycleCount = cycles.filter((c) => c.isActive).length;
+      const gate = await canCreateCycle(activeCycleCount);
+      if (!gate.allowed) {
+        setUpgradeMessage(gate.message!);
+        setUpgradePlan(gate.upgradeRequired!);
+        setUpgradeVisible(true);
+        return;
+      }
     }
 
     if (editCycle) {
@@ -498,6 +515,16 @@ export default function NewCycleScreen({ route, navigation }: any) {
         <Text style={styles.saveBtnText}>{editCycle ? "Save Changes" : "Start Cycle"}</Text>
       </TouchableOpacity>
     </ScrollView>
+    <UpgradePrompt
+      visible={upgradeVisible}
+      message={upgradeMessage}
+      suggestedPlan={upgradePlan}
+      onUpgrade={() => {
+        setUpgradeVisible(false);
+        navigation.navigate("HomeTab", { screen: "Subscription" });
+      }}
+      onDismiss={() => setUpgradeVisible(false)}
+    />
     </KeyboardAvoidingView>
   );
 }

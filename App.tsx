@@ -17,8 +17,9 @@ import { setDevPlanOverride } from "./src/services/planService";
 import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
 
-// DEV: give yourself full access for testing. Remove before production.
-if (__DEV__) setDevPlanOverride("elite");
+// DEV: uncomment to override plan for testing
+// if (__DEV__) setDevPlanOverride("elite");
+if (__DEV__) setDevPlanOverride(null); // clear any previous override
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN || "",

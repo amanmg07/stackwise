@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PlanId } from "../../types";
-import { getCurrentPlan, PLAN_CONFIG, PLAN_FEATURES } from "../../services/planService";
+import { getCurrentPlan, setPlan, PLAN_CONFIG, PLAN_FEATURES } from "../../services/planService";
 
 const PLAN_ICONS: Record<PlanId, keyof typeof Ionicons.glyphMap> = {
   basic: "flash-outline",
@@ -33,10 +33,12 @@ export default function SubscriptionScreen({ navigation }: any) {
     });
   }, []);
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     // TODO: Integrate RevenueCat for actual purchases
-    // For now, just show what would happen
-    alert(`This will connect to ${Platform.OS === "ios" ? "App Store" : "Google Play"} to subscribe to ${PLAN_CONFIG[selectedPlan].name} (${PLAN_CONFIG[selectedPlan].price}).`);
+    // For now, save the plan locally so you can test restrictions
+    await setPlan(selectedPlan);
+    setCurrentPlan(selectedPlan);
+    alert(`Plan changed to ${PLAN_CONFIG[selectedPlan].name}. In production this will go through ${Platform.OS === "ios" ? "App Store" : "Google Play"}.`);
   };
 
   return (
@@ -110,19 +112,21 @@ export default function SubscriptionScreen({ navigation }: any) {
         );
       })}
 
-      {/* Subscribe button */}
-      {selectedPlan !== currentPlan && selectedPlan !== "basic" && (
+      {/* Subscribe / change button */}
+      {selectedPlan !== currentPlan && (
         <TouchableOpacity
-          style={[styles.subscribeBtn, { backgroundColor: PLAN_COLORS[selectedPlan] }]}
+          style={[styles.subscribeBtn, { backgroundColor: PLAN_COLORS[selectedPlan] || colors.textSecondary }]}
           onPress={handleSubscribe}
         >
           <Text style={styles.subscribeBtnText}>
-            Subscribe to {PLAN_CONFIG[selectedPlan].name} — {PLAN_CONFIG[selectedPlan].price}
+            {selectedPlan === "basic"
+              ? "Switch to Basic (Free)"
+              : `Subscribe to ${PLAN_CONFIG[selectedPlan].name} — ${PLAN_CONFIG[selectedPlan].price}`}
           </Text>
         </TouchableOpacity>
       )}
 
-      {selectedPlan === currentPlan && currentPlan !== "basic" && (
+      {selectedPlan === currentPlan && (
         <View style={styles.currentPlanNote}>
           <Ionicons name="checkmark-circle" size={20} color={colors.success} />
           <Text style={styles.currentPlanNoteText}>You're on the {PLAN_CONFIG[currentPlan].name} plan</Text>
