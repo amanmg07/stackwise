@@ -10,7 +10,7 @@ export const PLAN_CONFIG: Record<PlanId, { name: string; price: string; limits: 
     price: "Free",
     limits: {
       aiQueriesPerDay: 5,
-      peptidesPerCycle: 3,
+      peptidesPerCycle: 2,
       journalEntriesPerWeek: 3,
       selfScansPerWeek: 0,
       priorityAi: false,
@@ -45,7 +45,7 @@ export const PLAN_CONFIG: Record<PlanId, { name: string; price: string; limits: 
 export const PLAN_FEATURES: Record<PlanId, string[]> = {
   basic: [
     "5 AI queries per day",
-    "Up to 3 compounds per cycle",
+    "Up to 2 compounds per cycle",
     "3 journal entries per week",
     "No Self Scan",
   ],
