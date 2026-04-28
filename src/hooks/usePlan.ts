@@ -4,7 +4,7 @@ import {
   getCurrentPlan,
   checkFeature,
   trackUsage,
-  canCreateCycle,
+  canAddPeptideToCycle,
   PLAN_CONFIG,
   FeatureGate,
   GateResult,
@@ -34,8 +34,8 @@ export function usePlan() {
     await trackUsage(feature);
   }, []);
 
-  const checkCycle = useCallback(async (activeCycleCount: number): Promise<GateResult> => {
-    return canCreateCycle(activeCycleCount);
+  const checkPeptideLimit = useCallback(async (currentCount: number): Promise<GateResult> => {
+    return canAddPeptideToCycle(currentCount);
   }, []);
 
   const config = PLAN_CONFIG[plan];
@@ -49,6 +49,6 @@ export function usePlan() {
     refresh,
     check,
     track,
-    checkCycle,
+    checkPeptideLimit,
   };
 }

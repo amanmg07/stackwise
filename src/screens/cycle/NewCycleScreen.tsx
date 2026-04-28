@@ -12,7 +12,7 @@ import { trackCycleCreated, trackCycleUpdated } from "../../services/analyticsSe
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
 import { CyclePeptide, AdministrationRoute, PeptideCategory, PlanId } from "../../types";
-import { canCreateCycle } from "../../services/planService";
+import { canAddPeptideToCycle } from "../../services/planService";
 import UpgradePrompt from "../../components/UpgradePrompt";
 
 const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
@@ -137,8 +137,17 @@ export default function NewCycleScreen({ route, navigation }: any) {
     [cyclePeptides]
   );
 
-  const addPeptide = (peptideId: string) => {
+  const addPeptide = async (peptideId: string) => {
     if (cyclePeptides.some((p) => p.peptideId === peptideId)) return;
+
+    // Check plan limit
+    const gate = await canAddPeptideToCycle(cyclePeptides.length);
+    if (!gate.allowed) {
+      setUpgradeMessage(gate.message!);
+      setUpgradePlan(gate.upgradeRequired!);
+      setUpgradeVisible(true);
+      return;
+    }
     const pep = peptideDB.find((p) => p.id === peptideId);
     const proto = pep?.dosingProtocols?.[0];
 
@@ -177,7 +186,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
     );
   };
 
-  const saveCycle = async () => {
+  const saveCycle = () => {
     if (!name.trim()) {
       Alert.alert("Name required", "Give your cycle a name");
       return;
@@ -190,18 +199,6 @@ export default function NewCycleScreen({ route, navigation }: any) {
     if (weeks < 1 || weeks > 52) {
       Alert.alert("Invalid duration", "Cycle duration must be between 1 and 52 weeks");
       return;
-    }
-
-    // Check plan limit for new cycles (not edits)
-    if (!editCycle) {
-      const activeCycleCount = cycles.filter((c) => c.isActive).length;
-      const gate = await canCreateCycle(activeCycleCount);
-      if (!gate.allowed) {
-        setUpgradeMessage(gate.message!);
-        setUpgradePlan(gate.upgradeRequired!);
-        setUpgradeVisible(true);
-        return;
-      }
     }
 
     if (editCycle) {

@@ -10,7 +10,7 @@ export const PLAN_CONFIG: Record<PlanId, { name: string; price: string; limits: 
     price: "Free",
     limits: {
       aiQueriesPerDay: 5,
-      activeCycles: 1,
+      peptidesPerCycle: 3,
       journalEntriesPerWeek: 3,
       selfScansPerWeek: 0,
       priorityAi: false,
@@ -21,7 +21,7 @@ export const PLAN_CONFIG: Record<PlanId, { name: string; price: string; limits: 
     price: "$4.99/mo",
     limits: {
       aiQueriesPerDay: -1,
-      activeCycles: -1,
+      peptidesPerCycle: -1,
       journalEntriesPerWeek: -1,
       selfScansPerWeek: 2,
       priorityAi: false,
@@ -32,7 +32,7 @@ export const PLAN_CONFIG: Record<PlanId, { name: string; price: string; limits: 
     price: "$9.99/mo",
     limits: {
       aiQueriesPerDay: -1,
-      activeCycles: -1,
+      peptidesPerCycle: -1,
       journalEntriesPerWeek: -1,
       selfScansPerWeek: -1,
       priorityAi: true,
@@ -45,13 +45,13 @@ export const PLAN_CONFIG: Record<PlanId, { name: string; price: string; limits: 
 export const PLAN_FEATURES: Record<PlanId, string[]> = {
   basic: [
     "5 AI queries per day",
-    "1 active cycle",
+    "Up to 3 compounds per cycle",
     "3 journal entries per week",
     "No Self Scan",
   ],
   pro: [
     "Unlimited AI chat",
-    "Unlimited cycles",
+    "Unlimited compounds per cycle",
     "Unlimited journal entries",
     "2 Self Scans per week",
   ],
@@ -166,9 +166,8 @@ export async function checkFeature(feature: FeatureGate): Promise<GateResult> {
       return { allowed: true, remaining, limit: limits.aiQueriesPerDay };
     }
     case "cycle_create": {
-      if (limits.activeCycles === -1) return { allowed: true, remaining: -1 };
-      // Caller must pass active cycle count — we just return the limit info
-      return { allowed: true, remaining: limits.activeCycles, limit: limits.activeCycles };
+      // No longer gated here — peptide count is checked via canAddPeptideToCycle
+      return { allowed: true, remaining: -1 };
     }
     case "journal_entry": {
       if (limits.journalEntriesPerWeek === -1) return { allowed: true, remaining: -1 };
@@ -226,19 +225,19 @@ export async function trackUsage(feature: FeatureGate): Promise<void> {
   await saveUsage(usage);
 }
 
-/** Check if active cycle count exceeds plan limit */
-export async function canCreateCycle(activeCycleCount: number): Promise<GateResult> {
+/** Check if adding another peptide/supplement to a cycle is allowed */
+export async function canAddPeptideToCycle(currentCount: number): Promise<GateResult> {
   const plan = await getCurrentPlan();
   const limits = PLAN_CONFIG[plan].limits;
-  if (limits.activeCycles === -1) return { allowed: true, remaining: -1 };
-  if (activeCycleCount >= limits.activeCycles) {
+  if (limits.peptidesPerCycle === -1) return { allowed: true, remaining: -1 };
+  if (currentCount >= limits.peptidesPerCycle) {
     return {
       allowed: false,
       remaining: 0,
-      limit: limits.activeCycles,
+      limit: limits.peptidesPerCycle,
       upgradeRequired: "pro",
-      message: `Basic plan allows ${limits.activeCycles} active cycle. Upgrade to Pro for unlimited.`,
+      message: `Basic plan allows up to ${limits.peptidesPerCycle} compounds per cycle. Upgrade to Pro for unlimited.`,
     };
   }
-  return { allowed: true, remaining: limits.activeCycles - activeCycleCount, limit: limits.activeCycles };
+  return { allowed: true, remaining: limits.peptidesPerCycle - currentCount, limit: limits.peptidesPerCycle };
 }

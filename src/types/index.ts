@@ -193,7 +193,7 @@ export type PlanId = "basic" | "pro" | "elite";
 
 export interface PlanLimits {
   aiQueriesPerDay: number; // -1 = unlimited
-  activeCycles: number;
+  peptidesPerCycle: number; // -1 = unlimited
   journalEntriesPerWeek: number;
   selfScansPerWeek: number;
   priorityAi: boolean;

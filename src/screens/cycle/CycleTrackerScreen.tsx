@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, Alert, Animated, ScrollView } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, Alert, Animated } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
@@ -10,9 +10,7 @@ import { trackCycleEnded } from "../../services/analyticsService";
 
 export default function CycleTrackerScreen({ navigation }: any) {
   const { cycles, doseLogs, deleteCycle, deleteDoseLog, updateCycle } = useApp();
-  const activeCycles = cycles.filter((c) => c.isActive);
-  const [selectedIdx, setSelectedIdx] = useState(0);
-  const activeCycle = activeCycles[Math.min(selectedIdx, activeCycles.length - 1)] || null;
+  const activeCycle = cycles.find((c) => c.isActive);
 
   if (!activeCycle) {
     return (
@@ -67,26 +65,6 @@ export default function CycleTrackerScreen({ navigation }: any) {
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
         <>
-          {/* Cycle switcher — shown when multiple active cycles */}
-          {activeCycles.length > 1 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cycleSwitcher} contentContainerStyle={styles.cycleSwitcherContent}>
-              {activeCycles.map((c, i) => {
-                const isActive = i === Math.min(selectedIdx, activeCycles.length - 1);
-                return (
-                  <TouchableOpacity
-                    key={c.id}
-                    style={[styles.cycleSwitchBtn, isActive && styles.cycleSwitchBtnActive]}
-                    onPress={() => setSelectedIdx(i)}
-                  >
-                    <Text style={[styles.cycleSwitchText, isActive && styles.cycleSwitchTextActive]} numberOfLines={1}>
-                      {c.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          )}
-
           {/* Cycle header */}
           <View style={styles.cycleHeader}>
             <View style={{ flex: 1 }}>
@@ -276,15 +254,6 @@ export default function CycleTrackerScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
-  cycleSwitcher: { marginBottom: 12 },
-  cycleSwitcherContent: { gap: 8 },
-  cycleSwitchBtn: {
-    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-  },
-  cycleSwitchBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  cycleSwitchText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
-  cycleSwitchTextActive: { color: colors.background },
   cycleHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: spacing.md },
   deleteBtn: {
     padding: 10, backgroundColor: colors.error + "15", borderRadius: 10,
