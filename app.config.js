@@ -18,12 +18,13 @@ export default {
       bundleIdentifier: "com.stackwise.app",
       backgroundColor: "#0a0a0a",
       infoPlist: {
-        NSPhotoLibraryUsageDescription: "StackWise needs photo access to set your profile picture.",
+        NSPhotoLibraryUsageDescription: "StackWise uses your photo library for Self Scan body composition analysis.",
+        NSCameraUsageDescription: "StackWise uses your camera to take photos for Self Scan body composition analysis.",
       },
     },
     android: {
       package: "com.stackwise.app",
-      permissions: ["CAMERA_ROLL"],
+      permissions: ["CAMERA_ROLL", "CAMERA"],
       adaptiveIcon: {
         backgroundColor: "#0a0a0a",
         foregroundImage: "./assets/android-icon-foreground.png",

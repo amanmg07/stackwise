@@ -16,7 +16,7 @@ import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
 
 Sentry.init({
-  dsn: "", // TODO: Add DSN from sentry.io
+  dsn: process.env.SENTRY_DSN || "",
   enabled: !__DEV__,
   tracesSampleRate: 0.2,
 });
