@@ -5,7 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { syncUserProfile } from "../../services/analyticsService";
-import { colors, spacing, safeTop } from "../../theme";
+import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { Gender, ExperienceLevel, Goal } from "../../types";
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
@@ -191,7 +191,7 @@ export default function EditDemographicsScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: spacing.lg, paddingBottom: Platform.OS === "ios" ? 50 : 30 },
+  content: { paddingHorizontal: spacing.lg, paddingBottom: safeBottom },
   sectionLabel: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
     textTransform: "uppercase", letterSpacing: 1, marginTop: spacing.xl, marginBottom: spacing.sm,

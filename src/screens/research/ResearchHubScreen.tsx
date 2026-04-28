@@ -205,6 +205,10 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: safeBottom }}
+        keyboardDismissMode="on-drag"
+        maxToRenderPerBatch={15}
+        updateCellsBatchingPeriod={50}
+        removeClippedSubviews
         ListHeaderComponent={
           <TouchableOpacity
             style={styles.guideCard}

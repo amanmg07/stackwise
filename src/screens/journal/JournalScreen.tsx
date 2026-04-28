@@ -581,6 +581,12 @@ export default function JournalScreen({ navigation }: any) {
             <TouchableOpacity
               style={styles.card}
               onPress={() => navigation.navigate("NewEntry", { entryId: item.id })}
+              onLongPress={() => {
+                Alert.alert("Delete Entry", `Delete entry from ${format(parseISO(item.date), "MMM d")}?`, [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Delete", style: "destructive", onPress: () => deleteJournalEntry(item.id) },
+                ]);
+              }}
               activeOpacity={0.7}
             >
               <View style={styles.cardHeader}>

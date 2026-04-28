@@ -112,42 +112,20 @@ export default function ScanCompareScreen({ route, navigation }: any) {
                 return (
                   <View key={`c-${i}`} style={[styles.changeCard, { borderColor: dir.color + "30" }]}>
                     <View style={styles.changeHeader}>
-                      <Ionicons name={dir.icon} size={16} color={dir.color} />
-                      <Text style={[styles.directionLabel, { color: dir.color }]}>{dir.label}</Text>
-                      {catInfo && <Text style={[styles.categoryTag, { color: catInfo.color }]}>{catInfo.label}</Text>}
+                      <View style={[styles.directionBadge, { backgroundColor: dir.color + "20" }]}>
+                        <Ionicons name={dir.icon} size={14} color={dir.color} />
+                        <Text style={[styles.directionLabel, { color: dir.color }]}>{dir.label}</Text>
+                      </View>
+                      {catInfo && (
+                        <View style={styles.categoryBadge}>
+                          <Ionicons name={catInfo.icon} size={13} color={catInfo.color} />
+                          <Text style={[styles.categoryTag, { color: catInfo.color }]}>{catInfo.label}</Text>
+                        </View>
+                      )}
                     </View>
+
                     <Text style={styles.changeText}>{c.change}</Text>
                   </View>
-                );
-              })}
-            </>
-          )}
-
-          {/* Working peptides */}
-          {comparison.workingPeptides.length > 0 && (
-            <>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-                <Text style={[styles.sectionTitle, { color: colors.success, marginBottom: 0, marginTop: 0 }]}>
-                  What's Working
-                </Text>
-              </View>
-              <Text style={styles.sectionDesc}>Peptides in your current cycle that appear to be helping</Text>
-              {comparison.workingPeptides.map((wp, i) => {
-                const p = peptideDB.find((pp) => pp.id === wp.peptideId);
-                if (!p) return null;
-                return (
-                  <TouchableOpacity
-                    key={`wp-${i}`}
-                    style={[styles.workingCard, { borderColor: colors.success + "30" }]}
-                    onPress={() => navigation.navigate("PeptideDetail", { peptideId: p.id })}
-                  >
-                    <View style={styles.workingHeader}>
-                      <Text style={styles.workingName}>{p.name}</Text>
-                      <Ionicons name="chevron-forward" size={16} color={colors.accent} />
-                    </View>
-                    <Text style={styles.workingReason}>{wp.reason}</Text>
-                  </TouchableOpacity>
                 );
               })}
             </>
@@ -162,7 +140,7 @@ export default function ScanCompareScreen({ route, navigation }: any) {
                   Consider Adding
                 </Text>
               </View>
-              <Text style={styles.sectionDesc}>New peptides to address areas that haven't improved</Text>
+              <Text style={styles.sectionDesc}>Compounds that could help with visible areas of concern</Text>
               {comparison.newRecommendations.map((rec, i) => {
                 const catInfo = CATEGORY_INFO[rec.category];
                 const recPeptides = rec.suggestedPeptideIds
@@ -241,17 +219,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, marginBottom: 8,
   },
-  changeHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
-  directionLabel: { fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
-  categoryTag: { fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5, marginLeft: "auto" },
-  changeText: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
-  workingCard: {
-    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1, marginBottom: 8,
+  changeHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
+  directionBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    borderRadius: 8, paddingVertical: 4, paddingHorizontal: 8,
   },
-  workingHeader: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
-  workingName: { fontSize: 15, fontWeight: "700", color: colors.text, flex: 1 },
-  workingReason: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
+  directionLabel: { fontSize: 12, fontWeight: "700" },
+  categoryBadge: { flexDirection: "row", alignItems: "center", gap: 4 },
+  categoryTag: { fontSize: 13, fontWeight: "600" },
+  changeText: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
   recCard: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, marginBottom: 8,

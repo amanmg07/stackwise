@@ -88,9 +88,44 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(
     editCycle ? editCycle.peptides : buildInitialPeptides()
   );
+  const [nameManuallyEdited, setNameManuallyEdited] = useState(
+    !!(editCycle?.name || template?.name || communityStack?.name)
+  );
   const [showPicker, setShowPicker] = useState<false | "peptide" | "supplement">(false);
   const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
   const [pickerSearch, setPickerSearch] = useState("");
+
+  // Auto-generate cycle name based on top categories of selected compounds
+  useMemo(() => {
+    if (nameManuallyEdited) return;
+    if (cyclePeptides.length === 0) {
+      setName("");
+      return;
+    }
+    if (cyclePeptides.length === 1) {
+      const pep = peptideDB.find((p) => p.id === cyclePeptides[0].peptideId);
+      setName(pep?.name || "");
+      return;
+    }
+    const catCounts: Record<string, number> = {};
+    for (const cp of cyclePeptides) {
+      const pep = peptideDB.find((p) => p.id === cp.peptideId);
+      if (!pep) continue;
+      for (const cat of pep.categories) {
+        catCounts[cat] = (catCounts[cat] || 0) + 1;
+      }
+    }
+    const topCats = Object.entries(catCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([cat]) => {
+        const info = CATEGORY_INFO.find((c) => c.key === cat);
+        return info?.label || cat.replace("_", " ");
+      });
+    if (topCats.length > 0) {
+      setName(topCats.join(" & ") + " Stack");
+    }
+  }, [cyclePeptides]);
 
   const interactions = useMemo(
     () => getInteractions(cyclePeptides.map((cp) => cp.peptideId)),
@@ -195,7 +230,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
       <TextInput
         style={styles.input}
         value={name}
-        onChangeText={setName}
+        onChangeText={(t) => { setName(t); setNameManuallyEdited(true); }}
         placeholder="e.g. Recovery Stack"
         placeholderTextColor={colors.textSecondary}
       />

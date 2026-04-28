@@ -44,38 +44,60 @@ export async function compareScans(
 
   const genderCtx = gender ? `The user is ${gender}. Tailor observations to sex-specific factors (hormonal profiles, body composition patterns, skin differences).\n` : "";
 
-  const systemPrompt = `You are comparing two progress photos of the SAME person taken ${daysBetween} days apart to track visible changes. You can recommend both peptides and supplements.
+  const timeCtx = daysBetween > 0
+    ? `These photos were taken ${daysBetween} days apart.`
+    : "These photos may have been taken at different points in time — ignore the timestamps and focus purely on visible differences between the two images.";
+
+  const systemPrompt = `You are comparing two photos of the SAME person. ${timeCtx}
 ${genderCtx}
 ${peptideContext}
 
-AVAILABLE PEPTIDES & SUPPLEMENTS (use these exact ids in your response):
+AVAILABLE COMPOUNDS (use exact ids):
 ${peptideIndex}
 
-CATEGORIES: recovery, fat_loss, muscle_gain, anti_aging, sleep, cognitive, immune, sexual_health, hormone
+VALID CATEGORIES: recovery, fat_loss, muscle_gain, anti_aging, sleep, cognitive, immune, sexual_health, hormone
 
-Photo 1 is the earlier scan. Photo 2 is the later scan. Be specific and honest about what you observe.
+Photo 1 = BEFORE. Photo 2 = AFTER. Compare them honestly.
 
-For "workingPeptides": ONLY include a peptide or supplement from the user's current stack if there is a visible improvement that aligns with its categories. Do not fabricate. If nothing visibly improved, return an empty array.
+RESPOND WITH ONLY VALID JSON matching this exact structure:
 
-For "newRecommendations": suggest peptides or supplements for any NEW issues visible in photo 2 that aren't addressed by the current stack, OR for issues that haven't improved despite the current stack. suggestedPeptideIds must be valid ids from the list above. Include both peptides and supplements where appropriate.
-
-Respond with ONLY valid JSON:
 {
-  "summary": "1-2 sentence overall progress summary",
+  "summary": "1-2 sentence summary of the most notable visible differences",
   "changes": [
-    {"category": "anti_aging", "change": "Skin tone appears more even, less redness around cheeks", "direction": "improved"},
-    {"category": "sleep", "change": "Dark circles under eyes still present", "direction": "unchanged"}
-  ],
-  "workingPeptides": [
-    {"peptideId": "ghkcu", "reason": "Skin texture improvement over ${daysBetween} days aligns with GHK-Cu's skin repair mechanism"}
+    {
+      "category": "muscle_gain",
+      "change": "Description of what is DIFFERENT between the photos",
+      "direction": "improved"
+    }
   ],
   "newRecommendations": [
-    {"category": "sleep", "observation": "Dark circles haven't improved", "suggestedPeptideIds": ["dsip", "sleep_blend"]}
+    {
+      "category": "sleep",
+      "observation": "Description of the visible PROBLEM",
+      "suggestedPeptideIds": ["dsip", "magnesium_glycinate"]
+    }
   ]
 }
 
-If the photos are unclear, of different people, or you cannot make a reliable comparison, return:
-{"summary": "Could not reliably compare these photos.", "changes": [], "workingPeptides": [], "newRecommendations": []}`;
+RULES:
+
+"changes" — List ONLY things that are visibly DIFFERENT between Photo 1 and Photo 2:
+- "improved" = Photo 2 looks BETTER (more muscle, clearer skin, less fat, less dark circles)
+- "worsened" = Photo 2 looks WORSE
+- Do NOT include "unchanged" items. Only list actual differences.
+- The "direction" MUST match the description. If you say "more defined muscles in Photo 2" the direction MUST be "improved". If you say "more acne in Photo 2" the direction MUST be "worsened".
+
+"newRecommendations" — ONLY for visible PROBLEMS in Photo 2:
+- There must be something visibly WRONG that you can describe (dark circles, acne, excess fat, etc.)
+- Do NOT recommend for anything that looks fine or healthy
+- Do NOT recommend for categories that improved
+- If you would write "no visible signs of X" — that means do NOT include X at all
+- If there are no visible problems, return an empty array []
+
+"workingPeptides" is NOT included — omit it entirely.
+
+If photos are unclear or not comparable:
+{"summary": "Could not reliably compare these photos.", "changes": [], "newRecommendations": []}`;
 
   const data = await callGroqProxy({
     model: "meta-llama/llama-4-scout-17b-16e-instruct",
@@ -88,7 +110,9 @@ If the photos are unclear, of different people, or you cannot make a reliable co
           { type: "image_url", image_url: { url: `data:${laterMime};base64,${laterB64}` } },
           {
             type: "text",
-            text: `Photo 1 is from ${earlier.date.split("T")[0]}. Photo 2 is from ${later.date.split("T")[0]} (${daysBetween} days later). Compare them and respond with JSON only.`,
+            text: daysBetween > 0
+              ? `Photo 1 is from ${earlier.date.split("T")[0]}. Photo 2 is from ${later.date.split("T")[0]} (${daysBetween} days later). Compare them and respond with JSON only.`
+              : `Compare these two photos. Focus on all visible physical differences between Photo 1 and Photo 2. Respond with JSON only.`,
           },
         ],
       },
@@ -101,10 +125,22 @@ If the photos are unclear, of different people, or you cannot make a reliable co
   if (!jsonMatch) throw new Error("Could not parse comparison. Please try again.");
 
   const parsed = JSON.parse(jsonMatch[0]) as ScanComparison;
+
+  // Filter out "unchanged" items the model may still return
+  const changes = (parsed.changes || []).filter((c) => c.direction !== "unchanged");
+
+  // Filter out recommendations that describe no problem (model sometimes ignores instructions)
+  const noIssuePatterns = /no visible|looks? (fine|good|healthy|great|normal)|not? .*(issue|problem|concern)/i;
+  const newRecs = (parsed.newRecommendations || []).filter((r) => !noIssuePatterns.test(r.observation));
+
+  // Filter out recommendations for categories that improved
+  const improvedCats = new Set(changes.filter((c) => c.direction === "improved").map((c) => c.category));
+  const filteredRecs = newRecs.filter((r) => !improvedCats.has(r.category));
+
   return {
     summary: parsed.summary || "",
-    changes: parsed.changes || [],
+    changes,
     workingPeptides: parsed.workingPeptides || [],
-    newRecommendations: parsed.newRecommendations || [],
+    newRecommendations: filteredRecs,
   };
 }

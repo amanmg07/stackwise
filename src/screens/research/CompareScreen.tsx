@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeBottom } from "../../theme";
 import { Peptide } from "../../types";
+
+const COMPARE_KEY = "stackwise_compare_ids";
 
 const CATEGORY_COLORS: Record<string, string> = {
   recovery: "#4ade80", fat_loss: "#f87171", muscle_gain: "#60a5fa",
@@ -16,8 +19,26 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function CompareScreen({ route, navigation }: any) {
   const initIds: string[] = route.params?.peptideIds || [];
   const [selected, setSelected] = useState<string[]>(initIds.slice(0, 3));
+  const [loaded, setLoaded] = useState(initIds.length > 0);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerSlot, setPickerSlot] = useState(0);
+
+  // Load saved selection if no params were passed
+  useEffect(() => {
+    if (initIds.length > 0) return;
+    AsyncStorage.getItem(COMPARE_KEY).then((val) => {
+      if (val) {
+        try { setSelected(JSON.parse(val)); } catch {}
+      }
+      setLoaded(true);
+    });
+  }, []);
+
+  // Save selection whenever it changes
+  useEffect(() => {
+    if (!loaded) return;
+    AsyncStorage.setItem(COMPARE_KEY, JSON.stringify(selected));
+  }, [selected, loaded]);
 
   const peptideList = selected.map((id) => peptideDB.find((p) => p.id === id)).filter(Boolean) as Peptide[];
 

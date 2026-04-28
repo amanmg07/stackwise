@@ -195,7 +195,8 @@ export default function ChatView({ navigation }: Props) {
     );
   };
 
-  const bottomPadding = keyboardHeight > 0 ? keyboardHeight - 85 : 0;
+  const tabBarHeight = Platform.OS === "ios" ? 85 : 65;
+  const bottomPadding = keyboardHeight > 0 ? keyboardHeight - tabBarHeight : 0;
   const keyboardOpen = keyboardHeight > 0;
 
   return (

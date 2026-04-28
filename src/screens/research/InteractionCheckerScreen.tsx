@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -77,11 +77,14 @@ export default function InteractionCheckerScreen({ navigation }: any) {
         <View style={styles.pickerCard}>
           <View style={styles.pickerSearch}>
             <Ionicons name="search" size={16} color={colors.textSecondary} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pickerSearchPlaceholder}>
-                {search || "Search peptides..."}
-              </Text>
-            </View>
+            <TextInput
+              style={styles.pickerSearchInput}
+              placeholder="Search peptides..."
+              placeholderTextColor={colors.textSecondary}
+              value={search}
+              onChangeText={setSearch}
+              autoCapitalize="none"
+            />
           </View>
           <ScrollView style={{ maxHeight: 250 }} nestedScrollEnabled>
             {filteredPeptides.map((p) => {
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", gap: 8,
     padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  pickerSearchPlaceholder: { fontSize: 14, color: colors.textSecondary },
+  pickerSearchInput: { flex: 1, fontSize: 14, color: colors.text, padding: 0 },
   pickerItem: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     paddingHorizontal: 14, paddingVertical: 12,
