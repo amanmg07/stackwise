@@ -27,9 +27,11 @@ interface Props {
 }
 
 export default function ChatView({ navigation }: Props) {
-  const { cycles, journal } = useApp();
+  const { cycles, journal, scans, settings } = useApp();
   const activeCycle = cycles.find((c) => c.isActive) || null;
+  const pastCycles = cycles.filter((c) => !c.isActive);
   const recentJournal = [...journal].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  const recentScans = [...scans].sort((a, b) => b.date.localeCompare(a.date));
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -89,7 +91,7 @@ export default function ChatView({ navigation }: Props) {
     try {
       const { content, peptideRefs } = await sendChatMessage(
         updated,
-        { activeCycle, recentJournal },
+        { activeCycle, recentJournal, pastCycles, scans: recentScans, settings },
       );
 
       const assistantMsg: ChatMessage = {

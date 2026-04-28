@@ -18,7 +18,7 @@ import { Platform, StatusBar } from "react-native";
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
 
 export const safeTop = Platform.OS === "ios" ? 60 : (StatusBar.currentHeight || 0) + 16;
-export const safeBottom = Platform.OS === "ios" ? 100 : 80;
+export const safeBottom = Platform.OS === "ios" ? 60 : 80;
 
 export const typography = {
   h1: { fontSize: 28, fontWeight: "700" as const, color: colors.text },

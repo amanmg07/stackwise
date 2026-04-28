@@ -1,5 +1,5 @@
 import { peptides } from "../data/peptides";
-import { Cycle, JournalEntry, ChatMessage } from "../types";
+import { Cycle, JournalEntry, ChatMessage, ScanRecord, UserSettings } from "../types";
 import { callGroqProxy } from "../utils/supabase";
 
 function findMentionedPeptides(messages: ChatMessage[]): string[] {
@@ -17,7 +17,10 @@ function findMentionedPeptides(messages: ChatMessage[]): string[] {
 function buildSystemPrompt(
   activeCycle: Cycle | null,
   recentJournal: JournalEntry[],
-  mentionedIds: string[]
+  mentionedIds: string[],
+  pastCycles?: Cycle[],
+  scans?: ScanRecord[],
+  settings?: UserSettings,
 ): string {
   // Full details only for mentioned peptides
   const detailed = peptides
@@ -79,6 +82,50 @@ Peptides: ${activeCycle.peptides.map((p) => {
     prompt += `\nRECENT JOURNAL:\n${entries.join("\n")}`;
   }
 
+  // Past cycles
+  if (pastCycles && pastCycles.length > 0) {
+    const past = pastCycles.slice(0, 5).map((c) => {
+      const peps = c.peptides.map((p) => {
+        const pep = peptides.find((db) => db.id === p.peptideId);
+        return pep?.name || p.peptideId;
+      }).join(", ");
+      return `${c.name} (${c.startDate} to ${c.endDate}): ${peps}`;
+    });
+    prompt += `\nPAST CYCLES:\n${past.join("\n")}`;
+  }
+
+  // Scan history
+  if (scans && scans.length > 0) {
+    const recent = scans.slice(0, 3).map((s) => {
+      const cats = s.result.recommendedCategories.join(", ");
+      const improvements = s.result.improvements.map((i) => i.observation).join("; ");
+      return `${s.date.split("T")[0]}: recommended=${cats}. observations: ${improvements}`;
+    });
+    prompt += `\nRECENT SELF SCANS:\n${recent.join("\n")}`;
+  }
+
+  // User demographics & preferences
+  if (settings) {
+    const parts: string[] = [];
+    if (settings.age) parts.push(`age: ${settings.age}`);
+    if (settings.gender) parts.push(`gender: ${settings.gender}`);
+    if (settings.experienceLevel) parts.push(`experience: ${settings.experienceLevel}`);
+    if (settings.goals && settings.goals.length > 0) parts.push(`goals: ${settings.goals.join(", ")}`);
+    if (settings.preferredRoutes && settings.preferredRoutes.length > 0) parts.push(`preferred routes: ${settings.preferredRoutes.join(", ")}`);
+    if (parts.length > 0) {
+      prompt += `\nUSER PROFILE: ${parts.join(", ")}`;
+    }
+
+    // Bookmarked peptides
+    if (settings.savedPeptides && settings.savedPeptides.length > 0) {
+      const names = settings.savedPeptides.map((id) => {
+        const pep = peptides.find((p) => p.id === id);
+        return pep?.name || id;
+      });
+      prompt += `\nBOOKMARKED COMPOUNDS: ${names.join(", ")}`;
+    }
+  }
+
   return prompt;
 }
 
@@ -97,10 +144,23 @@ function extractPeptideRefs(text: string): string[] {
 
 export async function sendChatMessage(
   messages: ChatMessage[],
-  context: { activeCycle: Cycle | null; recentJournal: JournalEntry[] },
+  context: {
+    activeCycle: Cycle | null;
+    recentJournal: JournalEntry[];
+    pastCycles?: Cycle[];
+    scans?: ScanRecord[];
+    settings?: UserSettings;
+  },
 ): Promise<{ content: string; peptideRefs: string[] }> {
   const mentionedIds = findMentionedPeptides(messages);
-  const systemPrompt = buildSystemPrompt(context.activeCycle, context.recentJournal, mentionedIds);
+  const systemPrompt = buildSystemPrompt(
+    context.activeCycle,
+    context.recentJournal,
+    mentionedIds,
+    context.pastCycles,
+    context.scans,
+    context.settings,
+  );
 
   const groqMessages = [
     { role: "system" as const, content: systemPrompt },
