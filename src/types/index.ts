@@ -123,6 +123,7 @@ export interface UserSettings {
   onboardingDone: boolean;
   demographicsDone: boolean;
   disclaimerAccepted: boolean;
+  planPicked: boolean;
   displayName: string;
   profileImage: string | null;
   // Demographics
