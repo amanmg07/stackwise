@@ -12,8 +12,12 @@ import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
 import DemographicsScreen from "./src/screens/onboarding/DemographicsScreen";
 import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
 import { syncUserProfile } from "./src/services/analyticsService";
+import { setDevPlanOverride } from "./src/services/planService";
 import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
+
+// DEV: give yourself full access for testing. Remove before production.
+if (__DEV__) setDevPlanOverride("elite");
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN || "",

@@ -9,9 +9,11 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { sendChatMessage } from "../../services/chatService";
 import { generateId } from "../../utils/id";
 import { colors, spacing } from "../../theme";
-import { ChatMessage } from "../../types";
+import { ChatMessage, PlanId } from "../../types";
 import { appStorage } from "../../utils/storage";
 import { trackChatQuestion } from "../../services/analyticsService";
+import { checkFeature, trackUsage } from "../../services/planService";
+import UpgradePrompt from "../../components/UpgradePrompt";
 
 const STARTERS = [
   "What peptides help with recovery?",
@@ -38,6 +40,9 @@ export default function ChatView({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [chatLoaded, setChatLoaded] = useState(false);
+  const [upgradeVisible, setUpgradeVisible] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState("");
+  const [upgradePlan, setUpgradePlan] = useState<PlanId>("pro");
   const listRef = useRef<FlatList>(null);
 
   // Load persisted chat on mount
@@ -70,8 +75,21 @@ export default function ChatView({ navigation }: Props) {
     };
   }, []);
 
+  const showUpgrade = (msg: string, plan: PlanId) => {
+    setUpgradeMessage(msg);
+    setUpgradePlan(plan);
+    setUpgradeVisible(true);
+  };
+
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
+
+    // Check plan limits
+    const gate = await checkFeature("ai_chat");
+    if (!gate.allowed) {
+      showUpgrade(gate.message!, gate.upgradeRequired!);
+      return;
+    }
 
     const userMsg: ChatMessage = {
       id: generateId(),
@@ -102,6 +120,7 @@ export default function ChatView({ navigation }: Props) {
         peptideRefs,
       };
       setMessages([...updated, assistantMsg]);
+      await trackUsage("ai_chat");
     } catch (err: any) {
       const errorMsg: ChatMessage = {
         id: generateId(),
@@ -273,6 +292,17 @@ export default function ChatView({ navigation }: Props) {
           <Ionicons name="send" size={18} color={colors.background} />
         </TouchableOpacity>
       </View>
+
+      <UpgradePrompt
+        visible={upgradeVisible}
+        message={upgradeMessage}
+        suggestedPlan={upgradePlan}
+        onUpgrade={() => {
+          setUpgradeVisible(false);
+          navigation.navigate("HomeTab", { screen: "Subscription" });
+        }}
+        onDismiss={() => setUpgradeVisible(false)}
+      />
     </View>
   );
 }

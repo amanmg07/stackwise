@@ -7,7 +7,9 @@ import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, parseISO } from "date-fns";
-import { JournalEntry } from "../../types";
+import { JournalEntry, PlanId } from "../../types";
+import { checkFeature } from "../../services/planService";
+import UpgradePrompt from "../../components/UpgradePrompt";
 
 
 interface Insight {
@@ -461,6 +463,20 @@ export default function JournalScreen({ navigation }: any) {
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal, settings.weightUnit);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [upgradeVisible, setUpgradeVisible] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState("");
+  const [upgradePlan, setUpgradePlan] = useState<PlanId>("pro");
+
+  const handleNewEntry = async () => {
+    const gate = await checkFeature("journal_entry");
+    if (!gate.allowed) {
+      setUpgradeMessage(gate.message!);
+      setUpgradePlan(gate.upgradeRequired!);
+      setUpgradeVisible(true);
+      return;
+    }
+    navigation.navigate("NewEntry");
+  };
   const visible = sorted.slice(0, visibleCount);
   const hasMore = visibleCount < sorted.length;
 
@@ -618,10 +634,21 @@ export default function JournalScreen({ navigation }: any) {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate("NewEntry")}
+        onPress={handleNewEntry}
       >
         <Ionicons name="add" size={28} color={colors.background} />
       </TouchableOpacity>
+
+      <UpgradePrompt
+        visible={upgradeVisible}
+        message={upgradeMessage}
+        suggestedPlan={upgradePlan}
+        onUpgrade={() => {
+          setUpgradeVisible(false);
+          navigation.navigate("HomeTab", { screen: "Subscription" });
+        }}
+        onDismiss={() => setUpgradeVisible(false)}
+      />
     </View>
   );
 }

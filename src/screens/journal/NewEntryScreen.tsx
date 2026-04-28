@@ -8,6 +8,7 @@ import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { colors, spacing, safeBottom } from "../../theme";
 import { trackJournalEntry } from "../../services/analyticsService";
+import { trackUsage } from "../../services/planService";
 
 const SIDE_EFFECTS = [
   "Nausea", "Headache", "Fatigue", "Dizziness",
@@ -100,6 +101,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
       showToast("Entry updated!");
     } else {
       addJournalEntry(entry);
+      trackUsage("journal_entry");
       trackJournalEntry({
         sleepQuality,
         energyLevel,

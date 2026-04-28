@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeBottom } from "../../theme";
+import { getCurrentPlan, PLAN_CONFIG } from "../../services/planService";
+import { PlanId } from "../../types";
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
@@ -29,8 +31,19 @@ const EXP_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.g
   experienced: { label: "Advanced", icon: "trophy", color: "#f87171" },
 };
 
+const PLAN_COLORS: Record<PlanId, string> = {
+  basic: colors.textSecondary,
+  pro: "#60a5fa",
+  elite: "#c084fc",
+};
+
 export default function ProfileScreen({ navigation }: any) {
   const { cycles, doseLogs, journal, settings, updateSettings, clearAllData, userId } = useApp();
+  const [plan, setPlan] = useState<PlanId>("basic");
+
+  useEffect(() => {
+    getCurrentPlan().then(setPlan);
+  }, []);
 
   const completedCycles = cycles.filter((c) => !c.isActive).length;
   const activeCycles = cycles.filter((c) => c.isActive).length;
@@ -100,6 +113,26 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
         )}
       </View>
+
+      {/* Plan card */}
+      <TouchableOpacity
+        style={[styles.planCard, { borderColor: PLAN_COLORS[plan] + "40" }]}
+        onPress={() => navigation.navigate("Subscription")}
+        activeOpacity={0.7}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={styles.planLabel}>Your Plan</Text>
+          <Text style={[styles.planName, { color: PLAN_COLORS[plan] }]}>
+            {PLAN_CONFIG[plan].name} {plan !== "basic" && `— ${PLAN_CONFIG[plan].price}`}
+          </Text>
+        </View>
+        <View style={[styles.planBadge, { backgroundColor: PLAN_COLORS[plan] + "20" }]}>
+          <Text style={[styles.planBadgeText, { color: PLAN_COLORS[plan] }]}>
+            {plan === "basic" ? "Upgrade" : "Manage"}
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={PLAN_COLORS[plan]} />
+        </View>
+      </TouchableOpacity>
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
@@ -219,6 +252,19 @@ export default function ProfileScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
+  // Plan card
+  planCard: {
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: colors.surface, borderRadius: 14, padding: 16,
+    borderWidth: 1, marginBottom: 16,
+  },
+  planLabel: { fontSize: 12, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5 },
+  planName: { fontSize: 18, fontWeight: "700", marginTop: 2 },
+  planBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+  },
+  planBadgeText: { fontSize: 13, fontWeight: "700" },
   // Profile header
   profileHeader: { alignItems: "center", paddingVertical: 20, marginBottom: 8, position: "relative" },
   editProfileBtn: {
