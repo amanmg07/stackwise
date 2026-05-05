@@ -21,28 +21,20 @@ function buildSystemPrompt(
   pastCycles?: Cycle[],
   scans?: ScanRecord[],
   settings?: UserSettings,
+  isFirstTurn: boolean = true,
 ): string {
-  // Full details only for mentioned peptides
+  // Full details only for mentioned peptides — trimmed to essentials
   const detailed = peptides
     .filter((p) => mentionedIds.includes(p.id))
     .map((p) => ({
       name: p.name,
       categories: p.categories,
-      description: p.description,
       mechanism: p.mechanism,
       routes: p.routes,
       dosingProtocols: p.dosingProtocols,
       sideEffects: p.sideEffects,
-      stacksWith: p.stacksWith,
       halfLife: p.halfLife,
-      notes: p.notes,
     }));
-
-  // Add compound type to index
-  const indexWithType = peptides.map((p) => {
-    const type = p.compoundType === "supplement" ? "[supplement]" : "[peptide]";
-    return `${p.name}${p.abbreviation && p.abbreviation !== p.name ? ` (${p.abbreviation})` : ""} ${type}: ${p.categories.join(", ")}`;
-  }).join("\n");
 
   let prompt = `You are StackWise AI, a knowledgeable peptide and supplement advisor built into the StackWise app. You help users understand peptides, supplements, dosing protocols, stacking strategies, side effects, and cycle planning.
 
@@ -56,13 +48,20 @@ RULES:
 - Be direct and helpful — users chose StackWise because they want real answers, not disclaimers
 - Keep responses concise — 2-4 paragraphs max
 - Friendly, confident, knowledgeable tone
-
-COMPOUND INDEX (name [type]: categories):
-${indexWithType}
 `;
 
+  // Compound index is large — include only on the first turn so subsequent
+  // turns rely on conversation history + the targeted detailed block below.
+  if (isFirstTurn) {
+    const indexWithType = peptides.map((p) => {
+      const type = p.compoundType === "supplement" ? "[supplement]" : "[peptide]";
+      return `${p.name}${p.abbreviation && p.abbreviation !== p.name ? ` (${p.abbreviation})` : ""} ${type}: ${p.categories.join(", ")}`;
+    }).join("\n");
+    prompt += `\nCOMPOUND INDEX (name [type]: categories):\n${indexWithType}\n`;
+  }
+
   if (detailed.length > 0) {
-    prompt += `\nDETAILED INFO FOR REFERENCED PEPTIDES:\n${JSON.stringify(detailed, null, 0)}\n`;
+    prompt += `\nDETAILED INFO FOR REFERENCED COMPOUNDS:\n${JSON.stringify(detailed, null, 0)}\n`;
   }
 
   if (activeCycle) {
@@ -153,6 +152,7 @@ export async function sendChatMessage(
   },
 ): Promise<{ content: string; peptideRefs: string[] }> {
   const mentionedIds = findMentionedPeptides(messages);
+  const isFirstTurn = messages.filter((m) => m.role === "user").length <= 1;
   const systemPrompt = buildSystemPrompt(
     context.activeCycle,
     context.recentJournal,
@@ -160,6 +160,7 @@ export async function sendChatMessage(
     context.pastCycles,
     context.scans,
     context.settings,
+    isFirstTurn,
   );
 
   const groqMessages = [

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform, Linking, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PlanId } from "../../types";
 import { getCurrentPlan, setPlan, PLAN_CONFIG, PLAN_FEATURES } from "../../services/planService";
+
+// TODO: replace with the live URLs hosted on stackwise.app (or wherever)
+// These MUST be reachable for Apple to approve the subscription.
+const PRIVACY_POLICY_URL = "https://stackwise.app/privacy";
+const TERMS_OF_USE_URL = "https://stackwise.app/terms"; // Apple's standard EULA is also acceptable: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
 const PLAN_ICONS: Record<PlanId, keyof typeof Ionicons.glyphMap> = {
   basic: "flash-outline",
@@ -26,10 +31,7 @@ export default function SubscriptionScreen({ navigation }: any) {
   useEffect(() => {
     getCurrentPlan().then((p) => {
       setCurrentPlan(p);
-      // Pre-select next tier up, or current if elite
-      if (p === "basic") setSelectedPlan("pro");
-      else if (p === "pro") setSelectedPlan("elite");
-      else setSelectedPlan("elite");
+      setSelectedPlan(p);
     });
   }, []);
 
@@ -39,6 +41,19 @@ export default function SubscriptionScreen({ navigation }: any) {
     await setPlan(selectedPlan);
     setCurrentPlan(selectedPlan);
     alert(`Plan changed to ${PLAN_CONFIG[selectedPlan].name}. In production this will go through ${Platform.OS === "ios" ? "App Store" : "Google Play"}.`);
+  };
+
+  const handleRestore = async () => {
+    // TODO: call Purchases.restorePurchases() once RevenueCat is wired up,
+    // then reconcile the active entitlement with setPlan().
+    Alert.alert(
+      "Restore Purchases",
+      "No previous purchases found on this Apple ID. (This will sync your subscription once payments are live.)",
+    );
+  };
+
+  const openLink = (url: string) => {
+    Linking.openURL(url).catch(() => Alert.alert("Couldn't open link", url));
   };
 
   return (
@@ -133,10 +148,31 @@ export default function SubscriptionScreen({ navigation }: any) {
         </View>
       )}
 
+      {/* Restore Purchases — required by Apple for any app with IAP */}
+      <TouchableOpacity onPress={handleRestore} style={styles.restoreBtn}>
+        <Ionicons name="refresh" size={16} color={colors.accent} />
+        <Text style={styles.restoreBtnText}>Restore Purchases</Text>
+      </TouchableOpacity>
+
+      {/* Apple-required subscription disclosure */}
       <Text style={styles.legalText}>
-        Subscriptions are billed monthly through {Platform.OS === "ios" ? "Apple" : "Google Play"}.
-        Cancel anytime in your {Platform.OS === "ios" ? "App Store" : "Play Store"} settings.
+        Subscriptions auto-renew monthly until cancelled. Payment is charged to your{" "}
+        {Platform.OS === "ios" ? "Apple ID" : "Google Play account"} at confirmation of purchase.
+        Your subscription renews automatically at the same price unless cancelled at least 24 hours
+        before the end of the current period. Manage or cancel anytime in your{" "}
+        {Platform.OS === "ios" ? "App Store account settings" : "Play Store subscriptions"}.
       </Text>
+
+      {/* Privacy Policy + Terms of Use — both required for App Store approval */}
+      <View style={styles.legalLinks}>
+        <TouchableOpacity onPress={() => openLink(PRIVACY_POLICY_URL)}>
+          <Text style={styles.legalLink}>Privacy Policy</Text>
+        </TouchableOpacity>
+        <Text style={styles.legalDot}>•</Text>
+        <TouchableOpacity onPress={() => openLink(TERMS_OF_USE_URL)}>
+          <Text style={styles.legalLink}>Terms of Use (EULA)</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -200,4 +236,17 @@ const styles = StyleSheet.create({
     fontSize: 12, color: colors.textSecondary, textAlign: "center",
     lineHeight: 18, marginTop: 8, paddingHorizontal: spacing.md,
   },
+  restoreBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, paddingVertical: 12, marginTop: 4,
+  },
+  restoreBtnText: { fontSize: 14, fontWeight: "600", color: colors.accent },
+  legalLinks: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, marginTop: 12, marginBottom: 4,
+  },
+  legalLink: {
+    fontSize: 12, color: colors.accent, textDecorationLine: "underline",
+  },
+  legalDot: { fontSize: 12, color: colors.textSecondary },
 });
