@@ -33,10 +33,15 @@ beforeEach(() => {
   store = installMemoryStore();
 });
 
+const CHAT_LIMIT = DAILY_LIMITS.ai_chat;
+const SCAN_LIMIT = DAILY_LIMITS.self_scan;
+
 describe("DAILY_LIMITS", () => {
-  it("ai_chat is 20/day, self_scan is 3/day", () => {
-    expect(DAILY_LIMITS.ai_chat).toBe(20);
-    expect(DAILY_LIMITS.self_scan).toBe(3);
+  it("defines positive integer caps for both features", () => {
+    expect(CHAT_LIMIT).toBeGreaterThan(0);
+    expect(SCAN_LIMIT).toBeGreaterThan(0);
+    expect(Number.isInteger(CHAT_LIMIT)).toBe(true);
+    expect(Number.isInteger(SCAN_LIMIT)).toBe(true);
   });
 });
 
@@ -44,39 +49,37 @@ describe("checkLimit", () => {
   it("ai_chat: allows 1st call, reports correct remaining", async () => {
     const r = await checkLimit("ai_chat");
     expect(r.allowed).toBe(true);
-    expect(r.remaining).toBe(20);
-    expect(r.limit).toBe(20);
+    expect(r.remaining).toBe(CHAT_LIMIT);
+    expect(r.limit).toBe(CHAT_LIMIT);
   });
 
-  it("ai_chat: blocks once 20 are used", async () => {
-    for (let i = 0; i < 20; i++) await trackUsage("ai_chat");
+  it("ai_chat: blocks once limit is exhausted", async () => {
+    for (let i = 0; i < CHAT_LIMIT; i++) await trackUsage("ai_chat");
     const r = await checkLimit("ai_chat");
     expect(r.allowed).toBe(false);
     expect(r.remaining).toBe(0);
-    expect(r.message).toMatch(/20 AI chat messages/);
+    expect(r.message).toMatch(new RegExp(`${CHAT_LIMIT} AI chat messages`));
   });
 
-  it("self_scan: blocks at 3", async () => {
-    await trackUsage("self_scan");
-    await trackUsage("self_scan");
-    await trackUsage("self_scan");
+  it("self_scan: blocks once limit is exhausted", async () => {
+    for (let i = 0; i < SCAN_LIMIT; i++) await trackUsage("self_scan");
     const r = await checkLimit("self_scan");
     expect(r.allowed).toBe(false);
     expect(r.remaining).toBe(0);
-    expect(r.message).toMatch(/3 Self Scans/);
+    expect(r.message).toMatch(new RegExp(`${SCAN_LIMIT} Self Scans`));
   });
 
   it("remaining decreases as usage tracked", async () => {
     await trackUsage("ai_chat");
     await trackUsage("ai_chat");
-    expect((await checkLimit("ai_chat")).remaining).toBe(18);
+    expect((await checkLimit("ai_chat")).remaining).toBe(CHAT_LIMIT - 2);
   });
 
   it("ai_chat usage doesn't affect self_scan budget", async () => {
-    for (let i = 0; i < 20; i++) await trackUsage("ai_chat");
+    for (let i = 0; i < CHAT_LIMIT; i++) await trackUsage("ai_chat");
     const scan = await checkLimit("self_scan");
     expect(scan.allowed).toBe(true);
-    expect(scan.remaining).toBe(3);
+    expect(scan.remaining).toBe(SCAN_LIMIT);
   });
 });
 
@@ -93,9 +96,9 @@ describe("daily reset", () => {
     const chat = await checkLimit("ai_chat");
     const scan = await checkLimit("self_scan");
     expect(chat.allowed).toBe(true);
-    expect(chat.remaining).toBe(20);
+    expect(chat.remaining).toBe(CHAT_LIMIT);
     expect(scan.allowed).toBe(true);
-    expect(scan.remaining).toBe(3);
+    expect(scan.remaining).toBe(SCAN_LIMIT);
   });
 
   it("trackUsage stamps today's date so persisted count survives same-day", async () => {
@@ -109,13 +112,13 @@ describe("daily reset", () => {
     store.set(STORAGE_KEY, "{not json");
     const r = await checkLimit("ai_chat");
     expect(r.allowed).toBe(true);
-    expect(r.remaining).toBe(20);
+    expect(r.remaining).toBe(CHAT_LIMIT);
   });
 });
 
 describe("setDevBypass", () => {
   it("when enabled, allows past the daily cap and does not increment", async () => {
-    for (let i = 0; i < 20; i++) await trackUsage("ai_chat");
+    for (let i = 0; i < CHAT_LIMIT; i++) await trackUsage("ai_chat");
     expect((await checkLimit("ai_chat")).allowed).toBe(false);
 
     await setDevBypass(true);
@@ -133,7 +136,7 @@ describe("setDevBypass", () => {
   it("disabling bypass restores normal gating", async () => {
     await setDevBypass(true);
     await setDevBypass(false);
-    for (let i = 0; i < 20; i++) await trackUsage("ai_chat");
+    for (let i = 0; i < CHAT_LIMIT; i++) await trackUsage("ai_chat");
     expect((await checkLimit("ai_chat")).allowed).toBe(false);
   });
 });

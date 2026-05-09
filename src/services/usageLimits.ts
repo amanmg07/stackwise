@@ -4,7 +4,7 @@ import { format, startOfDay } from "date-fns";
 export type LimitedFeature = "ai_chat" | "self_scan";
 
 export const DAILY_LIMITS: Record<LimitedFeature, number> = {
-  ai_chat: 20,
+  ai_chat: 10,
   self_scan: 3,
 };
 
