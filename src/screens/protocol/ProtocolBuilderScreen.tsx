@@ -102,8 +102,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
       {/* Route preferences */}
       {userGoals.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>Preferred administration</Text>
-          <Text style={styles.sectionDesc}>For peptides</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Preferred administration</Text>
           <View style={styles.routeGrid}>
             {ROUTES.map((r, i) => {
               const selected = selectedRoutes.includes(r.key);
