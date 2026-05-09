@@ -13,11 +13,11 @@ import { ChatMessage } from "../../types";
 import { appStorage } from "../../utils/storage";
 import { trackChatQuestion } from "../../services/analyticsService";
 import { checkLimit, trackUsage } from "../../services/usageLimits";
+import { useUsage } from "../../hooks/useUsage";
 
 const STARTERS = [
   "What peptides help with recovery?",
   "Explain BPC-157 + TB-500 stack",
-  "Best peptides for sleep quality?",
   "Side effects of semaglutide?",
   "What should I know about my cycle?",
   "Compare CJC-1295 vs MK-677",
@@ -39,6 +39,7 @@ export default function ChatView({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [chatLoaded, setChatLoaded] = useState(false);
+  const usage = useUsage("ai_chat");
   const listRef = useRef<FlatList>(null);
 
   // Load persisted chat on mount
@@ -111,6 +112,7 @@ export default function ChatView({ navigation }: Props) {
       };
       setMessages([...updated, assistantMsg]);
       await trackUsage("ai_chat");
+      usage.refresh();
     } catch (err: any) {
       const errorMsg: ChatMessage = {
         id: generateId(),
@@ -225,7 +227,11 @@ export default function ChatView({ navigation }: Props) {
                 <Text style={styles.infoNote}>For educational purposes. Individual results vary.</Text>
                 <View style={styles.starterChips}>
                   {STARTERS.map((q) => (
-                    <TouchableOpacity key={q} style={styles.starterChip} onPress={() => send(q)}>
+                    <TouchableOpacity
+                      key={q}
+                      style={[styles.starterChip, usage.remaining === 0 && styles.starterChipDisabled]}
+                      onPress={() => send(q)}
+                    >
                       <Text style={styles.starterChipText}>{q}</Text>
                     </TouchableOpacity>
                   ))}
@@ -255,6 +261,24 @@ export default function ChatView({ navigation }: Props) {
         </View>
       )}
 
+      {usage.loaded && (
+        <View style={styles.usageRow}>
+          <Ionicons
+            name="flash-outline"
+            size={11}
+            color={usage.remaining === 0 ? colors.error : colors.textSecondary}
+          />
+          <Text
+            style={[
+              styles.usageText,
+              usage.remaining === 0 && { color: colors.error },
+            ]}
+          >
+            {usage.limit - usage.remaining}/{usage.limit} today
+          </Text>
+        </View>
+      )}
+
       <View style={[styles.inputRow, { paddingBottom: Math.max(bottomPadding, Platform.OS === "ios" ? 8 : spacing.md) }]}>
         {messages.length > 0 && !loading && (
           <TouchableOpacity
@@ -275,7 +299,7 @@ export default function ChatView({ navigation }: Props) {
           editable={!loading}
         />
         <TouchableOpacity
-          style={[styles.sendBtn, (!input.trim() || loading) && styles.sendBtnDisabled]}
+          style={[styles.sendBtn, (!input.trim() || loading || usage.remaining === 0) && styles.sendBtnDisabled]}
           disabled={!input.trim() || loading}
           onPress={() => send(input)}
         >
@@ -302,6 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 12,
     borderWidth: 1, borderColor: colors.border,
   },
+  starterChipDisabled: { opacity: 0.4 },
   starterChipText: { fontSize: 13, color: colors.accent, fontWeight: "500", lineHeight: 18 },
   msgRow: { marginBottom: 12 },
   msgRowUser: { alignItems: "flex-end" },
@@ -326,6 +351,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingVertical: 8,
   },
   typingText: { fontSize: 13, color: colors.textSecondary },
+  usageRow: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+    paddingTop: 20, paddingBottom: 10,
+  },
+  usageText: { fontSize: 11, color: colors.textSecondary, fontWeight: "500" },
   inputRow: {
     flexDirection: "row", alignItems: "flex-end", gap: 8,
     padding: spacing.md,

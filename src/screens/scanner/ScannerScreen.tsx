@@ -14,6 +14,7 @@ import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData }
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 import { trackScanCompleted } from "../../services/analyticsService";
 import { checkLimit, trackUsage } from "../../services/usageLimits";
+import { useUsage } from "../../hooks/useUsage";
 import { callGroqProxy } from "../../utils/supabase";
 
 type ScanResult = ScanResultData & { error?: string };
@@ -99,6 +100,7 @@ export default function ScannerScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [selectedPeptides, setSelectedPeptides] = useState<Set<string>>(new Set());
+  const usage = useUsage("self_scan");
 
   const togglePeptide = (id: string) => {
     setSelectedPeptides((prev) => {
@@ -283,6 +285,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
           if (Platform.OS === "ios") setImageUri(savedPath);
           trackScanCompleted(parsed.recommendedCategories || []);
           await trackUsage("self_scan");
+          usage.refresh();
         } catch (e) {
           if (__DEV__) console.warn("Failed to save scan:", e);
         }
@@ -355,15 +358,39 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             : "Take your first scan to start tracking visible changes over time."}
         </Text>
 
-        <TouchableOpacity style={styles.cameraBtn} onPress={() => pickImage(true)}>
+        <TouchableOpacity
+          style={[styles.cameraBtn, usage.remaining === 0 && styles.btnDisabled]}
+          onPress={() => pickImage(true)}
+        >
           <Ionicons name="camera" size={22} color={colors.background} />
           <Text style={styles.cameraBtnText}>{hasHistory ? "New Scan" : "Take Photo"}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.galleryBtn} onPress={() => pickImage(false)}>
+        <TouchableOpacity
+          style={[styles.galleryBtn, usage.remaining === 0 && styles.btnDisabled]}
+          onPress={() => pickImage(false)}
+        >
           <Ionicons name="images-outline" size={20} color={colors.accent} />
           <Text style={styles.galleryBtnText}>Choose from Gallery</Text>
         </TouchableOpacity>
+
+        {usage.loaded && (
+          <View style={styles.usageRow}>
+            <Ionicons
+              name="flash-outline"
+              size={12}
+              color={usage.remaining === 0 ? colors.error : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.usageText,
+                usage.remaining === 0 && { color: colors.error },
+              ]}
+            >
+              {usage.limit - usage.remaining}/{usage.limit} scans today
+            </Text>
+          </View>
+        )}
 
         {scans.length >= 2 && (
           <TouchableOpacity
@@ -710,6 +737,12 @@ const styles = StyleSheet.create({
     width: "100%", borderWidth: 1, borderColor: colors.border,
   },
   galleryBtnText: { fontSize: 16, fontWeight: "600", color: colors.accent },
+  btnDisabled: { opacity: 0.4 },
+  usageRow: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+    marginTop: 10,
+  },
+  usageText: { fontSize: 12, color: colors.textSecondary, fontWeight: "500" },
   // Image
   imageContainer: { borderRadius: 16, overflow: "hidden", marginBottom: spacing.md, position: "relative" },
   image: Platform.OS === "android"
