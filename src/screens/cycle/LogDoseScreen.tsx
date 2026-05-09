@@ -38,24 +38,28 @@ export default function LogDoseScreen({ route, navigation }: any) {
   }
 
   const switchUnit = (newUnit: "mcg" | "mg" | "g" | "IU") => {
-    const current = parseFloat(amount) || 0;
     if (newUnit === unit) return;
 
-    // Don't convert to/from IU since it's not a weight unit
-    if (unit === "IU" || newUnit === "IU") {
+    // Always re-derive the amount from the cycle's recommended dose so the
+    // displayed value reflects the protocol's dose in the selected unit,
+    // not whatever the user has typed.
+    if (initUnit === "IU" || newUnit === "IU") {
+      // IU isn't a weight, so we can't convert across — show the recommendation
+      // only when the units match, otherwise leave blank for manual entry.
+      setAmount(newUnit === initUnit ? String(initAmount) : "");
       setUnit(newUnit);
       return;
     }
 
-    // Convert current → mg first
-    const inMg = unit === "mcg" ? current / 1000 : unit === "g" ? current * 1000 : current;
-    // Then mg → target
+    const inMg =
+      initUnit === "mcg" ? initAmount / 1000 :
+      initUnit === "g" ? initAmount * 1000 :
+      initAmount;
     let converted = inMg;
     if (newUnit === "mcg") converted = inMg * 1000;
     else if (newUnit === "g") converted = inMg / 1000;
 
-    const rounded = parseFloat(converted.toPrecision(4));
-    setAmount(String(rounded));
+    setAmount(String(parseFloat(converted.toPrecision(4))));
     setUnit(newUnit);
   };
 
@@ -87,24 +91,22 @@ export default function LogDoseScreen({ route, navigation }: any) {
       <Text style={styles.title}>{peptide?.name || initPeptideId}</Text>
 
       <Text style={styles.label}>Amount</Text>
-      <View style={styles.amountRow}>
-        <TextInput
-          style={[styles.input, { flex: 1 }]}
-          value={amount}
-          onChangeText={setAmount}
-          keyboardType="decimal-pad"
-        />
-        <View style={styles.unitRow}>
-          {(["mcg", "mg", "g", "IU"] as const).map((u) => (
-            <TouchableOpacity
-              key={u}
-              style={[styles.unitBtn, unit === u && styles.unitBtnActive]}
-              onPress={() => switchUnit(u)}
-            >
-              <Text style={[styles.unitText, unit === u && styles.unitTextActive]}>{u}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+      <TextInput
+        style={styles.input}
+        value={amount}
+        onChangeText={setAmount}
+        keyboardType="decimal-pad"
+      />
+      <View style={styles.unitRow}>
+        {(["mcg", "mg", "g", "IU"] as const).map((u) => (
+          <TouchableOpacity
+            key={u}
+            style={[styles.unitBtn, unit === u && styles.unitBtnActive]}
+            onPress={() => switchUnit(u)}
+          >
+            <Text style={[styles.unitText, unit === u && styles.unitTextActive]}>{u}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <Text style={styles.label}>Route</Text>
@@ -173,8 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     fontSize: 15, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
-  amountRow: { flexDirection: "row", gap: 12, alignItems: "center" },
-  unitRow: { flexDirection: "row", gap: 4 },
+  unitRow: { flexDirection: "row", gap: 6, marginTop: 8 },
   unitBtn: {
     flex: 1, alignItems: "center",
     backgroundColor: colors.surface, borderRadius: 8, paddingVertical: 10,

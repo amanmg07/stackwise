@@ -149,6 +149,10 @@ export default function NewCycleScreen({ route, navigation }: any) {
     // Use peptide's first route or default to subcutaneous
     const route = pep?.routes?.[0] || "subcutaneous";
 
+    // When editing an active cycle, stamp the new peptide with today's date
+    // so days-completed math knows it wasn't expected on prior days.
+    const addedAt = editCycle ? format(new Date(), "yyyy-MM-dd") : undefined;
+
     setCyclePeptides([
       ...cyclePeptides,
       {
@@ -158,6 +162,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         frequency: freq,
         route,
         timeOfDay: ["morning"],
+        ...(addedAt ? { addedAt } : {}),
       },
     ]);
     setShowPicker(false);

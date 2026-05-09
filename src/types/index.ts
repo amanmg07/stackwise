@@ -51,6 +51,9 @@ export interface CyclePeptide {
   frequency: string;
   route: AdministrationRoute;
   timeOfDay: string[];
+  // YYYY-MM-DD the peptide was added to the cycle. Optional for back-compat:
+  // missing → treat as the cycle's start date.
+  addedAt?: string;
 }
 
 export interface Cycle {

@@ -42,14 +42,23 @@ export default function CycleTrackerScreen({ navigation }: any) {
     (l) => l.cycleId === activeCycle.id && l.timestamp.startsWith(todayDate)
   );
 
-  // Count days where ALL peptides were logged
+  // Count days where every peptide that was active on that day got logged.
+  // A peptide added mid-cycle (addedAt > day) doesn't count toward the
+  // requirement for earlier days — that way appending a peptide doesn't
+  // retroactively un-complete previously-finished days.
   const cycleLogs = doseLogs.filter((l) => l.cycleId === activeCycle.id);
   const logDays = new Set(cycleLogs.map((l) => l.timestamp.split("T")[0]));
-  const pepCount = activeCycle.peptides.length;
   let completedDays = 0;
   logDays.forEach((day) => {
-    const uniquePeps = new Set(cycleLogs.filter((l) => l.timestamp.startsWith(day)).map((l) => l.peptideId));
-    if (uniquePeps.size >= pepCount) completedDays++;
+    const expectedPeps = activeCycle.peptides.filter(
+      (cp) => (cp.addedAt || activeCycle.startDate) <= day
+    );
+    if (expectedPeps.length === 0) return;
+    const uniquePeps = new Set(
+      cycleLogs.filter((l) => l.timestamp.startsWith(day)).map((l) => l.peptideId)
+    );
+    const allLogged = expectedPeps.every((cp) => uniquePeps.has(cp.peptideId));
+    if (allLogged) completedDays++;
   });
   const progress = Math.min(Math.max(completedDays / totalDays, 0), 1);
 
