@@ -17,13 +17,22 @@ const ANALYTICS_ENABLED_IN_DEV =
  * non-finite numbers, etc. Better to skip than to send garbage that
  * would later have to be cleaned out of the buyer dataset.
  */
+// Sanity bounds for any peptide/supplement dose. Far below normal mcg
+// dosing on the low end, far above any conceivable real-world dose on
+// the high end. Anything outside this range is a typo or garbage.
+const MIN_DOSE = 0.0001;
+const MAX_DOSE = 100000;
+
 function isValidPayload(eventType: string, payload: Record<string, any>): boolean {
   switch (eventType) {
     case "dose_logged":
       return (
         typeof payload.cycle_id === "string" && payload.cycle_id.length > 0 &&
         typeof payload.peptide_id === "string" && payload.peptide_id.length > 0 &&
-        typeof payload.amount === "number" && Number.isFinite(payload.amount) && payload.amount > 0
+        typeof payload.amount === "number" &&
+        Number.isFinite(payload.amount) &&
+        payload.amount > MIN_DOSE &&
+        payload.amount < MAX_DOSE
       );
     case "cycle_created":
     case "cycle_updated":
