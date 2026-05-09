@@ -1,7 +1,7 @@
 import { supabase, getCurrentUserId } from "../utils/supabase";
 import { appStorage } from "../utils/storage";
 import * as Sentry from "@sentry/react-native";
-import { CyclePeptide, JournalEntry, AdministrationRoute } from "../types";
+import { CyclePeptide, JournalEntry, AdministrationRoute, AdverseEvent } from "../types";
 
 // Toggleable per-build: in __DEV__ we never write to the production
 // analytics tables, so dev/test sessions don't pollute the dataset.
@@ -357,12 +357,27 @@ interface JournalEntryInput {
   weight?: number;
   weightUnit?: "lbs" | "kg";
   bodyFat?: number;
+  skinQuality?: number;
+  jointComfort?: number;
+  libido?: number;
+  strength?: number;
   sleepHours?: number;
   activePeptideIds: string[];
-  sideEffects?: string[];
+  /** Either legacy string[] or structured AdverseEvent[]. */
+  sideEffects?: string[] | AdverseEvent[];
 }
 
 export function trackJournalEntry(input: JournalEntryInput) {
+  // Normalize to the structured shape so the buyer view sees a consistent
+  // schema regardless of whether the caller sent strings or objects.
+  const sideEffects = (input.sideEffects || []).map((item) => {
+    if (typeof item === "string") return { effect: normalizeSideEffect(item) };
+    return {
+      effect: normalizeSideEffect(item.effect),
+      severity: item.severity,
+      duration: item.duration,
+    };
+  });
   trackEvent("journal_entry", {
     cycle_id: input.cycleId,
     sleepQuality: input.sleepQuality,
@@ -372,9 +387,14 @@ export function trackJournalEntry(input: JournalEntryInput) {
     weight: input.weight,
     weight_unit: input.weight != null ? input.weightUnit : undefined,
     body_fat: input.bodyFat,
+    skin_quality: input.skinQuality,
+    joint_comfort: input.jointComfort,
+    libido: input.libido,
+    strength: input.strength,
     sleep_hours: input.sleepHours,
     activePeptideIds: input.activePeptideIds,
-    sideEffects: (input.sideEffects || []).map(normalizeSideEffect),
+    // Structured: [{ effect, severity?, duration? }, ...]
+    sideEffects,
   });
 }
 

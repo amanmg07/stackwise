@@ -7,7 +7,7 @@ import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, parseISO } from "date-fns";
-import { JournalEntry } from "../../types";
+import { JournalEntry, normalizeSideEffects } from "../../types";
 
 
 interface Insight {
@@ -606,7 +606,9 @@ export default function JournalScreen({ navigation }: any) {
                 <View style={styles.sideEffectsRow}>
                   <Ionicons name="alert-circle-outline" size={13} color={colors.error} />
                   <Text style={styles.sideEffectsText} numberOfLines={1}>
-                    {item.sideEffects.join(", ")}
+                    {normalizeSideEffects(item.sideEffects).map((ev) =>
+                      ev.severity ? `${ev.effect} (${ev.severity})` : ev.effect
+                    ).join(", ")}
                   </Text>
                 </View>
               )}

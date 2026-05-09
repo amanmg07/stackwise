@@ -79,6 +79,15 @@ export interface DoseLog {
   notes?: string;
 }
 
+export type AdverseEventSeverity = "mild" | "moderate" | "severe";
+export type AdverseEventDuration = "<1d" | "1-3d" | "4-7d" | "1+wk";
+
+export interface AdverseEvent {
+  effect: string; // human-readable label (normalized for analytics, raw here)
+  severity?: AdverseEventSeverity;
+  duration?: AdverseEventDuration;
+}
+
 export interface JournalEntry {
   id: string;
   cycleId?: string;
@@ -90,10 +99,26 @@ export interface JournalEntry {
   energyLevel: number;
   recoveryScore: number;
   mood: number;
-  sideEffects?: string[];
+  // Optional subjective metrics surfaced in the Additional Metrics section.
+  // 1-10 scale where higher = better. Undefined when the user didn't rate.
+  skinQuality?: number;
+  jointComfort?: number;
+  libido?: number;
+  strength?: number;
+  // Either the legacy string[] shape or the new structured AdverseEvent[].
+  // Read with normalizeSideEffects() so callers always get AdverseEvent[].
+  sideEffects?: string[] | AdverseEvent[];
   notes: string;
   createdAt: string;
   scaleV2?: boolean;
+}
+
+/** Coerce a JournalEntry.sideEffects value to the structured shape. */
+export function normalizeSideEffects(raw: JournalEntry["sideEffects"]): AdverseEvent[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) =>
+    typeof item === "string" ? { effect: item } : item
+  );
 }
 
 export type Goal = "recovery" | "fat_loss" | "muscle_gain" | "anti_aging" | "sleep" | "cognitive" | "immune" | "sexual_health" | "hormone";
