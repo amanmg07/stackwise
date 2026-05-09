@@ -355,6 +355,7 @@ interface JournalEntryInput {
   recoveryScore: number;
   mood: number;
   weight?: number;
+  weightUnit?: "lbs" | "kg";
   sleepHours?: number;
   activePeptideIds: string[];
   sideEffects?: string[];
@@ -368,6 +369,7 @@ export function trackJournalEntry(input: JournalEntryInput) {
     recoveryScore: input.recoveryScore,
     mood: input.mood,
     weight: input.weight,
+    weight_unit: input.weight != null ? input.weightUnit : undefined,
     sleep_hours: input.sleepHours,
     activePeptideIds: input.activePeptideIds,
     sideEffects: (input.sideEffects || []).map(normalizeSideEffect),
