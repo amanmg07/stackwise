@@ -5,6 +5,9 @@ import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeBottom } from "../../theme";
 import { syncResearchConsent } from "../../services/analyticsService";
+import { exportUserData, deleteServerData } from "../../utils/supabase";
+import * as FileSystem from "expo-file-system";
+import { Share } from "react-native";
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
@@ -48,6 +51,46 @@ export default function ProfileScreen({ navigation }: any) {
       [
         { text: "Cancel", style: "cancel" },
         { text: "Delete Everything", style: "destructive", onPress: clearAllData },
+      ]
+    );
+  };
+
+  const handleExport = async () => {
+    try {
+      const data = await exportUserData();
+      const json = JSON.stringify(data, null, 2);
+      const fileUri = `${FileSystem.documentDirectory}stackwise-export-${Date.now()}.json`;
+      await FileSystem.writeAsStringAsync(fileUri, json);
+      // iOS opens a full share sheet (Save to Files, Mail, etc.). Android
+      // shows the message; the file is in the app's documents folder.
+      await Share.share({
+        url: fileUri,
+        message: `StackWise data export (${data.event_count} events)`,
+        title: "StackWise data export",
+      });
+    } catch (e: any) {
+      Alert.alert("Export failed", e.message || "Try again later.");
+    }
+  };
+
+  const confirmServerDelete = () => {
+    Alert.alert(
+      "Delete server data?",
+      "This permanently removes your profile, all anonymous events, and your account on our servers. Your local data on this device is unchanged. You can keep using the app — a new anonymous account will be created on the next session.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete from server",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteServerData();
+              Alert.alert("Deleted", "Your server data has been removed.");
+            } catch (e: any) {
+              Alert.alert("Delete failed", e.message || "Try again later.");
+            }
+          },
+        },
       ]
     );
   };
@@ -229,9 +272,22 @@ export default function ProfileScreen({ navigation }: any) {
 
       <Text style={styles.sectionTitle}>Data</Text>
 
-      <TouchableOpacity style={styles.dangerRow} onPress={confirmClear}>
+      <TouchableOpacity style={styles.settingRow} onPress={handleExport}>
+        <View style={styles.settingLeft}>
+          <Ionicons name="download-outline" size={20} color={colors.text} />
+          <Text style={styles.settingLabel}>Export My Data</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.dangerRow} onPress={confirmServerDelete}>
+        <Ionicons name="cloud-offline-outline" size={20} color={colors.error} />
+        <Text style={styles.dangerText}>Delete Server Data</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.dangerRow, { marginTop: 8 }]} onPress={confirmClear}>
         <Ionicons name="trash-outline" size={20} color={colors.error} />
-        <Text style={styles.dangerText}>Clear All Data</Text>
+        <Text style={styles.dangerText}>Clear Local Data</Text>
       </TouchableOpacity>
 
       <Text style={styles.version}>StackWise v1.0.0</Text>

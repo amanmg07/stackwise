@@ -75,3 +75,52 @@ export async function callGroqProxy(body: Record<string, any>): Promise<any> {
 
   return response.json();
 }
+
+/** Right-of-access: fetch all server-side data StackWise has on the current user. */
+export async function exportUserData(): Promise<any> {
+  await ensureAuth();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not signed in.");
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/data-export`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    Sentry.captureException(new Error(`data-export error: ${response.status}`), {
+      extra: { status: response.status, body: errText },
+    });
+    throw new Error("Couldn't export data right now. Please try again.");
+  }
+  return response.json();
+}
+
+/** Right-of-erasure: wipe all server-side data + the auth user, sign out. */
+export async function deleteServerData(): Promise<void> {
+  await ensureAuth();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not signed in.");
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/data-delete`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    Sentry.captureException(new Error(`data-delete error: ${response.status}`), {
+      extra: { status: response.status, body: errText },
+    });
+    throw new Error("Couldn't delete data right now. Please try again.");
+  }
+  // Sign out the local session — the auth.users row no longer exists.
+  await supabase.auth.signOut();
+}
