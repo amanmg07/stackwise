@@ -43,15 +43,31 @@ export default function CycleTrackerScreen({ navigation }: any) {
   );
 
   // Count days where every peptide that was active on that day got logged.
-  // A peptide added mid-cycle (addedAt > day) doesn't count toward the
-  // requirement for earlier days — that way appending a peptide doesn't
-  // retroactively un-complete previously-finished days.
+  // A peptide added mid-cycle doesn't count toward the requirement for
+  // earlier days — appending a peptide should never retroactively
+  // un-complete previously-finished days.
   const cycleLogs = doseLogs.filter((l) => l.cycleId === activeCycle.id);
   const logDays = new Set(cycleLogs.map((l) => l.timestamp.split("T")[0]));
+
+  // Precompute when each peptide became active in this cycle.
+  // Priority: explicit addedAt → earliest dose log → today (just added, no logs yet).
+  const peptideActiveSince: Record<string, string> = {};
+  for (const cp of activeCycle.peptides) {
+    if (cp.addedAt) {
+      peptideActiveSince[cp.peptideId] = cp.addedAt;
+      continue;
+    }
+    const earliest = cycleLogs
+      .filter((l) => l.peptideId === cp.peptideId)
+      .map((l) => l.timestamp.split("T")[0])
+      .sort()[0];
+    peptideActiveSince[cp.peptideId] = earliest || todayDate;
+  }
+
   let completedDays = 0;
   logDays.forEach((day) => {
     const expectedPeps = activeCycle.peptides.filter(
-      (cp) => (cp.addedAt || activeCycle.startDate) <= day
+      (cp) => peptideActiveSince[cp.peptideId] <= day
     );
     if (expectedPeps.length === 0) return;
     const uniquePeps = new Set(
