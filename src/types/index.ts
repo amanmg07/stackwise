@@ -136,6 +136,11 @@ export interface UserSettings {
   preferredRoutes?: AdministrationRoute[];
   // Analytics
   analyticsConsent: boolean;
+  // Research data sharing — separate consent from internal analytics.
+  // researchConsentDecided indicates the user has been prompted (true)
+  // or is yet to be (false). researchDataConsent is their answer.
+  researchConsentDecided: boolean;
+  researchDataConsent: boolean;
 }
 
 export interface ScanObservation {

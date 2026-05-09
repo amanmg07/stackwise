@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeBottom } from "../../theme";
+import { syncResearchConsent } from "../../services/analyticsService";
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
@@ -143,6 +144,27 @@ export default function ProfileScreen({ navigation }: any) {
         <Text style={styles.comingSoon}>Coming Soon</Text>
       </View>
 
+      <View style={styles.consentRow}>
+        <View style={styles.settingLeft}>
+          <Ionicons name="flask-outline" size={20} color={colors.text} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.settingLabel}>Share research data</Text>
+            <Text style={styles.consentSubtext}>
+              Anonymized protocol & outcome data. Revoke anytime.
+            </Text>
+          </View>
+        </View>
+        <Switch
+          value={settings.researchDataConsent}
+          onValueChange={(next) => {
+            updateSettings({ researchDataConsent: next, researchConsentDecided: true });
+            syncResearchConsent(next);
+          }}
+          trackColor={{ false: colors.border, true: colors.accent }}
+          thumbColor={colors.text}
+        />
+      </View>
+
       {/* Saved Peptides */}
       <Text style={styles.sectionTitle}>Saved for Later</Text>
       {(!settings.savedPeptides || settings.savedPeptides.length === 0) ? (
@@ -267,6 +289,12 @@ const styles = StyleSheet.create({
   settingLabel: { fontSize: 15, color: colors.text },
   settingValue: { fontSize: 15, fontWeight: "600", color: colors.accent },
   comingSoon: { fontSize: 12, fontWeight: "600", color: colors.textSecondary, backgroundColor: colors.surface, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, overflow: "hidden" },
+  consentRow: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8,
+    borderWidth: 1, borderColor: colors.border, marginBottom: 8,
+  },
+  consentSubtext: { fontSize: 12, color: colors.textSecondary, marginTop: 2, lineHeight: 16 },
   cycleRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,

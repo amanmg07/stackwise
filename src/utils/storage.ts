@@ -21,6 +21,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   displayName: "",
   profileImage: null,
   analyticsConsent: false,
+  researchConsentDecided: false,
+  researchDataConsent: false,
 };
 
 async function load<T>(key: string, fallback: T): Promise<T> {

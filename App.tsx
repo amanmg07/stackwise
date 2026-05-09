@@ -11,6 +11,7 @@ import SplashScreen from "./src/screens/SplashScreen";
 import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
 import DemographicsScreen from "./src/screens/onboarding/DemographicsScreen";
 import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
+import ResearchConsentScreen from "./src/screens/onboarding/ResearchConsentScreen";
 import { syncUserProfile } from "./src/services/analyticsService";
 import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
@@ -86,6 +87,19 @@ function AppContent() {
   if (!settings.disclaimerAccepted) {
     return (
       <DisclaimerScreen onAccept={() => updateSettings({ disclaimerAccepted: true })} />
+    );
+  }
+
+  if (!settings.researchConsentDecided) {
+    return (
+      <ResearchConsentScreen
+        onDecided={(consented) =>
+          updateSettings({
+            researchConsentDecided: true,
+            researchDataConsent: consented,
+          })
+        }
+      />
     );
   }
 

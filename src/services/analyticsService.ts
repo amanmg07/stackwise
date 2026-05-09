@@ -53,6 +53,37 @@ export async function syncUserProfile(demographics: {
       gender: demographics.gender || null,
       goals: demographics.goals || [],
       experience_level: demographics.experienceLevel || null,
+      analytics_consent: settings.analyticsConsent,
+      research_consent: settings.researchDataConsent,
+      research_consent_at: settings.researchDataConsent ? new Date().toISOString() : null,
+    });
+    if (error) {
+      Sentry.captureException(error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    Sentry.captureException(e);
+    return false;
+  }
+}
+
+/**
+ * Push a research-consent decision to the server. Called whenever the
+ * user toggles their decision (initial onboarding screen or the
+ * Profile setting). Always tries to write — if a user previously had
+ * analytics_consent=false and just opted into research, we still need
+ * to record the row so the server-side filter knows to include them.
+ */
+export async function syncResearchConsent(consented: boolean): Promise<boolean> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return false;
+
+    const { error } = await supabase.from("user_profiles").upsert({
+      anon_id: userId,
+      research_consent: consented,
+      research_consent_at: consented ? new Date().toISOString() : null,
     });
     if (error) {
       Sentry.captureException(error);

@@ -51,6 +51,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     displayName: "",
     profileImage: null,
     analyticsConsent: false,
+    researchConsentDecided: false,
+    researchDataConsent: false,
   });
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
