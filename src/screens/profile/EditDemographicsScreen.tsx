@@ -4,9 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
-import { syncUserProfile } from "../../services/analyticsService";
+import { syncUserProfile, syncCoMedications } from "../../services/analyticsService";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
-import { Gender, ExperienceLevel, Goal } from "../../types";
+import {
+  Gender, ExperienceLevel, Goal,
+  CO_MEDICATION_CATEGORIES, CO_MEDICATION_LABELS, CoMedicationCategory,
+} from "../../types";
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
   { value: "male", label: "Male", icon: "male", color: "#60a5fa" },
@@ -41,6 +44,10 @@ export default function EditDemographicsScreen({ navigation }: any) {
   const [goals, setGoals] = useState<Set<Goal>>(new Set(settings.goals || []));
   const [experience, setExperience] = useState<ExperienceLevel | undefined>(settings.experienceLevel);
   const [analyticsConsent, setAnalyticsConsent] = useState(settings.analyticsConsent ?? true);
+  const [coMeds, setCoMeds] = useState<Set<CoMedicationCategory>>(
+    new Set((settings.coMedications || []) as CoMedicationCategory[]),
+  );
+  const [coMedsOther, setCoMedsOther] = useState(settings.coMedicationsOther || "");
   const savedRef = useRef(false);
 
   const toggleGoal = (g: Goal) => {
@@ -48,6 +55,15 @@ export default function EditDemographicsScreen({ navigation }: any) {
       const next = new Set(prev);
       if (next.has(g)) next.delete(g);
       else next.add(g);
+      return next;
+    });
+  };
+
+  const toggleCoMed = (m: CoMedicationCategory) => {
+    setCoMeds((prev) => {
+      const next = new Set(prev);
+      if (next.has(m)) next.delete(m);
+      else next.add(m);
       return next;
     });
   };
@@ -66,6 +82,8 @@ export default function EditDemographicsScreen({ navigation }: any) {
       goals: [...goals],
       experienceLevel: experience,
       analyticsConsent,
+      coMedications: [...coMeds],
+      coMedicationsOther: coMedsOther,
     });
     showToast("Profile saved");
 
@@ -79,8 +97,11 @@ export default function EditDemographicsScreen({ navigation }: any) {
       if (!synced) {
         showToast("Profile saved locally. Sync will retry next time.");
       }
+      // Co-medications go up alongside the main demographics upsert,
+      // but if the user only changed those we still want them synced.
+      syncCoMedications([...coMeds], coMedsOther);
     }
-  }, [age, gender, goals, experience, analyticsConsent]);
+  }, [age, gender, goals, experience, analyticsConsent, coMeds, coMedsOther]);
 
   useFocusEffect(
     useCallback(() => {
@@ -167,6 +188,35 @@ export default function EditDemographicsScreen({ navigation }: any) {
         })}
       </View>
 
+      {/* Co-medications */}
+      <Text style={styles.sectionLabel}>Other meds & supplements</Text>
+      <Text style={styles.sectionHint}>
+        Select anything you take regularly. These can affect how peptides work — important for tracking real outcomes.
+      </Text>
+      <View style={styles.coMedGrid}>
+        {CO_MEDICATION_CATEGORIES.map((m) => {
+          const selected = coMeds.has(m);
+          return (
+            <TouchableOpacity
+              key={m}
+              style={[styles.coMedChip, selected && styles.coMedChipActive]}
+              onPress={() => toggleCoMed(m)}
+            >
+              <Text style={[styles.coMedText, selected && styles.coMedTextActive]}>
+                {CO_MEDICATION_LABELS[m]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <TextInput
+        style={[styles.input, { marginTop: 10 }]}
+        value={coMedsOther}
+        onChangeText={setCoMedsOther}
+        placeholder="Anything else? (optional)"
+        placeholderTextColor={colors.textSecondary}
+      />
+
       {/* Analytics consent */}
       <View style={styles.consentRow}>
         <View style={[styles.consentIcon, { backgroundColor: colors.success + "15" }]}>
@@ -239,4 +289,19 @@ const styles = StyleSheet.create({
   consentIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   consentTitle: { fontSize: 14, fontWeight: "700", color: colors.text, marginBottom: 2 },
   consentDesc: { fontSize: 11, color: colors.textSecondary, lineHeight: 16 },
+  sectionHint: {
+    fontSize: 12, color: colors.textSecondary, marginBottom: 10, lineHeight: 17,
+  },
+  coMedGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  coMedChip: {
+    paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  coMedChipActive: { backgroundColor: colors.accent + "18", borderColor: colors.accent + "60" },
+  coMedText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
+  coMedTextActive: { color: colors.accent },
+  input: {
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
+    fontSize: 14, color: colors.text, borderWidth: 1, borderColor: colors.border,
+  },
 });

@@ -1,7 +1,7 @@
 import { supabase, getCurrentUserId } from "../utils/supabase";
 import { appStorage } from "../utils/storage";
 import * as Sentry from "@sentry/react-native";
-import { CyclePeptide, JournalEntry, AdministrationRoute, AdverseEvent } from "../types";
+import { CyclePeptide, JournalEntry, AdministrationRoute, AdverseEvent, Bloodwork } from "../types";
 
 // Toggleable per-build: in __DEV__ we never write to the production
 // analytics tables, so dev/test sessions don't pollute the dataset.
@@ -139,6 +139,35 @@ export async function syncUserProfile(demographics: {
       analytics_consent: settings.analyticsConsent,
       research_consent: settings.researchDataConsent,
       research_consent_at: settings.researchDataConsent ? new Date().toISOString() : null,
+      co_medications: settings.coMedications || [],
+      co_medications_other: settings.coMedicationsOther || null,
+    });
+    if (error) {
+      Sentry.captureException(error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    Sentry.captureException(e);
+    return false;
+  }
+}
+
+/**
+ * Push the user's co-medications list to the server. Called after the
+ * user edits the list in their profile.
+ */
+export async function syncCoMedications(
+  categories: string[],
+  other: string,
+): Promise<boolean> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return false;
+    const { error } = await supabase.from("user_profiles").upsert({
+      anon_id: userId,
+      co_medications: categories,
+      co_medications_other: other || null,
     });
     if (error) {
       Sentry.captureException(error);
@@ -423,4 +452,36 @@ export function trackPeptideBookmarked(peptideId: string, action: "saved" | "rem
 
 export function trackChatQuestion(questionLength: number, activePeptideIds: string[]) {
   trackEvent("chat_question", { question_length: questionLength, active_peptide_ids: activePeptideIds });
+}
+
+/**
+ * Ship a bloodwork snapshot. Each numeric field travels with the
+ * unit baked into its column name (see Bloodwork interface in
+ * types/index.ts), so buyers can compare across users without
+ * unit conversions.
+ */
+export function trackBloodwork(input: Bloodwork) {
+  trackEvent("bloodwork_logged", {
+    bloodwork_id: input.id,
+    cycle_id: input.cycleId,
+    drawn_on: input.date,
+    lab_name: input.labName,
+    testosterone_total: input.testosterone_total,
+    testosterone_free: input.testosterone_free,
+    estradiol: input.estradiol,
+    shbg: input.shbg,
+    igf1: input.igf1,
+    tsh: input.tsh,
+    hba1c: input.hba1c,
+    fasting_glucose: input.fasting_glucose,
+    fasting_insulin: input.fasting_insulin,
+    total_cholesterol: input.total_cholesterol,
+    ldl: input.ldl,
+    hdl: input.hdl,
+    triglycerides: input.triglycerides,
+    hs_crp: input.hs_crp,
+    alt: input.alt,
+    ast: input.ast,
+    creatinine: input.creatinine,
+  });
 }

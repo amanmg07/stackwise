@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord, Bloodwork } from "../types";
 import { deleteCycleAnalytics } from "../services/analyticsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
@@ -11,6 +11,7 @@ interface AppState {
   doseLogs: DoseLog[];
   journal: JournalEntry[];
   scans: ScanRecord[];
+  bloodwork: Bloodwork[];
   settings: UserSettings;
   loading: boolean;
   userId: string | null;
@@ -28,6 +29,9 @@ interface AppState {
   // Scans
   addScan: (scan: ScanRecord) => void;
   deleteScan: (id: string) => void;
+  // Bloodwork
+  addBloodwork: (entry: Bloodwork) => void;
+  deleteBloodwork: (id: string) => void;
   // Settings
   updateSettings: (settings: Partial<UserSettings>) => void;
   // Data
@@ -41,6 +45,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [scans, setScans] = useState<ScanRecord[]>([]);
+  const [bloodwork, setBloodwork] = useState<Bloodwork[]>([]);
   const [settings, setSettings] = useState<UserSettings>({
     weightUnit: "lbs",
     notificationsEnabled: false,
@@ -54,6 +59,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     analyticsConsent: false,
     researchConsentDecided: false,
     researchDataConsent: false,
+    coMedications: [],
+    coMedicationsOther: "",
   });
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -61,16 +68,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Load local data first, then show the app immediately
     (async () => {
-      const [c, d, j, s, sc] = await Promise.all([
+      const [c, d, j, s, sc, bw] = await Promise.all([
         appStorage.loadCycles(),
         appStorage.loadDoseLogs(),
         appStorage.loadJournal(),
         appStorage.loadSettings(),
         appStorage.loadScans(),
+        appStorage.loadBloodwork(),
       ]);
       setCycles(c);
       setDoseLogs(d);
       setScans(sc);
+      setBloodwork(bw);
       // Migrate journal entries from 1-5 scale to 1-10 scale
       const needsMigration = j.some((e: any) => !e.scaleV2 || e.soreness !== undefined);
       const migrated = needsMigration
@@ -109,6 +118,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const persistLogs = useCallback((l: DoseLog[]) => { setDoseLogs(l); appStorage.saveDoseLogs(l); }, []);
   const persistJournal = useCallback((j: JournalEntry[]) => { setJournal(j); appStorage.saveJournal(j); }, []);
   const persistScans = useCallback((s: ScanRecord[]) => { setScans(s); appStorage.saveScans(s); }, []);
+  const persistBloodwork = useCallback((b: Bloodwork[]) => { setBloodwork(b); appStorage.saveBloodwork(b); }, []);
   const persistSettings = useCallback((s: UserSettings) => { setSettings(s); appStorage.saveSettings(s); }, []);
 
   const value: AppState = {
@@ -116,6 +126,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     doseLogs,
     journal,
     scans,
+    bloodwork,
     settings,
     loading,
     userId,
@@ -151,6 +162,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       persistScans(scans.filter((s) => s.id !== id));
     },
 
+    addBloodwork: (entry) => persistBloodwork([entry, ...bloodwork]),
+    deleteBloodwork: (id) => persistBloodwork(bloodwork.filter((b) => b.id !== id)),
+
     updateSettings: (partial) => persistSettings({ ...settings, ...partial }),
 
     clearAllData: () => {
@@ -165,6 +179,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       persistLogs([]);
       persistJournal([]);
       persistScans([]);
+      persistBloodwork([]);
       appStorage.clearAll();
     },
   };

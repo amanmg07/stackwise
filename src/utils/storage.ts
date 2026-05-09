@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Cycle, DoseLog, JournalEntry, UserSettings, ChatMessage, ScanRecord } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, ChatMessage, ScanRecord, Bloodwork } from "../types";
 
 const KEYS = {
   cycles: "@stackwise/cycles",
@@ -8,6 +8,7 @@ const KEYS = {
   settings: "@stackwise/settings",
   chatMessages: "@stackwise/chat_messages",
   scans: "@stackwise/scans",
+  bloodwork: "@stackwise/bloodwork",
 };
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -23,6 +24,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   analyticsConsent: false,
   researchConsentDecided: false,
   researchDataConsent: false,
+  coMedications: [],
+  coMedicationsOther: "",
 };
 
 async function load<T>(key: string, fallback: T): Promise<T> {
@@ -75,6 +78,13 @@ export const appStorage = {
   },
   async saveChatMessages(messages: ChatMessage[]): Promise<void> {
     return save(KEYS.chatMessages, messages);
+  },
+
+  async loadBloodwork(): Promise<Bloodwork[]> {
+    return load(KEYS.bloodwork, []);
+  },
+  async saveBloodwork(entries: Bloodwork[]): Promise<void> {
+    return save(KEYS.bloodwork, entries);
   },
 
   async clearAll(): Promise<void> {

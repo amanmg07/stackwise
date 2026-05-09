@@ -166,7 +166,67 @@ export interface UserSettings {
   // or is yet to be (false). researchDataConsent is their answer.
   researchConsentDecided: boolean;
   researchDataConsent: boolean;
+  // Concurrent medications and supplements — major confounders for
+  // any peptide effect. Users pick from a fixed list of categories
+  // below; "other" lets them free-text anything not covered.
+  coMedications?: string[];
+  coMedicationsOther?: string;
 }
+
+/** Common drug/supplement categories that can confound peptide effects. */
+export const CO_MEDICATION_CATEGORIES = [
+  "ssri_snri",            // antidepressants
+  "benzodiazepines",
+  "stimulants_adhd",
+  "statins",
+  "antihypertensives",
+  "beta_blockers",
+  "metformin",
+  "insulin",
+  "trt",                  // testosterone replacement
+  "thyroid_hormone",
+  "oral_contraceptives",
+  "ppi",                  // proton pump inhibitors
+  "nsaids_daily",
+  "creatine",
+  "protein_supplement",
+  "multivitamin",
+  "vitamin_d",
+  "omega_3",
+  "magnesium",
+  "ashwagandha",
+  "alcohol_regular",
+  "nicotine",
+  "thc_cbd",
+] as const;
+
+export type CoMedicationCategory = (typeof CO_MEDICATION_CATEGORIES)[number];
+
+export const CO_MEDICATION_LABELS: Record<CoMedicationCategory, string> = {
+  ssri_snri: "SSRI / SNRI",
+  benzodiazepines: "Benzodiazepines",
+  stimulants_adhd: "ADHD stimulants",
+  statins: "Statins",
+  antihypertensives: "Blood pressure meds",
+  beta_blockers: "Beta blockers",
+  metformin: "Metformin",
+  insulin: "Insulin",
+  trt: "Testosterone (TRT)",
+  thyroid_hormone: "Thyroid hormone",
+  oral_contraceptives: "Oral contraceptives",
+  ppi: "PPI (acid reducer)",
+  nsaids_daily: "Daily NSAIDs",
+  creatine: "Creatine",
+  protein_supplement: "Protein powder",
+  multivitamin: "Multivitamin",
+  vitamin_d: "Vitamin D",
+  omega_3: "Omega-3",
+  magnesium: "Magnesium",
+  ashwagandha: "Ashwagandha",
+  alcohol_regular: "Alcohol (regular)",
+  nicotine: "Nicotine",
+  thc_cbd: "THC / CBD",
+};
 
 export interface ScanObservation {
   category: PeptideCategory;
@@ -210,6 +270,62 @@ export interface ScanRecord {
   date: string; // ISO timestamp
   imagePath: string; // file:// URI in documentDirectory
   result: ScanResultData;
+}
+
+/**
+ * Bloodwork snapshot. All fields are optional because users will only
+ * log markers their lab actually tested. Units are fixed per field
+ * (documented in the UI label and the buyer-facing data dictionary)
+ * so values across users are directly comparable.
+ *
+ * Units shipped:
+ *   testosterone_total: ng/dL
+ *   testosterone_free:  pg/mL
+ *   estradiol:          pg/mL
+ *   shbg:               nmol/L
+ *   igf1:               ng/mL
+ *   tsh:                mIU/L
+ *   hba1c:              %
+ *   fasting_glucose:    mg/dL
+ *   fasting_insulin:    µIU/mL
+ *   total_cholesterol:  mg/dL
+ *   ldl:                mg/dL
+ *   hdl:                mg/dL
+ *   triglycerides:      mg/dL
+ *   hs_crp:             mg/L
+ *   alt:                U/L
+ *   ast:                U/L
+ *   creatinine:         mg/dL
+ */
+export interface Bloodwork {
+  id: string;
+  date: string; // YYYY-MM-DD when blood was drawn
+  cycleId?: string; // active cycle at draw time (best-effort)
+  labName?: string;
+  // Hormones
+  testosterone_total?: number;
+  testosterone_free?: number;
+  estradiol?: number;
+  shbg?: number;
+  igf1?: number;
+  tsh?: number;
+  // Metabolic
+  hba1c?: number;
+  fasting_glucose?: number;
+  fasting_insulin?: number;
+  // Lipids
+  total_cholesterol?: number;
+  ldl?: number;
+  hdl?: number;
+  triglycerides?: number;
+  // Inflammation
+  hs_crp?: number;
+  // Liver / kidney
+  alt?: number;
+  ast?: number;
+  creatinine?: number;
+  notes?: string;
+  createdAt: string;
 }
 
 export interface ChatMessage {

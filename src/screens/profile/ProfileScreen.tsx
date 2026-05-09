@@ -187,6 +187,17 @@ export default function ProfileScreen({ navigation }: any) {
         <Text style={styles.comingSoon}>Coming Soon</Text>
       </View>
 
+      <TouchableOpacity
+        style={styles.settingRow}
+        onPress={() => navigation.navigate("Bloodwork")}
+      >
+        <View style={styles.settingLeft}>
+          <Ionicons name="water-outline" size={20} color={colors.text} />
+          <Text style={styles.settingLabel}>Bloodwork</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+      </TouchableOpacity>
+
       <View style={styles.consentRow}>
         <View style={styles.settingLeft}>
           <Ionicons name="flask-outline" size={20} color={colors.text} />
