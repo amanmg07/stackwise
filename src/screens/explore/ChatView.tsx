@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback,
-  StyleSheet, FlatList, Platform, ActivityIndicator, Keyboard,
+  StyleSheet, FlatList, Platform, ActivityIndicator, Keyboard, Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
@@ -9,11 +9,10 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { sendChatMessage } from "../../services/chatService";
 import { generateId } from "../../utils/id";
 import { colors, spacing } from "../../theme";
-import { ChatMessage, PlanId } from "../../types";
+import { ChatMessage } from "../../types";
 import { appStorage } from "../../utils/storage";
 import { trackChatQuestion } from "../../services/analyticsService";
-import { checkFeature, trackUsage } from "../../services/planService";
-import UpgradePrompt from "../../components/UpgradePrompt";
+import { checkLimit, trackUsage } from "../../services/usageLimits";
 
 const STARTERS = [
   "What peptides help with recovery?",
@@ -40,9 +39,6 @@ export default function ChatView({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [chatLoaded, setChatLoaded] = useState(false);
-  const [upgradeVisible, setUpgradeVisible] = useState(false);
-  const [upgradeMessage, setUpgradeMessage] = useState("");
-  const [upgradePlan, setUpgradePlan] = useState<PlanId>("pro");
   const listRef = useRef<FlatList>(null);
 
   // Load persisted chat on mount
@@ -75,19 +71,13 @@ export default function ChatView({ navigation }: Props) {
     };
   }, []);
 
-  const showUpgrade = (msg: string, plan: PlanId) => {
-    setUpgradeMessage(msg);
-    setUpgradePlan(plan);
-    setUpgradeVisible(true);
-  };
-
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
 
-    // Check plan limits
-    const gate = await checkFeature("ai_chat");
+    // Daily rate limit
+    const gate = await checkLimit("ai_chat");
     if (!gate.allowed) {
-      showUpgrade(gate.message!, gate.upgradeRequired!);
+      Alert.alert("Daily limit reached", gate.message!);
       return;
     }
 
@@ -293,16 +283,6 @@ export default function ChatView({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      <UpgradePrompt
-        visible={upgradeVisible}
-        message={upgradeMessage}
-        suggestedPlan={upgradePlan}
-        onUpgrade={() => {
-          setUpgradeVisible(false);
-          navigation.navigate("HomeTab", { screen: "Subscription" });
-        }}
-        onDismiss={() => setUpgradeVisible(false)}
-      />
     </View>
   );
 }

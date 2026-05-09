@@ -48,7 +48,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     onboardingDone: false,
     demographicsDone: false,
     disclaimerAccepted: false,
-    planPicked: false,
     displayName: "",
     profileImage: null,
     analyticsConsent: false,

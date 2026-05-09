@@ -17,7 +17,6 @@ import ProtocolBuilderScreen from "../screens/protocol/ProtocolBuilderScreen";
 import ProtocolResultScreen from "../screens/protocol/ProtocolResultScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import EditDemographicsScreen from "../screens/profile/EditDemographicsScreen";
-import SubscriptionScreen from "../screens/profile/SubscriptionScreen";
 import ReconCalculatorScreen from "../screens/tools/ReconCalculatorScreen";
 import InteractionCheckerScreen from "../screens/research/InteractionCheckerScreen";
 import CompareScreen from "../screens/research/CompareScreen";
@@ -84,7 +83,6 @@ function ProtocolNavigator() {
       <ProtocolStack.Screen name="Compare" component={CompareScreen} options={{ title: "Compare" }} />
       <ProtocolStack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
       <ProtocolStack.Screen name="EditDemographics" component={EditDemographicsScreen} options={{ title: "Edit Profile" }} />
-      <ProtocolStack.Screen name="Subscription" component={SubscriptionScreen} options={{ headerShown: false }} />
     </ProtocolStack.Navigator>
   );
 }

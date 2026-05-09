@@ -10,11 +10,10 @@ import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
 import { saveScanImage } from "../../utils/scanImages";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
-import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData, PlanId } from "../../types";
+import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 import { trackScanCompleted } from "../../services/analyticsService";
-import { checkFeature, trackUsage } from "../../services/planService";
-import UpgradePrompt from "../../components/UpgradePrompt";
+import { checkLimit, trackUsage } from "../../services/usageLimits";
 import { callGroqProxy } from "../../utils/supabase";
 
 type ScanResult = ScanResultData & { error?: string };
@@ -100,9 +99,6 @@ export default function ScannerScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [selectedPeptides, setSelectedPeptides] = useState<Set<string>>(new Set());
-  const [upgradeVisible, setUpgradeVisible] = useState(false);
-  const [upgradeMessage, setUpgradeMessage] = useState("");
-  const [upgradePlan, setUpgradePlan] = useState<PlanId>("pro");
 
   const togglePeptide = (id: string) => {
     setSelectedPeptides((prev) => {
@@ -114,12 +110,10 @@ export default function ScannerScreen({ navigation }: any) {
   };
 
   const pickImage = async (useCamera: boolean) => {
-    // Check plan limits
-    const gate = await checkFeature("self_scan");
+    // Daily rate limit
+    const gate = await checkLimit("self_scan");
     if (!gate.allowed) {
-      setUpgradeMessage(gate.message!);
-      setUpgradePlan(gate.upgradeRequired!);
-      setUpgradeVisible(true);
+      Alert.alert("Daily limit reached", gate.message!);
       return;
     }
 
@@ -340,19 +334,6 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
     setSelectedPeptides(new Set());
   };
 
-  const upgradePrompt = (
-    <UpgradePrompt
-      visible={upgradeVisible}
-      message={upgradeMessage}
-      suggestedPlan={upgradePlan}
-      onUpgrade={() => {
-        setUpgradeVisible(false);
-        navigation.navigate("HomeTab", { screen: "Subscription" });
-      }}
-      onDismiss={() => setUpgradeVisible(false)}
-    />
-  );
-
   // Landing state — no image yet
   if (!imageUri) {
     const hasHistory = scans.length > 0;
@@ -438,7 +419,6 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             Photos are stored only on this device. They never leave your phone except when sent to the AI for analysis, and are not kept on any server.
           </Text>
         </View>
-        {upgradePrompt}
       </ScrollView>
     );
   }

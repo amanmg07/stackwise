@@ -11,15 +11,9 @@ import SplashScreen from "./src/screens/SplashScreen";
 import OnboardingScreen from "./src/screens/onboarding/OnboardingScreen";
 import DemographicsScreen from "./src/screens/onboarding/DemographicsScreen";
 import DisclaimerScreen from "./src/screens/onboarding/DisclaimerScreen";
-import PlanPickerScreen from "./src/screens/onboarding/PlanPickerScreen";
 import { syncUserProfile } from "./src/services/analyticsService";
-import { setDevPlanOverride } from "./src/services/planService";
 import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
-
-// DEV: uncomment to override plan for testing
-// if (__DEV__) setDevPlanOverride("elite");
-if (__DEV__) setDevPlanOverride(null); // clear any previous override
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN || "",
@@ -93,10 +87,6 @@ function AppContent() {
     return (
       <DisclaimerScreen onAccept={() => updateSettings({ disclaimerAccepted: true })} />
     );
-  }
-
-  if (!settings.planPicked) {
-    return <PlanPickerScreen onComplete={() => updateSettings({ planPicked: true })} />;
   }
 
   if (!splashDone) {

@@ -123,7 +123,6 @@ export interface UserSettings {
   onboardingDone: boolean;
   demographicsDone: boolean;
   disclaimerAccepted: boolean;
-  planPicked: boolean;
   displayName: string;
   profileImage: string | null;
   // Demographics
@@ -188,19 +187,3 @@ export interface ChatMessage {
   peptideRefs?: string[];
 }
 
-// Subscription plans
-export type PlanId = "basic" | "pro" | "elite";
-
-export interface PlanLimits {
-  aiQueriesPerDay: number; // -1 = unlimited
-  peptidesPerCycle: number; // -1 = unlimited
-  journalEntriesPerWeek: number;
-  selfScansPerWeek: number;
-  priorityAi: boolean;
-}
-
-export interface UsageCounters {
-  aiQueries: { count: number; resetDate: string }; // daily reset
-  journalEntries: { count: number; resetDate: string }; // weekly reset
-  selfScans: { count: number; resetDate: string }; // weekly reset
-}

@@ -11,9 +11,7 @@ import { protocolTemplates } from "../../data/protocolTemplates";
 import { trackCycleCreated, trackCycleUpdated } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
-import { CyclePeptide, AdministrationRoute, PeptideCategory, PlanId } from "../../types";
-import { canAddPeptideToCycle } from "../../services/planService";
-import UpgradePrompt from "../../components/UpgradePrompt";
+import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
 
 const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
   { key: "recovery", label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
@@ -93,9 +91,6 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const [nameManuallyEdited, setNameManuallyEdited] = useState(
     !!(editCycle?.name || template?.name || communityStack?.name)
   );
-  const [upgradeVisible, setUpgradeVisible] = useState(false);
-  const [upgradeMessage, setUpgradeMessage] = useState("");
-  const [upgradePlan, setUpgradePlan] = useState<PlanId>("pro");
   const [showPicker, setShowPicker] = useState<false | "peptide" | "supplement">(false);
   const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
   const [pickerSearch, setPickerSearch] = useState("");
@@ -140,14 +135,6 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const addPeptide = async (peptideId: string) => {
     if (cyclePeptides.some((p) => p.peptideId === peptideId)) return;
 
-    // Check plan limit
-    const gate = await canAddPeptideToCycle(cyclePeptides.length);
-    if (!gate.allowed) {
-      setUpgradeMessage(gate.message!);
-      setUpgradePlan(gate.upgradeRequired!);
-      setUpgradeVisible(true);
-      return;
-    }
     const pep = peptideDB.find((p) => p.id === peptideId);
     const proto = pep?.dosingProtocols?.[0];
 
@@ -512,16 +499,6 @@ export default function NewCycleScreen({ route, navigation }: any) {
         <Text style={styles.saveBtnText}>{editCycle ? "Save Changes" : "Start Cycle"}</Text>
       </TouchableOpacity>
     </ScrollView>
-    <UpgradePrompt
-      visible={upgradeVisible}
-      message={upgradeMessage}
-      suggestedPlan={upgradePlan}
-      onUpgrade={() => {
-        setUpgradeVisible(false);
-        navigation.navigate("HomeTab", { screen: "Subscription" });
-      }}
-      onDismiss={() => setUpgradeVisible(false)}
-    />
     </KeyboardAvoidingView>
   );
 }
