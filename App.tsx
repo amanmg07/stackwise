@@ -16,10 +16,38 @@ import { syncUserProfile } from "./src/services/analyticsService";
 import { colors } from "./src/theme";
 import ErrorBoundary from "./src/components/ErrorBoundary";
 
+// Read from EXPO_PUBLIC_* so the value is bundled into the runtime
+// build. Plain `process.env.SENTRY_DSN` works in dev but doesn't
+// propagate to production builds.
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || "";
+const APP_VERSION = "1.0.0";
+
+if (!SENTRY_DSN) {
+  // Loud-but-non-fatal warning. In production this should never
+  // happen — if it does, you've shipped without error monitoring.
+  if (!__DEV__) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[Sentry] No EXPO_PUBLIC_SENTRY_DSN set — production errors won't be captured.",
+    );
+  }
+}
+
 Sentry.init({
-  dsn: process.env.SENTRY_DSN || "",
-  enabled: !__DEV__,
+  dsn: SENTRY_DSN,
+  enabled: !__DEV__ && !!SENTRY_DSN,
+  release: `stackwise@${APP_VERSION}`,
+  environment: __DEV__ ? "development" : "production",
   tracesSampleRate: 0.2,
+  // Strip Authorization headers from breadcrumbs so user JWTs never
+  // accidentally leak into the Sentry dashboard.
+  beforeBreadcrumb(breadcrumb) {
+    if (breadcrumb.data && typeof breadcrumb.data === "object") {
+      const data = breadcrumb.data as Record<string, any>;
+      if (data.request_headers) delete data.request_headers.authorization;
+    }
+    return breadcrumb;
+  },
 });
 
 const navTheme = {

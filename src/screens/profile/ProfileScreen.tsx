@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
@@ -8,6 +8,11 @@ import { syncResearchConsent } from "../../services/analyticsService";
 import { exportUserData, deleteServerData } from "../../utils/supabase";
 import * as FileSystem from "expo-file-system";
 import { Share } from "react-native";
+
+// TODO: replace with the real support email before launch.
+// Apple's app review will sometimes test this address — make sure
+// it's actively monitored on the launching team's side.
+const SUPPORT_EMAIL = "support@stackwise.app";
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
@@ -194,6 +199,25 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={styles.settingLeft}>
           <Ionicons name="water-outline" size={20} color={colors.text} />
           <Text style={styles.settingLabel}>Bloodwork</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.settingRow}
+        onPress={() => {
+          const subject = encodeURIComponent("StackWise support");
+          const body = encodeURIComponent(
+            `\n\n— App: StackWise v1.0.0\n— User ID: ${userId || "(not signed in)"}`,
+          );
+          Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`).catch(
+            () => Alert.alert("Couldn't open email", `Reach us at ${SUPPORT_EMAIL}`),
+          );
+        }}
+      >
+        <View style={styles.settingLeft}>
+          <Ionicons name="mail-outline" size={20} color={colors.text} />
+          <Text style={styles.settingLabel}>Contact Support</Text>
         </View>
         <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
       </TouchableOpacity>

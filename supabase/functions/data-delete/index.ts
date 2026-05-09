@@ -25,6 +25,26 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Deletion is destructive and irreversible. Cap aggressively so an
+// accidental loop or a malicious request can't repeatedly hammer it.
+// 3/hr is generous for a real human use case while making attack
+// noise visible.
+const RATE_LIMIT = 3;
+const RATE_WINDOW = 60 * 60 * 1000;
+const deleteRateLimits = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = deleteRateLimits.get(userId);
+  if (!entry || now > entry.resetAt) {
+    deleteRateLimits.set(userId, { count: 1, resetAt: now + RATE_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -48,6 +68,16 @@ Deno.serve(async (req) => {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ error: `Rate limit exceeded. Maximum ${RATE_LIMIT} delete requests per hour.` }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

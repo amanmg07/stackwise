@@ -20,6 +20,27 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Per-user in-memory rate limit. Export is heavier than a normal API
+// call (full table scan + JSON stringify), so cap aggressively. The
+// map only lives for the lifetime of the edge function instance, so
+// it's a soft cap — adequate for stopping a single user from
+// hammering it but not a hard guarantee across cold starts.
+const RATE_LIMIT = 5;                         // exports per window
+const RATE_WINDOW = 60 * 60 * 1000;           // 1 hour
+const exportRateLimits = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = exportRateLimits.get(userId);
+  if (!entry || now > entry.resetAt) {
+    exportRateLimits.set(userId, { count: 1, resetAt: now + RATE_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -44,6 +65,17 @@ Deno.serve(async (req) => {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // 2. Per-user rate limit.
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ error: `Rate limit exceeded. Maximum ${RATE_LIMIT} exports per hour.` }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // 2. Use service role to gather data — bypasses RLS so we can

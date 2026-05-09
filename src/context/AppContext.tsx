@@ -107,6 +107,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         const uid = await ensureAuth();
         setUserId(uid);
+        // Attach the anon_id to Sentry so crashes can be tied to a
+        // user without leaking PII (anon_id is not PII).
+        Sentry.setUser({ id: uid });
       } catch (e) {
         Sentry.captureException(e);
       }
