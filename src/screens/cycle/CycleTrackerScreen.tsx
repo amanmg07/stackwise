@@ -158,10 +158,18 @@ export default function CycleTrackerScreen({ navigation }: any) {
                         isActive: false,
                         endDate,
                       });
+                      const plannedDays = Math.max(
+                        differenceInDays(parseISO(activeCycle.endDate + "T00:00:00"), parseISO(activeCycle.startDate + "T00:00:00")),
+                        1,
+                      );
                       trackCycleEnded({
+                        cycleId: activeCycle.id,
                         peptideIds: activeCycle.peptides.map((p) => p.peptideId),
                         durationDays,
                         reason,
+                        expectedDays: plannedDays,
+                        completedDays,
+                        totalDosesLogged: cycleLogs.length,
                       });
                     },
                   },

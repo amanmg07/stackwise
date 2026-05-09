@@ -8,7 +8,7 @@ import { format, addWeeks, differenceInWeeks, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { protocolTemplates } from "../../data/protocolTemplates";
-import { trackCycleCreated, trackCycleUpdated } from "../../services/analyticsService";
+import { trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
 import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
@@ -27,7 +27,7 @@ const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof I
 ];
 
 export default function NewCycleScreen({ route, navigation }: any) {
-  const { addCycle, updateCycle, cycles, settings } = useApp();
+  const { addCycle, updateCycle, cycles, settings, journal } = useApp();
   const templateId = route.params?.templateId;
   const template = templateId ? protocolTemplates.find((t) => t.id === templateId) : null;
   const communityStack = route.params?.communityStack;
@@ -211,13 +211,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
         endDate,
         notes: notes,
       });
-      trackCycleUpdated(cyclePeptides.map((p) => p.peptideId));
+      trackCycleUpdated(editCycle.id, cyclePeptides);
     } else {
       const startDate = new Date().toISOString().split("T")[0];
       const endDate = format(addWeeks(new Date(), parseInt(durationWeeks) || 8), "yyyy-MM-dd");
+      const cycleId = generateId();
 
       addCycle({
-        id: generateId(),
+        id: cycleId,
         name: name.trim(),
         peptides: cyclePeptides,
         startDate,
@@ -226,7 +227,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
         notes: template ? `Based on ${template.name} protocol` : "",
         createdAt: new Date().toISOString(),
       });
-      trackCycleCreated(cyclePeptides.map((p) => p.peptideId));
+      trackCycleCreated({
+        cycleId,
+        name: name.trim(),
+        peptides: cyclePeptides,
+        durationWeeks: parseInt(durationWeeks) || 8,
+        templateId: template?.id,
+        baseline: computeBaseline(journal),
+      });
     }
 
     navigation.goBack();

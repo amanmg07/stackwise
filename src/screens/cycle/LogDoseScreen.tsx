@@ -80,7 +80,14 @@ export default function LogDoseScreen({ route, navigation }: any) {
       site: site || undefined,
       notes: notes || undefined,
     });
-    trackDoseLogged(initPeptideId, parsed, unit);
+    trackDoseLogged({
+      cycleId,
+      peptideId: initPeptideId,
+      amount: parsed,
+      unit,
+      route: route_,
+      site: site || undefined,
+    });
     showToast("Dose logged!");
     navigation.goBack();
   };

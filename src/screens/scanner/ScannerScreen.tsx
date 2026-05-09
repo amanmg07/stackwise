@@ -12,7 +12,7 @@ import { saveScanImage } from "../../utils/scanImages";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
-import { trackScanCompleted } from "../../services/analyticsService";
+import { trackScanCompleted, trackCycleCreated, computeBaseline } from "../../services/analyticsService";
 import { checkLimit, trackUsage } from "../../services/usageLimits";
 import { useUsage } from "../../hooks/useUsage";
 import { callGroqProxy } from "../../utils/supabase";
@@ -95,7 +95,7 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
-  const { addCycle, scans, addScan, deleteScan, settings } = useApp();
+  const { addCycle, scans, addScan, deleteScan, settings, journal } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -641,8 +641,9 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                 });
                 const startDate = new Date().toISOString().split("T")[0];
                 const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
+                const cycleId = generateId();
                 addCycle({
-                  id: generateId(),
+                  id: cycleId,
                   name: "Self Scan Protocol",
                   peptides: cyclePeptides,
                   startDate,
@@ -650,6 +651,13 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   isActive: true,
                   notes: "Created from Self Scan results",
                   createdAt: new Date().toISOString(),
+                });
+                trackCycleCreated({
+                  cycleId,
+                  name: "Self Scan Protocol",
+                  peptides: cyclePeptides as any,
+                  durationWeeks: 8,
+                  baseline: computeBaseline(journal),
                 });
                 Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
                   { text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) },

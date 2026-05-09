@@ -1,6 +1,7 @@
 import { supabase, getCurrentUserId } from "../utils/supabase";
 import { appStorage } from "../utils/storage";
 import * as Sentry from "@sentry/react-native";
+import { CyclePeptide, JournalEntry, AdministrationRoute } from "../types";
 
 /**
  * Send an anonymized analytics event to Supabase.
@@ -64,26 +65,199 @@ export async function syncUserProfile(demographics: {
   }
 }
 
-// Convenience wrappers for common events
+// ── Pure helpers (exported for tests) ─────────────────────────────
 
-export function trackCycleCreated(peptideIds: string[], goal?: string) {
-  trackEvent("cycle_created", { peptide_ids: peptideIds, goal });
+/**
+ * Convert a free-form side-effect label into a stable, snake_case enum
+ * value. The UI shows "Injection site pain" but downstream buyers should
+ * see "injection_site_pain" so they can aggregate without case/punctuation
+ * surprises.
+ */
+export function normalizeSideEffect(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
-export function trackDoseLogged(peptideId: string, amount: number, unit: "mcg" | "mg" | "g" | "IU") {
-  trackEvent("dose_logged", { peptide_id: peptideId, amount, unit });
+export interface BaselineMetrics {
+  sleep_quality: number | null;
+  energy_level: number | null;
+  recovery_score: number | null;
+  mood: number | null;
+  weight: number | null;
+  entry_count: number;
 }
 
-export function trackCycleUpdated(peptideIds: string[]) {
-  trackEvent("cycle_updated", { peptide_ids: peptideIds });
+/**
+ * Average the last `windowDays` of journal entries to get a baseline
+ * snapshot. Returns null fields when there's no data — buyers can detect
+ * cycles that started "cold" vs ones with prior history.
+ */
+export function computeBaseline(
+  entries: JournalEntry[],
+  windowDays: number = 7
+): BaselineMetrics {
+  if (entries.length === 0) {
+    return {
+      sleep_quality: null,
+      energy_level: null,
+      recovery_score: null,
+      mood: null,
+      weight: null,
+      entry_count: 0,
+    };
+  }
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - windowDays);
+  const cutoffStr = cutoff.toISOString().split("T")[0];
+
+  const recent = entries.filter((e) => e.date >= cutoffStr);
+  if (recent.length === 0) {
+    return {
+      sleep_quality: null,
+      energy_level: null,
+      recovery_score: null,
+      mood: null,
+      weight: null,
+      entry_count: 0,
+    };
+  }
+
+  const avg = (fn: (e: JournalEntry) => number | undefined): number | null => {
+    const vals = recent.map(fn).filter((v): v is number => typeof v === "number");
+    if (vals.length === 0) return null;
+    return Number((vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(2));
+  };
+
+  return {
+    sleep_quality: avg((e) => e.sleepQuality),
+    energy_level: avg((e) => e.energyLevel),
+    recovery_score: avg((e) => e.recoveryScore),
+    mood: avg((e) => e.mood),
+    weight: avg((e) => e.weight),
+    entry_count: recent.length,
+  };
 }
 
-export function trackCycleEnded(data: {
+/** Serialize a CyclePeptide to the analytics-friendly snake_case shape. */
+function serializeCompound(cp: CyclePeptide) {
+  return {
+    peptide_id: cp.peptideId,
+    dose_amount: cp.doseAmount,
+    dose_unit: cp.doseUnit,
+    frequency: cp.frequency,
+    route: cp.route,
+    time_of_day: cp.timeOfDay,
+    added_at: cp.addedAt || null,
+  };
+}
+
+// ── Convenience wrappers ──────────────────────────────────────────
+
+interface CycleCreatedInput {
+  cycleId: string;
+  name: string;
+  peptides: CyclePeptide[];
+  durationWeeks: number;
+  templateId?: string;
+  goal?: string;
+  baseline?: BaselineMetrics;
+}
+
+export function trackCycleCreated(input: CycleCreatedInput) {
+  trackEvent("cycle_created", {
+    cycle_id: input.cycleId,
+    name: input.name,
+    // Keep peptide_ids for back-compat with existing analytics_insights view.
+    peptide_ids: input.peptides.map((p) => p.peptideId),
+    goal: input.goal,
+    duration_weeks: input.durationWeeks,
+    template_id: input.templateId,
+    compounds: input.peptides.map(serializeCompound),
+    baseline: input.baseline,
+  });
+}
+
+export function trackCycleUpdated(cycleId: string, peptides: CyclePeptide[]) {
+  trackEvent("cycle_updated", {
+    cycle_id: cycleId,
+    peptide_ids: peptides.map((p) => p.peptideId),
+    compounds: peptides.map(serializeCompound),
+  });
+}
+
+interface CycleEndedInput {
+  cycleId: string;
   peptideIds: string[];
   durationDays: number;
   reason: "completed" | "ended_early";
-}) {
-  trackEvent("cycle_ended", data);
+  expectedDays: number;
+  completedDays: number;
+  totalDosesLogged: number;
+}
+
+export function trackCycleEnded(input: CycleEndedInput) {
+  const adherencePct =
+    input.expectedDays > 0
+      ? Math.round((input.completedDays / input.expectedDays) * 100)
+      : 0;
+  trackEvent("cycle_ended", {
+    cycle_id: input.cycleId,
+    peptideIds: input.peptideIds, // back-compat
+    durationDays: input.durationDays,
+    reason: input.reason,
+    expected_days: input.expectedDays,
+    completed_days: input.completedDays,
+    adherence_pct: adherencePct,
+    total_doses_logged: input.totalDosesLogged,
+  });
+}
+
+interface DoseLoggedInput {
+  cycleId: string;
+  peptideId: string;
+  amount: number;
+  unit: "mcg" | "mg" | "g" | "IU";
+  route: AdministrationRoute;
+  site?: string;
+}
+
+export function trackDoseLogged(input: DoseLoggedInput) {
+  trackEvent("dose_logged", {
+    cycle_id: input.cycleId,
+    peptide_id: input.peptideId,
+    amount: input.amount,
+    unit: input.unit,
+    route: input.route,
+    site: input.site,
+  });
+}
+
+interface JournalEntryInput {
+  cycleId?: string;
+  sleepQuality: number;
+  energyLevel: number;
+  recoveryScore: number;
+  mood: number;
+  weight?: number;
+  sleepHours?: number;
+  activePeptideIds: string[];
+  sideEffects?: string[];
+}
+
+export function trackJournalEntry(input: JournalEntryInput) {
+  trackEvent("journal_entry", {
+    cycle_id: input.cycleId,
+    sleepQuality: input.sleepQuality,
+    energyLevel: input.energyLevel,
+    recoveryScore: input.recoveryScore,
+    mood: input.mood,
+    weight: input.weight,
+    sleep_hours: input.sleepHours,
+    activePeptideIds: input.activePeptideIds,
+    sideEffects: (input.sideEffects || []).map(normalizeSideEffect),
+  });
 }
 
 export function trackScanCompleted(recommendedCategories: string[]) {
@@ -99,18 +273,6 @@ export function trackScanCompared(data: {
   recommendedCategories: string[];
 }) {
   trackEvent("scan_compared", data);
-}
-
-export function trackJournalEntry(metrics: {
-  sleepQuality: number;
-  energyLevel: number;
-  recoveryScore: number;
-  mood: number;
-  weight?: number;
-  activePeptideIds: string[];
-  sideEffects?: string[];
-}) {
-  trackEvent("journal_entry", metrics);
 }
 
 export function trackPeptideViewed(peptideId: string) {

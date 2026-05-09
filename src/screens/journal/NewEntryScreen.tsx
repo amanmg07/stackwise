@@ -89,11 +89,13 @@ export default function NewEntryScreen({ route, navigation }: any) {
     if (existing) {
       updateJournalEntry(entry);
       trackJournalEntry({
+        cycleId: activeCycle?.id,
         sleepQuality,
         energyLevel,
         recoveryScore,
         mood,
         weight: parsedWeight,
+        sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
         activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
         sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
       });
@@ -101,11 +103,13 @@ export default function NewEntryScreen({ route, navigation }: any) {
     } else {
       addJournalEntry(entry);
       trackJournalEntry({
+        cycleId: activeCycle?.id,
         sleepQuality,
         energyLevel,
         recoveryScore,
         mood,
         weight: parsedWeight,
+        sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
         activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
         sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
       });

@@ -7,6 +7,7 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
 import { parseDurationWeeks } from "../../utils/duration";
+import { trackCycleCreated, computeBaseline } from "../../services/analyticsService";
 import { colors, spacing, safeBottom, emptyStateStyle } from "../../theme";
 import { Goal, AdministrationRoute } from "../../types";
 
@@ -18,7 +19,7 @@ const DIFFICULTY_COLORS = {
 
 export default function ProtocolResultScreen({ route, navigation }: any) {
   const { goals, routes: preferredRoutes } = route.params as { goals: Goal[]; routes?: AdministrationRoute[] };
-  const { addCycle } = useApp();
+  const { addCycle, journal } = useApp();
 
   const scored = protocolTemplates
     .map((t) => {
@@ -144,8 +145,9 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
               const startDate = new Date().toISOString().split("T")[0];
               const weeks = parseDurationWeeks(t.cycleDuration);
               const endDate = format(addWeeks(new Date(), weeks), "yyyy-MM-dd");
+              const cycleId = generateId();
               addCycle({
-                id: generateId(),
+                id: cycleId,
                 name: t.name,
                 peptides: peptidesList,
                 startDate,
@@ -153,6 +155,15 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 isActive: true,
                 notes: `Based on ${t.name} protocol`,
                 createdAt: new Date().toISOString(),
+              });
+              trackCycleCreated({
+                cycleId,
+                name: t.name,
+                peptides: peptidesList,
+                durationWeeks: weeks,
+                templateId: t.id,
+                goal: t.goals?.[0],
+                baseline: computeBaseline(journal),
               });
               Alert.alert("Cycle Started", `${t.name} is now active!`, [
                 { text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) },
