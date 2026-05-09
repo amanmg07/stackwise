@@ -12,6 +12,7 @@ import { trackCycleCreated, trackCycleUpdated } from "../../services/analyticsSe
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
 import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
+import { parseDurationWeeks } from "../../utils/duration";
 
 const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
   { key: "recovery", label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
@@ -79,11 +80,16 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const [name, setName] = useState(
     editCycle?.name || template?.name || communityStack?.name || ""
   );
-  const [durationWeeks, setDurationWeeks] = useState(
-    editCycle
-      ? String(differenceInWeeks(parseISO(editCycle.endDate), parseISO(editCycle.startDate)) || 8)
-      : "8"
-  );
+  const [durationWeeks, setDurationWeeks] = useState(() => {
+    if (editCycle) {
+      return String(
+        differenceInWeeks(parseISO(editCycle.endDate), parseISO(editCycle.startDate)) || 8
+      );
+    }
+    return String(
+      parseDurationWeeks(template?.cycleDuration || communityStack?.duration)
+    );
+  });
   const [notes, setNotes] = useState(editCycle?.notes || "");
   const [cyclePeptides, setCyclePeptides] = useState<CyclePeptide[]>(
     editCycle ? editCycle.peptides : buildInitialPeptides()

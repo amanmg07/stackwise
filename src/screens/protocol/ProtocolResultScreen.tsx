@@ -6,6 +6,7 @@ import { protocolTemplates } from "../../data/protocolTemplates";
 import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
+import { parseDurationWeeks } from "../../utils/duration";
 import { colors, spacing, safeBottom, emptyStateStyle } from "../../theme";
 import { Goal, AdministrationRoute } from "../../types";
 
@@ -141,7 +142,8 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 };
               });
               const startDate = new Date().toISOString().split("T")[0];
-              const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
+              const weeks = parseDurationWeeks(t.cycleDuration);
+              const endDate = format(addWeeks(new Date(), weeks), "yyyy-MM-dd");
               addCycle({
                 id: generateId(),
                 name: t.name,
