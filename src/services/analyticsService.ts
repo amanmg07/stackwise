@@ -356,6 +356,7 @@ interface JournalEntryInput {
   mood: number;
   weight?: number;
   weightUnit?: "lbs" | "kg";
+  bodyFat?: number;
   sleepHours?: number;
   activePeptideIds: string[];
   sideEffects?: string[];
@@ -370,6 +371,7 @@ export function trackJournalEntry(input: JournalEntryInput) {
     mood: input.mood,
     weight: input.weight,
     weight_unit: input.weight != null ? input.weightUnit : undefined,
+    body_fat: input.bodyFat,
     sleep_hours: input.sleepHours,
     activePeptideIds: input.activePeptideIds,
     sideEffects: (input.sideEffects || []).map(normalizeSideEffect),

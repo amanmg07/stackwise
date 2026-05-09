@@ -51,6 +51,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
   const activeCycle = cycles.find((c) => c.isActive);
 
   const [weight, setWeight] = useState(existing?.weight?.toString() || "");
+  const [bodyFat, setBodyFat] = useState(existing?.bodyFat?.toString() || "");
   const [sleepHours, setSleepHours] = useState(existing?.sleepHours?.toString() || "");
   const [sleepQuality, setSleepQuality] = useState(existing?.sleepQuality || 5);
   const [energyLevel, setEnergyLevel] = useState(existing?.energyLevel || 5);
@@ -70,11 +71,13 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
   const save = () => {
     const parsedWeight = weight ? parseFloat(weight) : undefined;
+    const parsedBodyFat = bodyFat ? parseFloat(bodyFat) : undefined;
     const entry = {
       id: existing?.id || generateId(),
       cycleId: activeCycle?.id,
       date: existing?.date || format(new Date(), "yyyy-MM-dd"),
       weight: parsedWeight,
+      bodyFat: parsedBodyFat,
       sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
       sleepQuality,
       energyLevel,
@@ -96,6 +99,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
         mood,
         weight: parsedWeight,
         weightUnit: settings.weightUnit,
+        bodyFat: parsedBodyFat,
         sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
         activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
         sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
@@ -111,6 +115,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
         mood,
         weight: parsedWeight,
         weightUnit: settings.weightUnit,
+        bodyFat: parsedBodyFat,
         sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
         activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
         sideEffects: sideEffects.size > 0 ? [...sideEffects] : undefined,
@@ -127,15 +132,30 @@ export default function NewEntryScreen({ route, navigation }: any) {
         {existing ? format(parseISO(existing.date), "EEEE, MMMM d") : format(new Date(), "EEEE, MMMM d")}
       </Text>
 
-      <Text style={styles.label}>Weight ({settings.weightUnit})</Text>
-      <TextInput
-        style={styles.input}
-        value={weight}
-        onChangeText={setWeight}
-        keyboardType="decimal-pad"
-        placeholder="—"
-        placeholderTextColor={colors.textSecondary}
-      />
+      <View style={styles.row}>
+        <View style={styles.half}>
+          <Text style={styles.label}>Weight ({settings.weightUnit})</Text>
+          <TextInput
+            style={styles.input}
+            value={weight}
+            onChangeText={setWeight}
+            keyboardType="decimal-pad"
+            placeholder="—"
+            placeholderTextColor={colors.textSecondary}
+          />
+        </View>
+        <View style={styles.half}>
+          <Text style={styles.label}>Body fat (%)</Text>
+          <TextInput
+            style={styles.input}
+            value={bodyFat}
+            onChangeText={setBodyFat}
+            keyboardType="decimal-pad"
+            placeholder="—"
+            placeholderTextColor={colors.textSecondary}
+          />
+        </View>
+      </View>
 
       <Text style={styles.label}>Sleep (hours)</Text>
       <TextInput
