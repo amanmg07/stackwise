@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord } from "../types";
+import { deleteCycleAnalytics } from "../services/analyticsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
 import { ensureAuth } from "../utils/supabase";
@@ -124,6 +125,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteCycle: (id) => {
       persistCycles(cycles.filter((c) => c.id !== id));
       persistLogs(doseLogs.filter((l) => l.cycleId !== id));
+      // Cascade to server-side events so a mistake-deleted cycle
+      // never reaches the buyer-facing dataset.
+      deleteCycleAnalytics(id);
     },
 
     addDoseLog: (log) => persistLogs([log, ...doseLogs]),

@@ -3,16 +3,64 @@ import { appStorage } from "../utils/storage";
 import * as Sentry from "@sentry/react-native";
 import { CyclePeptide, JournalEntry, AdministrationRoute } from "../types";
 
+// Toggleable per-build: in __DEV__ we never write to the production
+// analytics tables, so dev/test sessions don't pollute the dataset.
+// Override with EXPO_PUBLIC_FORCE_ANALYTICS=1 if you specifically want
+// to verify the analytics pipeline end-to-end during development.
+const ANALYTICS_ENABLED_IN_DEV =
+  typeof process !== "undefined" &&
+  process.env?.EXPO_PUBLIC_FORCE_ANALYTICS === "1";
+
+/**
+ * Validate an event payload before it leaves the device. Drops the
+ * event if it's clearly malformed — empty/missing required fields,
+ * non-finite numbers, etc. Better to skip than to send garbage that
+ * would later have to be cleaned out of the buyer dataset.
+ */
+function isValidPayload(eventType: string, payload: Record<string, any>): boolean {
+  switch (eventType) {
+    case "dose_logged":
+      return (
+        typeof payload.cycle_id === "string" && payload.cycle_id.length > 0 &&
+        typeof payload.peptide_id === "string" && payload.peptide_id.length > 0 &&
+        typeof payload.amount === "number" && Number.isFinite(payload.amount) && payload.amount > 0
+      );
+    case "cycle_created":
+    case "cycle_updated":
+    case "cycle_ended":
+      return typeof payload.cycle_id === "string" && payload.cycle_id.length > 0;
+    case "journal_entry":
+      return (
+        typeof payload.sleepQuality === "number" && payload.sleepQuality >= 1 && payload.sleepQuality <= 10 &&
+        typeof payload.energyLevel === "number" && payload.energyLevel >= 1 && payload.energyLevel <= 10
+      );
+    default:
+      // Lightweight events (peptide_viewed, chat_question, etc.)
+      // don't have hard validation. Allow them through.
+      return true;
+  }
+}
+
 /**
  * Send an anonymized analytics event to Supabase.
  * Only fires if the user opted in (analyticsConsent === true).
  * All events are keyed by anonymous user ID — no PII is sent.
+ *
+ * Skipped silently when:
+ *   - the user hasn't opted into analytics
+ *   - the build is __DEV__ (unless EXPO_PUBLIC_FORCE_ANALYTICS=1)
+ *   - the payload is structurally invalid
  */
 export async function trackEvent(
   eventType: string,
   payload: Record<string, any> = {}
 ) {
   try {
+    if (typeof __DEV__ !== "undefined" && __DEV__ && !ANALYTICS_ENABLED_IN_DEV) {
+      return;
+    }
+    if (!isValidPayload(eventType, payload)) return;
+
     const settings = await appStorage.loadSettings();
     if (!settings.analyticsConsent) return;
 
@@ -26,6 +74,32 @@ export async function trackEvent(
     });
   } catch (e) {
     // Analytics should never crash the app
+    Sentry.captureException(e);
+  }
+}
+
+/**
+ * Cascade-delete all analytics events tied to a cycle. Called when the
+ * user deletes a cycle in the app — keeps the buyer-facing dataset
+ * free of "user created cycle then realized it was a mistake" noise.
+ *
+ * Safe to call on cycles that were never sent to analytics (e.g. dev
+ * builds, opted-out users) — the DELETE simply matches zero rows.
+ */
+export async function deleteCycleAnalytics(cycleId: string): Promise<void> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+
+    // RLS limits this to the caller's own rows by anon_id, so we don't
+    // need to filter explicitly here.
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .in("event_type", ["cycle_created", "cycle_updated", "cycle_ended", "dose_logged"])
+      .eq("anon_id", userId)
+      .filter("payload->>cycle_id", "eq", cycleId);
+  } catch (e) {
     Sentry.captureException(e);
   }
 }
