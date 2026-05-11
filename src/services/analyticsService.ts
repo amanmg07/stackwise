@@ -449,6 +449,8 @@ interface DoseLoggedInput {
   unit: "mcg" | "mg" | "g" | "IU";
   route: AdministrationRoute;
   site?: string;
+  /** Vendor / brand / lab — first-class confounder for outcome analysis. */
+  source?: string;
 }
 
 export function trackDoseLogged(input: DoseLoggedInput) {
@@ -460,6 +462,7 @@ export function trackDoseLogged(input: DoseLoggedInput) {
     unit: input.unit,
     route: input.route,
     site: input.site,
+    source: input.source,
   });
 }
 

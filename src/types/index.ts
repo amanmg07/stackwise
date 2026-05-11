@@ -82,6 +82,11 @@ export interface DoseLog {
   timestamp: string;
   site?: string;
   notes?: string;
+  // Vendor / brand / lab name. Same compound from different sources
+  // can have wildly different purity, so this is a real research
+  // variable of concern, not free-text metadata. Optional — users
+  // who don't know or don't care can leave it blank.
+  source?: string;
 }
 
 /** Standardized check-in week numbers per the Architecture Spec. */

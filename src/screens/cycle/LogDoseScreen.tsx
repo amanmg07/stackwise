@@ -27,6 +27,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
   const [unit, setUnit] = useState<"mcg" | "mg" | "g" | "IU">(initUnit);
   const [route_, setRoute] = useState<AdministrationRoute>(cyclePeptide?.route || "subcutaneous");
   const [site, setSite] = useState("");
+  const [source, setSource] = useState("");
   const [notes, setNotes] = useState("");
 
   if (!cycle) {
@@ -70,6 +71,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
       return;
     }
     const doseLogId = generateId();
+    const trimmedSource = source.trim();
     addDoseLog({
       id: doseLogId,
       cycleId,
@@ -80,6 +82,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
       timestamp: new Date().toISOString(),
       site: site || undefined,
       notes: notes || undefined,
+      source: trimmedSource || undefined,
     });
     trackDoseLogged({
       doseLogId,
@@ -89,6 +92,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
       unit,
       route: route_,
       site: site || undefined,
+      source: trimmedSource || undefined,
     });
     showToast("Dose logged!");
     navigation.goBack();
@@ -149,6 +153,16 @@ export default function LogDoseScreen({ route, navigation }: any) {
           </View>
         </>
       )}
+
+      <Text style={styles.label}>Brand or vendor (optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={source}
+        onChangeText={setSource}
+        placeholder="e.g. Limitless, Peptide Sciences, compounding pharmacy"
+        placeholderTextColor={colors.textSecondary}
+        autoCapitalize="words"
+      />
 
       <Text style={styles.label}>Notes (optional)</Text>
       <TextInput
