@@ -7,9 +7,10 @@ import { peptides } from "../../data/peptides";
 import { colors, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
 import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
 import { trackCycleEnded } from "../../services/analyticsService";
+import { OUTCOME_WEEKS, OutcomeWeek } from "../../types";
 
 export default function CycleTrackerScreen({ navigation }: any) {
-  const { cycles, doseLogs, deleteCycle, deleteDoseLog, updateCycle } = useApp();
+  const { cycles, doseLogs, outcomes, deleteCycle, deleteDoseLog, updateCycle } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
 
   if (!activeCycle) {
@@ -63,6 +64,19 @@ export default function CycleTrackerScreen({ navigation }: any) {
       .sort()[0];
     peptideActiveSince[cp.peptideId] = earliest || todayDate;
   }
+
+  // Find the earliest milestone week (4/8/12/16) that's due but not yet
+  // completed. Returns null if none — either nothing is due, or every
+  // overdue milestone has already been answered.
+  const daysSinceStart = differenceInCalendarDays(
+    new Date(),
+    parseISO(activeCycle.startDate + "T00:00:00"),
+  );
+  const completedWeeks = new Set(
+    outcomes.filter((o) => o.cycleId === activeCycle.id).map((o) => o.weekNumber),
+  );
+  const dueWeek: OutcomeWeek | null =
+    OUTCOME_WEEKS.find((w) => daysSinceStart >= w * 7 && !completedWeeks.has(w)) ?? null;
 
   let completedDays = 0;
   logDays.forEach((day) => {
@@ -180,6 +194,29 @@ export default function CycleTrackerScreen({ navigation }: any) {
             <Ionicons name="checkmark-done-outline" size={16} color={colors.accent} />
             <Text style={styles.endBtnText}>End Cycle</Text>
           </TouchableOpacity>
+
+          {/* Outcome check-in due banner */}
+          {dueWeek !== null && (
+            <TouchableOpacity
+              style={styles.checkInBanner}
+              onPress={() =>
+                navigation.navigate("OutcomeCheckIn", {
+                  cycleId: activeCycle.id,
+                  weekNumber: dueWeek,
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Ionicons name="checkmark-circle-outline" size={22} color={colors.accent} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.checkInBannerTitle}>Week {dueWeek} check-in is due</Text>
+                <Text style={styles.checkInBannerDesc}>
+                  ~60-second standardized check-in. Helps track this protocol's outcome.
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+            </TouchableOpacity>
+          )}
 
           {/* Progress bar */}
           <View style={styles.progressContainer}>
@@ -336,6 +373,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent + "15", borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16,
     borderWidth: 1, borderColor: colors.accent + "30", marginBottom: spacing.md,
   },
+  checkInBanner: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    backgroundColor: colors.accent + "12", borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.accent + "40", marginBottom: spacing.md,
+  },
+  checkInBannerTitle: { fontSize: 14, fontWeight: "700", color: colors.accent },
+  checkInBannerDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2, lineHeight: 17 },
   endBtnText: { fontSize: 13, fontWeight: "700", color: colors.accent },
   swipeDelete: {
     backgroundColor: colors.error, justifyContent: "center", alignItems: "center",

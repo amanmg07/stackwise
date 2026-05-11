@@ -11,6 +11,7 @@ import CycleTrackerScreen from "../screens/cycle/CycleTrackerScreen";
 import NewCycleScreen from "../screens/cycle/NewCycleScreen";
 import LogDoseScreen from "../screens/cycle/LogDoseScreen";
 import CycleDetailScreen from "../screens/cycle/CycleDetailScreen";
+import OutcomeCheckInScreen from "../screens/cycle/OutcomeCheckInScreen";
 import JournalScreen from "../screens/journal/JournalScreen";
 import NewEntryScreen from "../screens/journal/NewEntryScreen";
 import ProtocolBuilderScreen from "../screens/protocol/ProtocolBuilderScreen";
@@ -56,6 +57,7 @@ function CycleNavigator() {
       <CycleStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
       <CycleStack.Screen name="LogDose" component={LogDoseScreen} options={{ title: "Log Dose" }} />
       <CycleStack.Screen name="CycleDetail" component={CycleDetailScreen} options={{ title: "Cycle Details" }} />
+      <CycleStack.Screen name="OutcomeCheckIn" component={OutcomeCheckInScreen} options={{ title: "Check-In" }} />
     </CycleStack.Navigator>
   );
 }

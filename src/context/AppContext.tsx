@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord, Bloodwork } from "../types";
+import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord, Bloodwork, CycleOutcome } from "../types";
 import {
   deleteCycleAnalytics,
   deleteDoseLogAnalytics,
   deleteJournalEntryAnalytics,
   deleteScanAnalytics,
+  deleteOutcomeAnalytics,
 } from "../services/analyticsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
@@ -37,6 +38,10 @@ interface AppState {
   // Bloodwork
   addBloodwork: (entry: Bloodwork) => void;
   deleteBloodwork: (id: string) => void;
+  // Cycle outcome check-ins (week 4/8/12/16)
+  outcomes: CycleOutcome[];
+  addOutcome: (entry: CycleOutcome) => void;
+  deleteOutcome: (id: string) => void;
   // Settings
   updateSettings: (settings: Partial<UserSettings>) => void;
   // Data
@@ -51,6 +56,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [scans, setScans] = useState<ScanRecord[]>([]);
   const [bloodwork, setBloodwork] = useState<Bloodwork[]>([]);
+  const [outcomes, setOutcomes] = useState<CycleOutcome[]>([]);
   const [settings, setSettings] = useState<UserSettings>({
     weightUnit: "lbs",
     notificationsEnabled: false,
@@ -73,18 +79,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Load local data first, then show the app immediately
     (async () => {
-      const [c, d, j, s, sc, bw] = await Promise.all([
+      const [c, d, j, s, sc, bw, oc] = await Promise.all([
         appStorage.loadCycles(),
         appStorage.loadDoseLogs(),
         appStorage.loadJournal(),
         appStorage.loadSettings(),
         appStorage.loadScans(),
         appStorage.loadBloodwork(),
+        appStorage.loadOutcomes(),
       ]);
       setCycles(c);
       setDoseLogs(d);
       setScans(sc);
       setBloodwork(bw);
+      setOutcomes(oc);
       // Migrate journal entries from 1-5 scale to 1-10 scale
       const needsMigration = j.some((e: any) => !e.scaleV2 || e.soreness !== undefined);
       const migrated = needsMigration
@@ -127,6 +135,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const persistJournal = useCallback((j: JournalEntry[]) => { setJournal(j); appStorage.saveJournal(j); }, []);
   const persistScans = useCallback((s: ScanRecord[]) => { setScans(s); appStorage.saveScans(s); }, []);
   const persistBloodwork = useCallback((b: Bloodwork[]) => { setBloodwork(b); appStorage.saveBloodwork(b); }, []);
+  const persistOutcomes = useCallback((o: CycleOutcome[]) => { setOutcomes(o); appStorage.saveOutcomes(o); }, []);
   const persistSettings = useCallback((s: UserSettings) => { setSettings(s); appStorage.saveSettings(s); }, []);
 
   const value: AppState = {
@@ -135,6 +144,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     journal,
     scans,
     bloodwork,
+    outcomes,
     settings,
     loading,
     userId,
@@ -181,6 +191,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addBloodwork: (entry) => persistBloodwork([entry, ...bloodwork]),
     deleteBloodwork: (id) => persistBloodwork(bloodwork.filter((b) => b.id !== id)),
 
+    addOutcome: (entry) => persistOutcomes([entry, ...outcomes]),
+    deleteOutcome: (id) => {
+      persistOutcomes(outcomes.filter((o) => o.id !== id));
+      deleteOutcomeAnalytics(id);
+    },
+
     updateSettings: (partial) => persistSettings({ ...settings, ...partial }),
 
     clearAllData: () => {
@@ -196,6 +212,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       persistJournal([]);
       persistScans([]);
       persistBloodwork([]);
+      persistOutcomes([]);
       appStorage.clearAll();
     },
   };

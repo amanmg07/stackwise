@@ -1,7 +1,7 @@
 import { supabase, getCurrentUserId } from "../utils/supabase";
 import { appStorage } from "../utils/storage";
 import * as Sentry from "@sentry/react-native";
-import { CyclePeptide, JournalEntry, AdministrationRoute, AdverseEvent, Bloodwork } from "../types";
+import { CyclePeptide, JournalEntry, AdministrationRoute, AdverseEvent, Bloodwork, CycleOutcome } from "../types";
 
 // Toggleable per-build: in __DEV__ we never write to the production
 // analytics tables, so dev/test sessions don't pollute the dataset.
@@ -140,6 +140,22 @@ export async function deleteJournalEntryAnalytics(journalEntryId: string): Promi
       .eq("event_type", "journal_entry")
       .eq("anon_id", userId)
       .filter("payload->>journal_entry_id", "eq", journalEntryId);
+  } catch (e) {
+    Sentry.captureException(e);
+  }
+}
+
+/** Cascade-delete the cycle_outcome event for a deleted check-in. */
+export async function deleteOutcomeAnalytics(outcomeId: string): Promise<void> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("event_type", "cycle_outcome")
+      .eq("anon_id", userId)
+      .filter("payload->>outcome_id", "eq", outcomeId);
   } catch (e) {
     Sentry.captureException(e);
   }
@@ -518,6 +534,28 @@ export function trackPeptideBookmarked(peptideId: string, action: "saved" | "rem
 
 export function trackChatQuestion(questionLength: number, activePeptideIds: string[]) {
   trackEvent("chat_question", { question_length: questionLength, active_peptide_ids: activePeptideIds });
+}
+
+/**
+ * Standardized outcome check-in at week 4 / 8 / 12 / 16 of a cycle.
+ * These structured-interval scores are what makes outcome data
+ * scientifically comparable across users — buyers can ask "what does
+ * week 8 of compound X look like" cleanly only because every user
+ * answers the same questions on the same schedule.
+ */
+export function trackOutcome(input: CycleOutcome) {
+  trackEvent("cycle_outcome", {
+    outcome_id: input.id,
+    cycle_id: input.cycleId,
+    week_number: input.weekNumber,
+    overall_score: input.overallScore,
+    goal_progress_score: input.goalProgressScore,
+    energy_score: input.energyScore,
+    recovery_score: input.recoveryScore,
+    would_repeat: input.wouldRepeat,
+    side_effects_reported: (input.sideEffectsReported || []).map(normalizeSideEffect),
+    side_effect_severity: input.sideEffectSeverity,
+  });
 }
 
 /**

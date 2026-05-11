@@ -79,6 +79,33 @@ export interface DoseLog {
   notes?: string;
 }
 
+/** Standardized check-in week numbers per the Architecture Spec. */
+export type OutcomeWeek = 4 | 8 | 12 | 16;
+export const OUTCOME_WEEKS: readonly OutcomeWeek[] = [4, 8, 12, 16] as const;
+
+/**
+ * Structured outcome check-in collected at a fixed cycle milestone
+ * (week 4 / 8 / 12 / 16). These standardized intervals are what make
+ * outcome data scientifically comparable across users — a buyer can
+ * ask "what does week 8 of BPC-157 look like?" cleanly only because
+ * every user answers the same questions on the same schedule.
+ */
+export interface CycleOutcome {
+  id: string;
+  cycleId: string;
+  weekNumber: OutcomeWeek;
+  overallScore: number;        // 1-10
+  goalProgressScore: number;   // 1-10
+  energyScore: number;         // 1-10
+  recoveryScore: number;       // 1-10
+  wouldRepeat: boolean;
+  /** Side effects experienced this period (raw labels, normalized for analytics). */
+  sideEffectsReported: string[];
+  sideEffectSeverity: "none" | "mild" | "moderate" | "severe";
+  notes: string;
+  createdAt: string;
+}
+
 export type AdverseEventSeverity = "mild" | "moderate" | "severe";
 export type AdverseEventDuration = "<1d" | "1-3d" | "4-7d" | "1+wk";
 
