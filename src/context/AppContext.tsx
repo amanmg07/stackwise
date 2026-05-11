@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord, Bloodwork } from "../types";
-import { deleteCycleAnalytics } from "../services/analyticsService";
+import {
+  deleteCycleAnalytics,
+  deleteDoseLogAnalytics,
+  deleteJournalEntryAnalytics,
+  deleteScanAnalytics,
+} from "../services/analyticsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
 import { ensureAuth } from "../utils/supabase";
@@ -145,11 +150,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
 
     addDoseLog: (log) => persistLogs([log, ...doseLogs]),
-    deleteDoseLog: (id) => persistLogs(doseLogs.filter((l) => l.id !== id)),
+    deleteDoseLog: (id) => {
+      persistLogs(doseLogs.filter((l) => l.id !== id));
+      // Cascade so a mistake-deleted dose isn't permanent in the buyer dataset.
+      deleteDoseLogAnalytics(id);
+    },
 
     addJournalEntry: (entry) => persistJournal([entry, ...journal]),
     updateJournalEntry: (entry) => persistJournal(journal.map((e) => (e.id === entry.id ? entry : e))),
-    deleteJournalEntry: (id) => persistJournal(journal.filter((e) => e.id !== id)),
+    deleteJournalEntry: (id) => {
+      persistJournal(journal.filter((e) => e.id !== id));
+      deleteJournalEntryAnalytics(id);
+    },
 
     addScan: (scan) => persistScans([scan, ...scans]),
     deleteScan: (id) => {
@@ -163,6 +175,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
       persistScans(scans.filter((s) => s.id !== id));
+      deleteScanAnalytics(id);
     },
 
     addBloodwork: (entry) => persistBloodwork([entry, ...bloodwork]),

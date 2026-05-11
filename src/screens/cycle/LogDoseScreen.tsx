@@ -69,8 +69,9 @@ export default function LogDoseScreen({ route, navigation }: any) {
       Alert.alert("Invalid dose", "Please enter a dose amount greater than zero.");
       return;
     }
+    const doseLogId = generateId();
     addDoseLog({
-      id: generateId(),
+      id: doseLogId,
       cycleId,
       peptideId: initPeptideId,
       amount: parsed,
@@ -81,6 +82,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
       notes: notes || undefined,
     });
     trackDoseLogged({
+      doseLogId,
       cycleId,
       peptideId: initPeptideId,
       amount: parsed,

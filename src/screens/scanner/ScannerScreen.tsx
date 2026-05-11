@@ -283,7 +283,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             },
           });
           if (Platform.OS === "ios") setImageUri(savedPath);
-          trackScanCompleted(parsed.recommendedCategories || []);
+          trackScanCompleted(id, parsed.recommendedCategories || []);
           await trackUsage("self_scan");
           usage.refresh();
         } catch (e) {

@@ -113,6 +113,54 @@ export async function deleteCycleAnalytics(cycleId: string): Promise<void> {
   }
 }
 
+/** Cascade-delete the single dose_logged event for a deleted dose log. */
+export async function deleteDoseLogAnalytics(doseLogId: string): Promise<void> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("event_type", "dose_logged")
+      .eq("anon_id", userId)
+      .filter("payload->>dose_log_id", "eq", doseLogId);
+  } catch (e) {
+    Sentry.captureException(e);
+  }
+}
+
+/** Cascade-delete the single journal_entry event for a deleted journal entry. */
+export async function deleteJournalEntryAnalytics(journalEntryId: string): Promise<void> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("event_type", "journal_entry")
+      .eq("anon_id", userId)
+      .filter("payload->>journal_entry_id", "eq", journalEntryId);
+  } catch (e) {
+    Sentry.captureException(e);
+  }
+}
+
+/** Cascade-delete scan_completed + scan_compared events for a deleted scan. */
+export async function deleteScanAnalytics(scanId: string): Promise<void> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .in("event_type", ["scan_completed", "scan_compared"])
+      .eq("anon_id", userId)
+      .filter("payload->>scan_id", "eq", scanId);
+  } catch (e) {
+    Sentry.captureException(e);
+  }
+}
+
 /**
  * Upsert the user's anonymous profile (demographics) to Supabase.
  * Called once after the demographics screen.
@@ -358,6 +406,7 @@ export function trackCycleEnded(input: CycleEndedInput) {
 }
 
 interface DoseLoggedInput {
+  doseLogId: string;
   cycleId: string;
   peptideId: string;
   amount: number;
@@ -368,6 +417,7 @@ interface DoseLoggedInput {
 
 export function trackDoseLogged(input: DoseLoggedInput) {
   trackEvent("dose_logged", {
+    dose_log_id: input.doseLogId,
     cycle_id: input.cycleId,
     peptide_id: input.peptideId,
     amount: input.amount,
@@ -378,6 +428,7 @@ export function trackDoseLogged(input: DoseLoggedInput) {
 }
 
 interface JournalEntryInput {
+  journalEntryId: string;
   cycleId?: string;
   sleepQuality: number;
   energyLevel: number;
@@ -408,6 +459,7 @@ export function trackJournalEntry(input: JournalEntryInput) {
     };
   });
   trackEvent("journal_entry", {
+    journal_entry_id: input.journalEntryId,
     cycle_id: input.cycleId,
     sleepQuality: input.sleepQuality,
     energyLevel: input.energyLevel,
@@ -427,11 +479,16 @@ export function trackJournalEntry(input: JournalEntryInput) {
   });
 }
 
-export function trackScanCompleted(recommendedCategories: string[]) {
-  trackEvent("scan_completed", { recommended_categories: recommendedCategories });
+export function trackScanCompleted(scanId: string, recommendedCategories: string[]) {
+  trackEvent("scan_completed", {
+    scan_id: scanId,
+    recommended_categories: recommendedCategories,
+  });
 }
 
 export function trackScanCompared(data: {
+  scanId: string;
+  earlierScanId?: string;
   daysBetween: number;
   changesImproved: number;
   changesWorsened: number;
@@ -439,7 +496,16 @@ export function trackScanCompared(data: {
   workingPeptideIds: string[];
   recommendedCategories: string[];
 }) {
-  trackEvent("scan_compared", data);
+  trackEvent("scan_compared", {
+    scan_id: data.scanId,
+    earlier_scan_id: data.earlierScanId,
+    daysBetween: data.daysBetween,
+    changesImproved: data.changesImproved,
+    changesWorsened: data.changesWorsened,
+    changesUnchanged: data.changesUnchanged,
+    workingPeptideIds: data.workingPeptideIds,
+    recommendedCategories: data.recommendedCategories,
+  });
 }
 
 export function trackPeptideViewed(peptideId: string) {

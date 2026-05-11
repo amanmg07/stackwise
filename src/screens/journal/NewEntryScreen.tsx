@@ -175,6 +175,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
     if (existing) {
       updateJournalEntry(entry);
       trackJournalEntry({
+        journalEntryId: entry.id,
         cycleId: activeCycle?.id,
         sleepQuality,
         energyLevel,
@@ -195,6 +196,7 @@ export default function NewEntryScreen({ route, navigation }: any) {
     } else {
       addJournalEntry(entry);
       trackJournalEntry({
+        journalEntryId: entry.id,
         cycleId: activeCycle?.id,
         sleepQuality,
         energyLevel,

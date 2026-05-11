@@ -33,6 +33,8 @@ export default function ScanCompareScreen({ route, navigation }: any) {
         const result = await compareScans(earlier, later, activeCycle, settings.gender);
         setComparison(result);
         trackScanCompared({
+          scanId: laterScanId,
+          earlierScanId,
           daysBetween,
           changesImproved: result.changes.filter((c) => c.direction === "improved").length,
           changesWorsened: result.changes.filter((c) => c.direction === "worsened").length,
