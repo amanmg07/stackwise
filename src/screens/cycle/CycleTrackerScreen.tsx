@@ -4,7 +4,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
-import { colors, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
+import { colors, highlights, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
 import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
 import { trackCycleEnded } from "../../services/analyticsService";
 import { OUTCOME_WEEKS, OutcomeWeek, CycleEndReason } from "../../types";
@@ -16,12 +16,17 @@ export default function CycleTrackerScreen({ navigation }: any) {
   if (!activeCycle) {
     return (
       <View style={emptyStateStyle.container}>
-        <View style={emptyStateStyle.icon}>
-          <Ionicons name="repeat-outline" size={44} color={colors.accent} />
+        <View style={emptyStateStyle.iconHalo}>
+          <View style={emptyStateStyle.icon}>
+            <Ionicons name="repeat-outline" size={44} color={colors.accent} />
+          </View>
         </View>
-        <Text style={emptyStateStyle.title}>No Active Cycle</Text>
+        <Text style={emptyStateStyle.title}>Ready when you are</Text>
         <Text style={emptyStateStyle.subtitle}>
-          Start a new cycle to track your peptide protocol and log daily doses
+          Start a new cycle to track your protocol, log doses, and see how it's working.
+        </Text>
+        <Text style={emptyStateStyle.hint}>
+          Tip: try a pre-built protocol from the Home tab for a quick start.
         </Text>
         <TouchableOpacity
           style={emptyStateStyle.button}
@@ -375,7 +380,8 @@ const styles = StyleSheet.create({
     height: 8, backgroundColor: colors.surface, borderRadius: 4, overflow: "hidden",
     borderWidth: 1, borderColor: colors.border,
   },
-  progressFill: { height: 8, backgroundColor: colors.accent, borderRadius: 4 },
+  // PALETTE_V2: yellow progress fill for warmth + achievement feel.
+  progressFill: { height: 8, backgroundColor: highlights.yellow, borderRadius: 4 },
   progressText: { fontSize: 12, color: colors.textSecondary, marginTop: 6 },
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
@@ -399,10 +405,11 @@ const styles = StyleSheet.create({
   logName: { fontSize: 14, fontWeight: "600", color: colors.text },
   logMeta: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   logTime: { fontSize: 12, color: colors.textSecondary },
+  // PALETTE_V2: red tint for the end-cycle CTA — striking but not garish.
   endBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    backgroundColor: colors.accent + "15", borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16,
-    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: spacing.md,
+    backgroundColor: highlights.red + "15", borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16,
+    borderWidth: 1, borderColor: highlights.red + "40", marginBottom: spacing.md,
   },
   checkInBanner: {
     flexDirection: "row", alignItems: "center", gap: 12,
@@ -411,7 +418,8 @@ const styles = StyleSheet.create({
   },
   checkInBannerTitle: { fontSize: 14, fontWeight: "700", color: colors.accent },
   checkInBannerDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2, lineHeight: 17 },
-  endBtnText: { fontSize: 13, fontWeight: "700", color: colors.accent },
+  // PALETTE_V2
+  endBtnText: { fontSize: 13, fontWeight: "700", color: highlights.red },
   swipeDelete: {
     backgroundColor: colors.error, justifyContent: "center", alignItems: "center",
     width: 80, borderRadius: 10, marginBottom: 8,

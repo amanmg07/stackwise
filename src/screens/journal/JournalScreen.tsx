@@ -545,12 +545,17 @@ export default function JournalScreen({ navigation }: any) {
         </>}
         ListEmptyComponent={
           <View style={{ alignItems: "center", paddingTop: 80, paddingHorizontal: spacing.xl }}>
-            <View style={emptyStateStyle.icon}>
-              <Ionicons name="book-outline" size={44} color={colors.accent} />
+            <View style={emptyStateStyle.iconHalo}>
+              <View style={emptyStateStyle.icon}>
+                <Ionicons name="book-outline" size={44} color={colors.accent} />
+              </View>
             </View>
-            <Text style={emptyStateStyle.title}>No Entries Yet</Text>
+            <Text style={emptyStateStyle.title}>Your story starts here</Text>
             <Text style={emptyStateStyle.subtitle}>
-              Start logging your daily metrics — after a few entries, StackWise will analyze your trends and recommend peptides & supplements tailored to you.
+              Log how you feel today, and StackWise will start spotting trends across your protocol.
+            </Text>
+            <Text style={emptyStateStyle.hint}>
+              Tip: log 5+ days to unlock trend insights and tailored recommendations.
             </Text>
           </View>
         }

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, Li
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
-import { colors, spacing, safeBottom } from "../../theme";
+import { colors, highlights, spacing, safeBottom, inlineEmptyStyle } from "../../theme";
 import { syncResearchConsent } from "../../services/analyticsService";
 import { exportUserData, deleteServerData } from "../../utils/supabase";
 import {
@@ -289,7 +289,14 @@ export default function ProfileScreen({ navigation }: any) {
       {/* Saved Peptides */}
       <Text style={styles.sectionTitle}>Saved for Later</Text>
       {(!settings.savedPeptides || settings.savedPeptides.length === 0) ? (
-        <Text style={styles.emptyText}>No saved peptides — tap the bookmark on any peptide to save it</Text>
+        <View style={inlineEmptyStyle.container}>
+          <View style={inlineEmptyStyle.iconWrap}>
+            <Ionicons name="bookmark-outline" size={20} color={colors.accent} />
+          </View>
+          <Text style={inlineEmptyStyle.text}>
+            Nothing saved yet. Tap the bookmark icon on any compound to keep it here for later.
+          </Text>
+        </View>
       ) : (
         settings.savedPeptides.map((id) => {
           const pep = peptideDB.find((p) => p.id === id);
@@ -318,7 +325,14 @@ export default function ProfileScreen({ navigation }: any) {
       <Text style={styles.sectionTitle}>Cycle History</Text>
 
       {cycles.length === 0 ? (
-        <Text style={styles.emptyText}>No cycles yet</Text>
+        <View style={inlineEmptyStyle.container}>
+          <View style={inlineEmptyStyle.iconWrap}>
+            <Ionicons name="repeat-outline" size={20} color={colors.accent} />
+          </View>
+          <Text style={inlineEmptyStyle.text}>
+            No cycles yet. Your protocol history will show up here once you start tracking.
+          </Text>
+        </View>
       ) : (
         cycles.map((c) => (
           <TouchableOpacity
@@ -408,7 +422,8 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     alignItems: "center", borderWidth: 1, borderColor: colors.border,
   },
-  statNum: { fontSize: 22, fontWeight: "800", color: colors.accent },
+  // PALETTE_V2: pure white hero number for sharper emphasis.
+  statNum: { fontSize: 22, fontWeight: "800", color: highlights.white },
   statLabel: { fontSize: 11, color: colors.textSecondary, marginTop: 4 },
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
