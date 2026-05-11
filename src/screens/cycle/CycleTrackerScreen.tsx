@@ -96,6 +96,45 @@ export default function CycleTrackerScreen({ navigation }: any) {
     .filter((l) => l.cycleId === activeCycle.id)
     .slice(0, 10);
 
+  // End-cycle flow extracted so the delete-redirect "End Cycle"
+  // button can reuse it without showing the initial "End Cycle?"
+  // confirm a second time. promptReasonAndFinalize() goes straight
+  // to the reason picker (or silently finalizes 'completed' if the
+  // cycle has already passed its planned end).
+  const promptReasonAndFinalize = () => {
+    const now = new Date();
+    const plannedEnd = parseISO(activeCycle.endDate + "T00:00:00");
+    const endingEarly = now < plannedEnd;
+    const finalize = (reason: CycleEndReason) => {
+      const endDate = now.toISOString().split("T")[0];
+      const durationDays = differenceInCalendarDays(now, parseISO(activeCycle.startDate));
+      const plannedDays = Math.max(
+        differenceInDays(parseISO(activeCycle.endDate + "T00:00:00"), parseISO(activeCycle.startDate + "T00:00:00")),
+        1,
+      );
+      updateCycle({ ...activeCycle, isActive: false, endDate });
+      trackCycleEnded({
+        cycleId: activeCycle.id,
+        peptideIds: activeCycle.peptides.map((p) => p.peptideId),
+        durationDays,
+        reason,
+        expectedDays: plannedDays,
+        completedDays,
+        totalDosesLogged: cycleLogs.length,
+      });
+    };
+    if (!endingEarly) {
+      finalize("completed");
+      return;
+    }
+    Alert.alert("Why are you ending early?", "Picking a reason helps you and other users learn what works.", [
+      { text: "Side effects", onPress: () => finalize("side_effects") },
+      { text: "Goal achieved", onPress: () => finalize("goal_achieved") },
+      { text: "Cost", onPress: () => finalize("cost") },
+      { text: "Other", onPress: () => finalize("other") },
+    ]);
+  };
+
   return (
     <FlatList
       style={styles.container}
@@ -115,14 +154,33 @@ export default function CycleTrackerScreen({ navigation }: any) {
             <TouchableOpacity
               style={styles.deleteBtn}
               onPress={() => {
-                Alert.alert(
-                  "Delete Cycle",
-                  `Delete "${activeCycle.name}"? This will remove the cycle and all its data. This cannot be undone.`,
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Delete", style: "destructive", onPress: () => deleteCycle(activeCycle.id) },
-                  ]
-                );
+                const hasActivity = cycleLogs.length > 0;
+                const doDelete = () =>
+                  Alert.alert(
+                    "Delete Cycle",
+                    `Delete "${activeCycle.name}"? This will remove the cycle and all its data. This cannot be undone.`,
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Delete", style: "destructive", onPress: () => deleteCycle(activeCycle.id) },
+                    ]
+                  );
+
+                // If the cycle has dose logs, the user probably meant
+                // End Cycle (preserves history + records a reason).
+                // Surface that option before letting them destroy data.
+                if (hasActivity) {
+                  Alert.alert(
+                    "Stop tracking this cycle?",
+                    `"${activeCycle.name}" has ${cycleLogs.length} dose ${cycleLogs.length === 1 ? "log" : "logs"}. Did you mean to end it instead? "End Cycle" preserves your history; "Delete" permanently erases everything.`,
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "End Cycle", onPress: promptReasonAndFinalize },
+                      { text: "Delete", style: "destructive", onPress: doDelete },
+                    ]
+                  );
+                } else {
+                  doDelete();
+                }
               }}
             >
               <Ionicons name="trash-outline" size={20} color={colors.error} />
@@ -154,52 +212,12 @@ export default function CycleTrackerScreen({ navigation }: any) {
           <TouchableOpacity
             style={styles.endBtn}
             onPress={() => {
-              const now = new Date();
-              const plannedEnd = parseISO(activeCycle.endDate + "T00:00:00");
-              const endingEarly = now < plannedEnd;
-
-              const finalize = (reason: CycleEndReason) => {
-                const endDate = now.toISOString().split("T")[0];
-                const durationDays = differenceInCalendarDays(now, parseISO(activeCycle.startDate));
-                const plannedDays = Math.max(
-                  differenceInDays(parseISO(activeCycle.endDate + "T00:00:00"), parseISO(activeCycle.startDate + "T00:00:00")),
-                  1,
-                );
-                updateCycle({ ...activeCycle, isActive: false, endDate });
-                trackCycleEnded({
-                  cycleId: activeCycle.id,
-                  peptideIds: activeCycle.peptides.map((p) => p.peptideId),
-                  durationDays,
-                  reason,
-                  expectedDays: plannedDays,
-                  completedDays,
-                  totalDosesLogged: cycleLogs.length,
-                });
-              };
-
-              // First confirmation. If the cycle hit its planned end,
-              // we silently mark it completed — no need to ask why.
               Alert.alert(
                 "End Cycle",
                 `End "${activeCycle.name}"? It will be marked as completed with today's date.`,
                 [
                   { text: "Cancel", style: "cancel" },
-                  {
-                    text: "End Cycle",
-                    onPress: () => {
-                      if (!endingEarly) {
-                        finalize("completed");
-                        return;
-                      }
-                      // Early stop — ask why so the data is meaningful.
-                      Alert.alert("Why are you ending early?", "Picking a reason helps you and other users learn what works.", [
-                        { text: "Side effects", onPress: () => finalize("side_effects") },
-                        { text: "Goal achieved", onPress: () => finalize("goal_achieved") },
-                        { text: "Cost", onPress: () => finalize("cost") },
-                        { text: "Other", onPress: () => finalize("other") },
-                      ]);
-                    },
-                  },
+                  { text: "End Cycle", onPress: promptReasonAndFinalize },
                 ]
               );
             }}
