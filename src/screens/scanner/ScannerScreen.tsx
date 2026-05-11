@@ -9,7 +9,7 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { useApp } from "../../context/AppContext";
 import { generateId } from "../../utils/id";
 import { saveScanImage } from "../../utils/scanImages";
-import { colors, spacing, safeTop, safeBottom } from "../../theme";
+import { colors, highlights, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
 import { trackScanCompleted, trackCycleCreated, computeBaseline } from "../../services/analyticsService";

@@ -545,10 +545,8 @@ export default function JournalScreen({ navigation }: any) {
         </>}
         ListEmptyComponent={
           <View style={{ alignItems: "center", paddingTop: 80, paddingHorizontal: spacing.xl }}>
-            <View style={emptyStateStyle.iconHalo}>
-              <View style={emptyStateStyle.icon}>
-                <Ionicons name="book-outline" size={44} color={colors.accent} />
-              </View>
+            <View style={emptyStateStyle.icon}>
+              <Ionicons name="book-outline" size={44} color={colors.accent} />
             </View>
             <Text style={emptyStateStyle.title}>Your story starts here</Text>
             <Text style={emptyStateStyle.subtitle}>

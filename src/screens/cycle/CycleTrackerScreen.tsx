@@ -16,10 +16,8 @@ export default function CycleTrackerScreen({ navigation }: any) {
   if (!activeCycle) {
     return (
       <View style={emptyStateStyle.container}>
-        <View style={emptyStateStyle.iconHalo}>
-          <View style={emptyStateStyle.icon}>
-            <Ionicons name="repeat-outline" size={44} color={colors.accent} />
-          </View>
+        <View style={emptyStateStyle.icon}>
+          <Ionicons name="repeat-outline" size={44} color={colors.accent} />
         </View>
         <Text style={emptyStateStyle.title}>Ready when you are</Text>
         <Text style={emptyStateStyle.subtitle}>

@@ -8,7 +8,7 @@ import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { sendChatMessage } from "../../services/chatService";
 import { generateId } from "../../utils/id";
-import { colors, spacing } from "../../theme";
+import { colors, highlights, spacing } from "../../theme";
 import { ChatMessage } from "../../types";
 import { appStorage } from "../../utils/storage";
 import { trackChatQuestion } from "../../services/analyticsService";

@@ -89,7 +89,7 @@ export default function ResearchConsentScreen({ onDecided }: Props) {
             <ActivityIndicator color={colors.background} />
           ) : (
             <>
-              <Text style={styles.acceptBtnText}>Yes, share my data</Text>
+              <Text style={styles.acceptBtnText}>I agree</Text>
               <Ionicons name="arrow-forward" size={18} color={colors.background} />
             </>
           )}

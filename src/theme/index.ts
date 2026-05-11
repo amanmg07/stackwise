@@ -61,19 +61,6 @@ export const emptyStateStyle = {
     padding: spacing.xl,
     paddingTop: safeTop,
   },
-  // Outer halo ring around the icon — subtle accent glow so the
-  // empty state feels intentional, not bare.
-  iconHalo: {
-    width: 144,
-    height: 144,
-    borderRadius: 72,
-    backgroundColor: colors.accent + "0a",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.accent + "1a",
-  },
   icon: {
     width: 100,
     height: 100,
@@ -81,6 +68,7 @@ export const emptyStateStyle = {
     backgroundColor: colors.surface,
     alignItems: "center" as const,
     justifyContent: "center" as const,
+    marginBottom: spacing.lg,
     borderWidth: 1,
     borderColor: colors.border,
   },

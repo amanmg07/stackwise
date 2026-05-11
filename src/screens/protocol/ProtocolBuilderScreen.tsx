@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Platform, Animated, Easing } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useApp } from "../../context/AppContext";
-import { colors, spacing, safeTop, safeBottom } from "../../theme";
+import { colors, highlights, spacing, safeTop, safeBottom } from "../../theme";
 import { AdministrationRoute } from "../../types";
 import GlassCard from "../../components/GlassCard";
 
@@ -31,6 +32,22 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   const userGoals = settings.goals || [];
   const selectedRoutes = settings.preferredRoutes ?? ROUTES.map((r) => r.key);
 
+  // Gentle infinite pulse on the Self Scan button — flags it as the
+  // marquee feature without being distracting. Scale 1 → 1.04 → 1
+  // over ~1.6s using native driver.
+  const pulse = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+  const scale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
+
   const toggleRoute = (route: AdministrationRoute) => {
     const updated = selectedRoutes.includes(route)
       ? selectedRoutes.filter((r) => r !== route)
@@ -45,7 +62,6 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         <View style={{ width: 32 }} />
         <View style={styles.headerCenter}>
           <Image source={require("../../../assets/logo.png")} style={styles.headerLogo} />
-          <Text style={styles.welcome}>StackWise</Text>
         </View>
         <TouchableOpacity
           style={styles.profileBtn}
@@ -139,47 +155,32 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         <Text style={styles.buildBtnText}>View Recommended Protocols</Text>
       </TouchableOpacity>
 
-      {/* Quick links */}
-      <Text style={[styles.sectionTitle, { marginTop: 32, marginBottom: 16 }]}>Or explore on your own</Text>
-      <TouchableOpacity onPress={() => navigation.navigate("ExploreTab")} activeOpacity={0.7}>
-        <GlassCard style={styles.linkRow}>
-          <Ionicons name="compass-outline" size={20} color={colors.accent} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.linkTitle}>Explore Peptides</Text>
-            <Text style={styles.linkDesc}>Chat with AI or browse the full database</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-        </GlassCard>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("NewCycle")} activeOpacity={0.7}>
-        <GlassCard style={styles.linkRow}>
-          <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.linkTitle}>Build Custom Cycle</Text>
-            <Text style={styles.linkDesc}>Skip recommendations and pick your own peptides</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-        </GlassCard>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("ReconCalculator")} activeOpacity={0.7}>
-        <GlassCard style={styles.linkRow}>
-          <Ionicons name="calculator-outline" size={20} color={colors.accent} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.linkTitle}>Dosing Calculator</Text>
-            <Text style={styles.linkDesc}>Calculate exactly how much to draw on your syringe</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-        </GlassCard>
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale }], marginTop: 12, borderRadius: 14, overflow: "hidden" }}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ScannerTab")}
+          activeOpacity={0.85}
+        >
+          <LinearGradient
+            colors={["rgba(252,211,77,0.08)", "rgba(245,158,11,0.32)"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.selfScanBtn}
+          >
+            <Ionicons name="scan-outline" size={20} color={highlights.yellow} />
+            <Text style={styles.selfScanBtnText}>Self Scan</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
+
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: safeTop },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 8, marginBottom: 24 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 8, marginBottom: 8 },
   headerCenter: { alignItems: "center", flex: 1 },
-  headerLogo: { width: 100, height: 100, resizeMode: "contain" },
+  headerLogo: { width: 140, height: 140, resizeMode: "contain" },
   profileBtn: { padding: 4 },
   welcome: { fontSize: 24, fontWeight: "900", color: colors.accent, letterSpacing: -0.5 },
   activeCycleCard: {
@@ -224,6 +225,13 @@ const styles = StyleSheet.create({
   },
   buildBtnDisabled: { opacity: 0.4 },
   buildBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
+  selfScanBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    padding: 18,
+  },
+  // Bright yellow text + icon on the translucent tint — looks like
+  // yellow glass over the dark surface.
+  selfScanBtnText: { fontSize: 16, fontWeight: "700", color: "#fcd34d" },
   linkRow: {
     flexDirection: "row", alignItems: "center", gap: 14,
     borderRadius: 14, padding: 16, marginBottom: 8,
