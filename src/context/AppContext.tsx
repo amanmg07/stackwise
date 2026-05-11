@@ -6,6 +6,7 @@ import {
   deleteJournalEntryAnalytics,
   deleteScanAnalytics,
   deleteOutcomeAnalytics,
+  deleteBloodworkAnalytics,
 } from "../services/analyticsService";
 import {
   scheduleOutcomeReminders,
@@ -203,7 +204,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
 
     addBloodwork: (entry) => persistBloodwork([entry, ...bloodwork]),
-    deleteBloodwork: (id) => persistBloodwork(bloodwork.filter((b) => b.id !== id)),
+    deleteBloodwork: (id) => {
+      persistBloodwork(bloodwork.filter((b) => b.id !== id));
+      deleteBloodworkAnalytics(id);
+    },
 
     addOutcome: (entry) => {
       persistOutcomes([entry, ...outcomes]);

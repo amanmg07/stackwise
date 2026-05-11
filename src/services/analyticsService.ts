@@ -145,6 +145,22 @@ export async function deleteJournalEntryAnalytics(journalEntryId: string): Promi
   }
 }
 
+/** Cascade-delete the bloodwork_logged event for a deleted bloodwork entry. */
+export async function deleteBloodworkAnalytics(bloodworkId: string): Promise<void> {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("event_type", "bloodwork_logged")
+      .eq("anon_id", userId)
+      .filter("payload->>bloodwork_id", "eq", bloodworkId);
+  } catch (e) {
+    Sentry.captureException(e);
+  }
+}
+
 /** Cascade-delete the cycle_outcome event for a deleted check-in. */
 export async function deleteOutcomeAnalytics(outcomeId: string): Promise<void> {
   try {
