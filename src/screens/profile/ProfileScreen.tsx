@@ -223,7 +223,7 @@ export default function ProfileScreen({ navigation }: any) {
       </TouchableOpacity>
 
       <View style={styles.consentRow}>
-        <View style={styles.settingLeft}>
+        <View style={[styles.settingLeft, { flex: 1, marginRight: 12 }]}>
           <Ionicons name="flask-outline" size={20} color={colors.text} />
           <View style={{ flex: 1 }}>
             <Text style={styles.settingLabel}>Share research data</Text>
@@ -232,15 +232,17 @@ export default function ProfileScreen({ navigation }: any) {
             </Text>
           </View>
         </View>
-        <Switch
-          value={settings.researchDataConsent}
-          onValueChange={(next) => {
-            updateSettings({ researchDataConsent: next, researchConsentDecided: true });
-            syncResearchConsent(next);
-          }}
-          trackColor={{ false: colors.border, true: colors.accent }}
-          thumbColor={colors.text}
-        />
+        <View style={styles.switchWrap}>
+          <Switch
+            value={settings.researchDataConsent}
+            onValueChange={(next) => {
+              updateSettings({ researchDataConsent: next, researchConsentDecided: true });
+              syncResearchConsent(next);
+            }}
+            trackColor={{ false: colors.border, true: colors.success }}
+            thumbColor={colors.text}
+          />
+        </View>
       </View>
 
       {/* Saved Peptides */}
@@ -386,6 +388,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, marginBottom: 8,
   },
   consentSubtext: { fontSize: 12, color: colors.textSecondary, marginTop: 2, lineHeight: 16 },
+  switchWrap: { alignItems: "center", justifyContent: "center" },
   cycleRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
