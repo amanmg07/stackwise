@@ -36,7 +36,18 @@ export default {
     web: {
       favicon: "./assets/favicon.png",
     },
-    plugins: ["@sentry/react-native"],
+    plugins: [
+      "@sentry/react-native",
+      [
+        "expo-notifications",
+        {
+          // Default icon shown in the system notification tray.
+          // Falls back to the app icon if not set.
+          icon: "./assets/icon.png",
+          color: "#0a0a0a",
+        },
+      ],
+    ],
     extra: {},
   },
 };

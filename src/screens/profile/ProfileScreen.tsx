@@ -6,6 +6,11 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeBottom } from "../../theme";
 import { syncResearchConsent } from "../../services/analyticsService";
 import { exportUserData, deleteServerData } from "../../utils/supabase";
+import {
+  requestNotificationPermission,
+  scheduleDailyReminder,
+  cancelDailyReminder,
+} from "../../services/notificationsService";
 import * as FileSystem from "expo-file-system";
 import { Share } from "react-native";
 
@@ -184,12 +189,48 @@ export default function ProfileScreen({ navigation }: any) {
         <Text style={styles.settingValue}>{settings.weightUnit}</Text>
       </TouchableOpacity>
 
-      <View style={styles.settingRow}>
-        <View style={styles.settingLeft}>
+      <View style={styles.consentRow}>
+        <View style={[styles.settingLeft, { flex: 1, marginRight: 12 }]}>
           <Ionicons name="notifications-outline" size={20} color={colors.text} />
-          <Text style={styles.settingLabel}>Reminders</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.settingLabel}>Daily reminder</Text>
+            <Text style={styles.consentSubtext}>
+              {settings.notificationsEnabled
+                ? `Pings you at ${settings.reminderTimes?.[0] || "8:00 PM"}`
+                : "Off — turn on to get a daily nudge to log doses & journal"}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.comingSoon}>Coming Soon</Text>
+        <View style={styles.switchWrap}>
+          <Switch
+            value={settings.notificationsEnabled}
+            onValueChange={async (next) => {
+              if (next) {
+                const granted = await requestNotificationPermission();
+                if (!granted) {
+                  Alert.alert(
+                    "Permission denied",
+                    "Enable notifications for StackWise in iOS Settings to receive reminders.",
+                  );
+                  return;
+                }
+                // Default 8 PM; users can change in a future settings flow.
+                const time = settings.reminderTimes?.[0] || "20:00";
+                const [h, m] = time.split(":").map((s) => parseInt(s, 10));
+                await scheduleDailyReminder(h || 20, m || 0);
+                updateSettings({
+                  notificationsEnabled: true,
+                  reminderTimes: [time],
+                });
+              } else {
+                await cancelDailyReminder();
+                updateSettings({ notificationsEnabled: false });
+              }
+            }}
+            trackColor={{ false: colors.border, true: colors.success }}
+            thumbColor={colors.text}
+          />
+        </View>
       </View>
 
       <TouchableOpacity

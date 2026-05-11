@@ -7,6 +7,11 @@ import {
   deleteScanAnalytics,
   deleteOutcomeAnalytics,
 } from "../services/analyticsService";
+import {
+  scheduleOutcomeReminders,
+  cancelOutcomeRemindersForCycle,
+  cancelOutcomeReminder,
+} from "../services/notificationsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
 import { ensureAuth } from "../utils/supabase";
@@ -149,7 +154,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     loading,
     userId,
 
-    addCycle: (cycle) => persistCycles([cycle, ...cycles]),
+    addCycle: (cycle) => {
+      persistCycles([cycle, ...cycles]);
+      // Auto-schedule the four outcome check-in reminders for this
+      // cycle. No-op if user hasn't granted notification permission.
+      scheduleOutcomeReminders(cycle);
+    },
     updateCycle: (cycle) => persistCycles(cycles.map((c) => (c.id === cycle.id ? cycle : c))),
     deleteCycle: (id) => {
       persistCycles(cycles.filter((c) => c.id !== id));
@@ -157,6 +167,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Cascade to server-side events so a mistake-deleted cycle
       // never reaches the buyer-facing dataset.
       deleteCycleAnalytics(id);
+      // Also cancel any pending outcome reminders for this cycle.
+      cancelOutcomeRemindersForCycle(id);
     },
 
     addDoseLog: (log) => persistLogs([log, ...doseLogs]),
@@ -191,7 +203,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addBloodwork: (entry) => persistBloodwork([entry, ...bloodwork]),
     deleteBloodwork: (id) => persistBloodwork(bloodwork.filter((b) => b.id !== id)),
 
-    addOutcome: (entry) => persistOutcomes([entry, ...outcomes]),
+    addOutcome: (entry) => {
+      persistOutcomes([entry, ...outcomes]);
+      // User completed this milestone — cancel its scheduled reminder.
+      cancelOutcomeReminder(entry.cycleId, entry.weekNumber);
+    },
     deleteOutcome: (id) => {
       persistOutcomes(outcomes.filter((o) => o.id !== id));
       deleteOutcomeAnalytics(id);
