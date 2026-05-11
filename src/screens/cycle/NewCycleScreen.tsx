@@ -11,7 +11,7 @@ import { protocolTemplates } from "../../data/protocolTemplates";
 import { trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
-import { CyclePeptide, AdministrationRoute, PeptideCategory } from "../../types";
+import { CyclePeptide, AdministrationRoute, PeptideCategory, Goal } from "../../types";
 import { parseDurationWeeks } from "../../utils/duration";
 
 const CATEGORY_INFO: { key: PeptideCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
@@ -96,6 +96,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
   );
   const [nameManuallyEdited, setNameManuallyEdited] = useState(
     !!(editCycle?.name || template?.name || communityStack?.name)
+  );
+  // Per-cycle goal. Defaults: existing cycle's goal → template's first goal
+  // → user's first profile goal → undefined (user picks). PeptideCategory
+  // and Goal share their string values, so template.goals[0] is usable.
+  const [goal, setGoal] = useState<Goal | undefined>(
+    editCycle?.goal ||
+    (template?.goals?.[0] as Goal | undefined) ||
+    settings.goals?.[0],
   );
   const [showPicker, setShowPicker] = useState<false | "peptide" | "supplement">(false);
   const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
@@ -210,6 +218,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         peptides: cyclePeptides,
         endDate,
         notes: notes,
+        goal,
       });
       trackCycleUpdated(editCycle.id, cyclePeptides);
     } else {
@@ -226,6 +235,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         isActive: true,
         notes: template ? `Based on ${template.name} protocol` : "",
         createdAt: new Date().toISOString(),
+        goal,
       });
       trackCycleCreated({
         cycleId,
@@ -233,6 +243,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         peptides: cyclePeptides,
         durationWeeks: parseInt(durationWeeks) || 8,
         templateId: template?.id,
+        goal,
         baseline: computeBaseline(journal),
       });
     }
@@ -264,6 +275,26 @@ export default function NewCycleScreen({ route, navigation }: any) {
         placeholder="8"
         placeholderTextColor={colors.textSecondary}
       />
+
+      <Text style={styles.label}>Primary goal for this cycle</Text>
+      <View style={styles.goalRow}>
+        {CATEGORY_INFO.map((c) => {
+          const selected = goal === c.key;
+          return (
+            <TouchableOpacity
+              key={c.key}
+              style={[
+                styles.goalChip,
+                selected && { backgroundColor: c.color + "18", borderColor: c.color },
+              ]}
+              onPress={() => setGoal(selected ? undefined : (c.key as Goal))}
+            >
+              <Ionicons name={c.icon} size={14} color={selected ? c.color : colors.textSecondary} />
+              <Text style={[styles.goalChipText, selected && { color: c.color }]}>{c.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       <Text style={styles.label}>Peptides</Text>
       {template && (
@@ -609,5 +640,12 @@ const styles = StyleSheet.create({
     alignItems: "center", marginTop: 24,
   },
   saveBtnDisabled: { opacity: 0.4 },
+  goalRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  goalChip: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 10, paddingVertical: 7, borderRadius: 9,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  goalChipText: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   saveBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
 });

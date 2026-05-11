@@ -648,6 +648,9 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                 const startDate = new Date().toISOString().split("T")[0];
                 const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
                 const cycleId = generateId();
+                // Derive a primary goal from the scan's top recommended
+                // category. PeptideCategory and Goal share string values.
+                const inferredGoal = (result?.recommendedCategories?.[0] as any) || settings.goals?.[0];
                 addCycle({
                   id: cycleId,
                   name: "Self Scan Protocol",
@@ -657,12 +660,14 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   isActive: true,
                   notes: "Created from Self Scan results",
                   createdAt: new Date().toISOString(),
+                  goal: inferredGoal,
                 });
                 trackCycleCreated({
                   cycleId,
                   name: "Self Scan Protocol",
                   peptides: cyclePeptides as any,
                   durationWeeks: 8,
+                  goal: inferredGoal,
                   baseline: computeBaseline(journal),
                   sourceScanId: currentScanId || undefined,
                 });

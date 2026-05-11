@@ -155,6 +155,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 isActive: true,
                 notes: `Based on ${t.name} protocol`,
                 createdAt: new Date().toISOString(),
+                goal: t.goals?.[0],
               });
               trackCycleCreated({
                 cycleId,
