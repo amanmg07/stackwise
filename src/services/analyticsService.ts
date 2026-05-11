@@ -552,8 +552,22 @@ export function trackPeptideBookmarked(peptideId: string, action: "saved" | "rem
   trackEvent("peptide_bookmarked", { peptide_id: peptideId, action });
 }
 
-export function trackChatQuestion(questionLength: number, activePeptideIds: string[]) {
-  trackEvent("chat_question", { question_length: questionLength, active_peptide_ids: activePeptideIds });
+interface ChatQuestionInput {
+  questionLength: number;
+  activePeptideIds: string[];
+  /** Keyword-classified intent: dosing / stacking / side_effects / comparison / cycle_planning / general. */
+  queryCategory: string;
+  /** Peptide IDs extracted from the query text itself (not from the active cycle). */
+  peptideIdsQueried: string[];
+}
+
+export function trackChatQuestion(input: ChatQuestionInput) {
+  trackEvent("chat_question", {
+    question_length: input.questionLength,
+    active_peptide_ids: input.activePeptideIds,
+    query_category: input.queryCategory,
+    peptide_ids_queried: input.peptideIdsQueried,
+  });
 }
 
 /**

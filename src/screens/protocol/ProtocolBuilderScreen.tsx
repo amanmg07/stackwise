@@ -161,7 +161,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           activeOpacity={0.85}
         >
           <LinearGradient
-            colors={["rgba(252,211,77,0.08)", "rgba(245,158,11,0.32)"]}
+            colors={["rgba(252,211,77,0.04)", "rgba(245,158,11,0.16)"]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={styles.selfScanBtn}

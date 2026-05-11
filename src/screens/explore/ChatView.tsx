@@ -6,7 +6,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
-import { sendChatMessage } from "../../services/chatService";
+import { sendChatMessage, categorizeQuery } from "../../services/chatService";
+import { peptides as peptideDataset } from "../../data/peptides";
 import { generateId } from "../../utils/id";
 import { colors, highlights, spacing } from "../../theme";
 import { ChatMessage } from "../../types";
@@ -90,7 +91,21 @@ export default function ChatView({ navigation }: Props) {
     };
 
     const activePeptideIds = activeCycle?.peptides.map((p) => p.peptideId) || [];
-    trackChatQuestion(text.trim().length, activePeptideIds);
+    // Extract peptides mentioned in the user's question (distinct from
+    // active_peptide_ids, which is what the user's current cycle has).
+    const lowered = text.toLowerCase();
+    const peptideIdsQueried = peptideDataset
+      .filter((p) => {
+        const names = [p.name, p.abbreviation].filter(Boolean) as string[];
+        return names.some((n) => lowered.includes(n.toLowerCase()));
+      })
+      .map((p) => p.id);
+    trackChatQuestion({
+      questionLength: text.trim().length,
+      activePeptideIds,
+      queryCategory: categorizeQuery(text),
+      peptideIdsQueried,
+    });
 
     const updated = [...messages, userMsg];
     setMessages(updated);

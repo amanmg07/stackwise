@@ -14,6 +14,60 @@ function findMentionedPeptides(messages: ChatMessage[]): string[] {
   return mentioned;
 }
 
+export type ChatQueryCategory =
+  | "dosing"
+  | "stacking"
+  | "side_effects"
+  | "comparison"
+  | "cycle_planning"
+  | "general";
+
+/**
+ * Lightweight keyword-based intent classifier. Per the architecture
+ * spec, we ship a category with every chat event so buyers can do
+ * per-category breakdowns ("X% of queries are dosing questions").
+ *
+ * Keyword-based (not LLM-based) by design: zero extra API cost,
+ * deterministic, fast. Misclassifies edge cases but aggregate
+ * percentages are stable. Easy to upgrade to a Groq structured-output
+ * classifier later if accuracy becomes a real issue.
+ *
+ * Order matters — higher-priority categories checked first. A query
+ * like "how much BPC-157 to stack with TB-500" matches both dosing
+ * AND stacking; first-match wins (stacking, by ordering).
+ */
+export function categorizeQuery(query: string): ChatQueryCategory {
+  const q = query.toLowerCase();
+
+  // Stacking first — most specific. The word "stack" or "with X" /
+  // "combine" / "alongside" is a strong signal.
+  if (/\b(stack|combine|alongside|together with|stacked|combo)\b/.test(q)) {
+    return "stacking";
+  }
+
+  // Comparison — "vs", "versus", "or", "compare", "better than".
+  if (/\b(vs|versus|compare|better than|which is better|or which)\b/.test(q)) {
+    return "comparison";
+  }
+
+  // Side effects + safety language.
+  if (/\b(side effect|side-effect|nausea|safe|safety|risk|risks|harm|dangerous|adverse|warning)\b/.test(q)) {
+    return "side_effects";
+  }
+
+  // Cycle planning — duration/timing/protocol design.
+  if (/\b(cycle|duration|weeks|start|stop|begin|protocol|when to|how long|first cycle|next cycle)\b/.test(q)) {
+    return "cycle_planning";
+  }
+
+  // Dosing — quantity / frequency / route language.
+  if (/\b(dose|dosing|mg|mcg|iu|how much|frequency|twice|daily|weekly|injection|inject|inject site)\b/.test(q)) {
+    return "dosing";
+  }
+
+  return "general";
+}
+
 function buildSystemPrompt(
   activeCycle: Cycle | null,
   recentJournal: JournalEntry[],

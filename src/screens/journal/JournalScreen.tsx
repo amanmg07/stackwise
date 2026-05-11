@@ -517,7 +517,9 @@ export default function JournalScreen({ navigation }: any) {
       <FlatList
         data={visible}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        // flexGrow:1 lets the ListEmptyComponent claim the full
+        // available height so the empty state can vertically center.
+        contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
         ListFooterComponent={
           hasMore ? (
             <TouchableOpacity
@@ -532,9 +534,6 @@ export default function JournalScreen({ navigation }: any) {
         }
         ListHeaderComponent={<>
           <Text style={styles.journalTitle}>Journal</Text>
-          {sorted.length === 0 && (
-            <Text style={styles.journalSubtitle}>Log how you feel daily — StackWise will spot trends and recommend peptides & supplements based on your metrics.</Text>
-          )}
           {header()}
           {sorted.length >= 3 && <TrendChart entries={sorted} />}
           {sorted.length > 0 && (
@@ -544,7 +543,7 @@ export default function JournalScreen({ navigation }: any) {
           )}
         </>}
         ListEmptyComponent={
-          <View style={{ alignItems: "center", paddingTop: 80, paddingHorizontal: spacing.xl }}>
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.xl }}>
             <View style={emptyStateStyle.icon}>
               <Ionicons name="book-outline" size={44} color={colors.accent} />
             </View>
