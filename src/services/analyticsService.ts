@@ -401,7 +401,8 @@ interface CycleEndedInput {
   cycleId: string;
   peptideIds: string[];
   durationDays: number;
-  reason: "completed" | "ended_early";
+  /** Granular reasons added in 2026-05; legacy events used only completed|ended_early. */
+  reason: "completed" | "side_effects" | "goal_achieved" | "cost" | "other";
   expectedDays: number;
   completedDays: number;
   totalDosesLogged: number;

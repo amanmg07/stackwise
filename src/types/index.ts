@@ -111,6 +111,19 @@ export interface CycleOutcome {
   createdAt: string;
 }
 
+/**
+ * Why a cycle ended. Granular reasons let buyers analyze churn by
+ * cause — extremely valuable for safety research and product design.
+ * Historical events used only `completed | ended_early`; treat the
+ * legacy `ended_early` as "early stop, reason unspecified."
+ */
+export type CycleEndReason =
+  | "completed"
+  | "side_effects"
+  | "goal_achieved"
+  | "cost"
+  | "other";
+
 export type AdverseEventSeverity = "mild" | "moderate" | "severe";
 export type AdverseEventDuration = "<1d" | "1-3d" | "4-7d" | "1+wk";
 

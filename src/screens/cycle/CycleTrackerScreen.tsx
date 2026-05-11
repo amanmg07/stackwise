@@ -7,7 +7,7 @@ import { peptides } from "../../data/peptides";
 import { colors, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
 import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
 import { trackCycleEnded } from "../../services/analyticsService";
-import { OUTCOME_WEEKS, OutcomeWeek } from "../../types";
+import { OUTCOME_WEEKS, OutcomeWeek, CycleEndReason } from "../../types";
 
 export default function CycleTrackerScreen({ navigation }: any) {
   const { cycles, doseLogs, outcomes, deleteCycle, deleteDoseLog, updateCycle } = useApp();
@@ -154,37 +154,50 @@ export default function CycleTrackerScreen({ navigation }: any) {
           <TouchableOpacity
             style={styles.endBtn}
             onPress={() => {
+              const now = new Date();
+              const plannedEnd = parseISO(activeCycle.endDate + "T00:00:00");
+              const endingEarly = now < plannedEnd;
+
+              const finalize = (reason: CycleEndReason) => {
+                const endDate = now.toISOString().split("T")[0];
+                const durationDays = differenceInCalendarDays(now, parseISO(activeCycle.startDate));
+                const plannedDays = Math.max(
+                  differenceInDays(parseISO(activeCycle.endDate + "T00:00:00"), parseISO(activeCycle.startDate + "T00:00:00")),
+                  1,
+                );
+                updateCycle({ ...activeCycle, isActive: false, endDate });
+                trackCycleEnded({
+                  cycleId: activeCycle.id,
+                  peptideIds: activeCycle.peptides.map((p) => p.peptideId),
+                  durationDays,
+                  reason,
+                  expectedDays: plannedDays,
+                  completedDays,
+                  totalDosesLogged: cycleLogs.length,
+                });
+              };
+
+              // First confirmation. If the cycle hit its planned end,
+              // we silently mark it completed — no need to ask why.
               Alert.alert(
                 "End Cycle",
-                `End "${activeCycle.name}" early? It will be marked as completed with today's date.`,
+                `End "${activeCycle.name}"? It will be marked as completed with today's date.`,
                 [
                   { text: "Cancel", style: "cancel" },
                   {
                     text: "End Cycle",
                     onPress: () => {
-                      const now = new Date();
-                      const endDate = now.toISOString().split("T")[0];
-                      const durationDays = differenceInCalendarDays(now, parseISO(activeCycle.startDate));
-                      const plannedEnd = parseISO(activeCycle.endDate + "T00:00:00");
-                      const reason: "completed" | "ended_early" = now < plannedEnd ? "ended_early" : "completed";
-                      updateCycle({
-                        ...activeCycle,
-                        isActive: false,
-                        endDate,
-                      });
-                      const plannedDays = Math.max(
-                        differenceInDays(parseISO(activeCycle.endDate + "T00:00:00"), parseISO(activeCycle.startDate + "T00:00:00")),
-                        1,
-                      );
-                      trackCycleEnded({
-                        cycleId: activeCycle.id,
-                        peptideIds: activeCycle.peptides.map((p) => p.peptideId),
-                        durationDays,
-                        reason,
-                        expectedDays: plannedDays,
-                        completedDays,
-                        totalDosesLogged: cycleLogs.length,
-                      });
+                      if (!endingEarly) {
+                        finalize("completed");
+                        return;
+                      }
+                      // Early stop — ask why so the data is meaningful.
+                      Alert.alert("Why are you ending early?", "Picking a reason helps you and other users learn what works.", [
+                        { text: "Side effects", onPress: () => finalize("side_effects") },
+                        { text: "Goal achieved", onPress: () => finalize("goal_achieved") },
+                        { text: "Cost", onPress: () => finalize("cost") },
+                        { text: "Other", onPress: () => finalize("other") },
+                      ]);
                     },
                   },
                 ]
