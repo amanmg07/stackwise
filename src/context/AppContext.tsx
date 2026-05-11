@@ -39,6 +39,7 @@ interface AppState {
   deleteJournalEntry: (id: string) => void;
   // Scans
   addScan: (scan: ScanRecord) => void;
+  updateScan: (scan: ScanRecord) => void;
   deleteScan: (id: string) => void;
   // Bloodwork
   addBloodwork: (entry: Bloodwork) => void;
@@ -186,6 +187,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
 
     addScan: (scan) => persistScans([scan, ...scans]),
+    updateScan: (scan) => persistScans(scans.map((s) => (s.id === scan.id ? scan : s))),
     deleteScan: (id) => {
       const scan = scans.find((s) => s.id === id);
       if (scan) {

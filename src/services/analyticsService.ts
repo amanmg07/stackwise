@@ -370,6 +370,8 @@ interface CycleCreatedInput {
   templateId?: string;
   goal?: string;
   baseline?: BaselineMetrics;
+  /** ID of the Self Scan that produced this cycle, if any. */
+  sourceScanId?: string;
 }
 
 export function trackCycleCreated(input: CycleCreatedInput) {
@@ -383,6 +385,7 @@ export function trackCycleCreated(input: CycleCreatedInput) {
     template_id: input.templateId,
     compounds: input.peptides.map(serializeCompound),
     baseline: input.baseline,
+    source_scan_id: input.sourceScanId,
   });
 }
 

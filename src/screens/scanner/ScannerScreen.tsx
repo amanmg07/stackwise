@@ -95,11 +95,15 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
-  const { addCycle, scans, addScan, deleteScan, settings, journal } = useApp();
+  const { addCycle, scans, addScan, updateScan, deleteScan, settings, journal } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [selectedPeptides, setSelectedPeptides] = useState<Set<string>>(new Set());
+  // Tracks the scan_id of the currently displayed result so the
+  // "Add to Cycle" button can attribute the resulting cycle back to
+  // this specific scan (closes the recommendation feedback loop).
+  const [currentScanId, setCurrentScanId] = useState<string | null>(null);
   const usage = useUsage("self_scan");
 
   const togglePeptide = (id: string) => {
@@ -283,6 +287,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             },
           });
           if (Platform.OS === "ios") setImageUri(savedPath);
+          setCurrentScanId(id);
           trackScanCompleted(id, parsed.recommendedCategories || []);
           await trackUsage("self_scan");
           usage.refresh();
@@ -335,6 +340,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
     setImageUri(null);
     setResult(null);
     setSelectedPeptides(new Set());
+    setCurrentScanId(null);
   };
 
   // Landing state — no image yet
@@ -658,7 +664,14 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   peptides: cyclePeptides as any,
                   durationWeeks: 8,
                   baseline: computeBaseline(journal),
+                  sourceScanId: currentScanId || undefined,
                 });
+                // Stamp the resulting cycle id back on the local scan so
+                // the conversion is visible in scan history too.
+                if (currentScanId) {
+                  const scan = scans.find((s) => s.id === currentScanId);
+                  if (scan) updateScan({ ...scan, resultingCycleId: cycleId });
+                }
                 Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
                   { text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) },
                 ]);

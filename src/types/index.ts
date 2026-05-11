@@ -297,6 +297,10 @@ export interface ScanRecord {
   date: string; // ISO timestamp
   imagePath: string; // file:// URI in documentDirectory
   result: ScanResultData;
+  // Set when the user tapped "Add to Cycle" from this scan and a
+  // cycle was created from its recommendations. Lets us measure the
+  // scan → cycle conversion funnel.
+  resultingCycleId?: string;
 }
 
 /**
