@@ -144,4 +144,5 @@ be announced in-app before they take effect.
 
 ## 11. Contact
 
-[YOUR CONTACT EMAIL HERE]
+Email: stackwse1@gmail.com
+Web: https://stackwse.com

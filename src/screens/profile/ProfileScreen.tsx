@@ -14,10 +14,7 @@ import {
 import * as FileSystem from "expo-file-system";
 import { Share } from "react-native";
 
-// TODO: replace with the real support email before launch.
-// Apple's app review will sometimes test this address — make sure
-// it's actively monitored on the launching team's side.
-const SUPPORT_EMAIL = "support@stackwise.app";
+const SUPPORT_EMAIL = "stackwse1@gmail.com";
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
