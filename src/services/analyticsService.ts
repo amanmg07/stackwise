@@ -384,7 +384,7 @@ interface CycleCreatedInput {
   peptides: CyclePeptide[];
   durationWeeks: number;
   templateId?: string;
-  goal?: string;
+  goals?: string[];
   baseline?: BaselineMetrics;
   /** ID of the Self Scan that produced this cycle, if any. */
   sourceScanId?: string;
@@ -396,7 +396,7 @@ export function trackCycleCreated(input: CycleCreatedInput) {
     name: input.name,
     // Keep peptide_ids for back-compat with existing analytics_insights view.
     peptide_ids: input.peptides.map((p) => p.peptideId),
-    goal: input.goal,
+    goals: input.goals,
     duration_weeks: input.durationWeeks,
     template_id: input.templateId,
     compounds: input.peptides.map(serializeCompound),

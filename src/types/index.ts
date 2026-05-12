@@ -65,11 +65,11 @@ export interface Cycle {
   isActive: boolean;
   notes: string;
   createdAt: string;
-  // Primary goal for THIS cycle. May differ from the user's
+  // Primary goals for THIS cycle. May differ from the user's
   // profile-level goals (someone whose profile says "muscle gain"
   // might run a recovery-focused cycle for an injury). Optional
   // for back-compat with cycles created before this field existed.
-  goal?: Goal;
+  goals?: Goal[];
 }
 
 export interface DoseLog {

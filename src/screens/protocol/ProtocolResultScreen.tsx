@@ -155,7 +155,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 isActive: true,
                 notes: `Based on ${t.name} protocol`,
                 createdAt: new Date().toISOString(),
-                goal: t.goals?.[0],
+                goals: t.goals,
               });
               trackCycleCreated({
                 cycleId,
@@ -163,7 +163,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 peptides: peptidesList,
                 durationWeeks: weeks,
                 templateId: t.id,
-                goal: t.goals?.[0],
+                goals: t.goals,
                 baseline: computeBaseline(journal),
               });
               Alert.alert("Cycle Started", `${t.name} is now active!`, [
