@@ -15,7 +15,7 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.stackwise.app",
+      bundleIdentifier: "com.stackwse.app",
       backgroundColor: "#0a0a0a",
       infoPlist: {
         NSPhotoLibraryUsageDescription: "StackWise uses your photo library for Self Scan body composition analysis.",
@@ -23,7 +23,7 @@ export default {
       },
     },
     android: {
-      package: "com.stackwise.app",
+      package: "com.stackwse.app",
       permissions: ["CAMERA_ROLL", "CAMERA"],
       adaptiveIcon: {
         backgroundColor: "#0a0a0a",
