@@ -167,6 +167,7 @@ export const supplements: Peptide[] = [
     id: "betaine_tmg",
     name: "Betaine (TMG)",
     abbreviation: "TMG",
+    aliases: ["Trimethylglycine"],
     compoundType: "supplement",
     categories: ["muscle_gain", "recovery"],
     description:
@@ -195,6 +196,7 @@ export const supplements: Peptide[] = [
     id: "ashwagandha",
     name: "Ashwagandha (KSM-66)",
     abbreviation: "Ashwagandha",
+    aliases: ["Withania Somnifera", "KSM-66", "Sensoril"],
     compoundType: "supplement",
     categories: ["hormone", "recovery", "cognitive"],
     description:
@@ -228,6 +230,7 @@ export const supplements: Peptide[] = [
     id: "tongkat_ali",
     name: "Tongkat Ali",
     abbreviation: "Tongkat Ali",
+    aliases: ["Eurycoma Longifolia", "Longjack"],
     compoundType: "supplement",
     categories: ["hormone", "muscle_gain"],
     description:
@@ -408,6 +411,7 @@ export const supplements: Peptide[] = [
   {
     id: "lions_mane",
     name: "Lion's Mane",
+    aliases: ["Hericium Erinaceus"],
     compoundType: "supplement",
     categories: ["cognitive"],
     description:
@@ -707,6 +711,7 @@ export const supplements: Peptide[] = [
     id: "coq10",
     name: "CoQ10 (Ubiquinol)",
     abbreviation: "CoQ10",
+    aliases: ["Ubiquinol", "Ubiquinone", "Coenzyme Q10"],
     compoundType: "supplement",
     categories: ["anti_aging", "recovery"],
     description:
@@ -733,6 +738,7 @@ export const supplements: Peptide[] = [
     id: "nmn",
     name: "NMN (Nicotinamide Mononucleotide)",
     abbreviation: "NMN",
+    aliases: ["Nicotinamide Mononucleotide"],
     compoundType: "supplement",
     categories: ["anti_aging"],
     description:

@@ -1,17 +1,10 @@
 import { peptides } from "../data/peptides";
 import { Cycle, JournalEntry, ChatMessage, ScanRecord, UserSettings } from "../types";
 import { callGroqProxy } from "../utils/supabase";
+import { extractPeptideIds } from "../utils/peptideMatch";
 
 function findMentionedPeptides(messages: ChatMessage[]): string[] {
-  const text = messages.map((m) => m.content).join(" ").toLowerCase();
-  const mentioned: string[] = [];
-  for (const p of peptides) {
-    const names = [p.name, p.abbreviation].filter(Boolean) as string[];
-    if (names.some((n) => text.includes(n.toLowerCase()))) {
-      mentioned.push(p.id);
-    }
-  }
-  return mentioned;
+  return extractPeptideIds(messages.map((m) => m.content).join(" "), peptides);
 }
 
 export type ChatQueryCategory =
@@ -183,16 +176,7 @@ Peptides: ${activeCycle.peptides.map((p) => {
 }
 
 function extractPeptideRefs(text: string): string[] {
-  const refs: string[] = [];
-  for (const p of peptides) {
-    const names = [p.name, p.abbreviation].filter(Boolean) as string[];
-    for (const name of names) {
-      if (text.toLowerCase().includes(name.toLowerCase()) && !refs.includes(p.id)) {
-        refs.push(p.id);
-      }
-    }
-  }
-  return refs;
+  return extractPeptideIds(text, peptides);
 }
 
 export async function sendChatMessage(

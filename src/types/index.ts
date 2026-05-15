@@ -30,6 +30,15 @@ export interface Peptide {
   id: string;
   name: string;
   abbreviation?: string;
+  /**
+   * Alternate names this compound is searched/typed as — brand names,
+   * full chemical names, common shorthand. Used by the synonym mapper
+   * (utils/peptideMatch) so "Body Protection Compound", "Wegovy", etc.
+   * resolve to the canonical id. Punctuation/spacing variants
+   * ("BPC-157" vs "bpc 157" vs "bpc157") are handled by normalization
+   * and do NOT need to be listed here.
+   */
+  aliases?: string[];
   compoundType?: CompoundType; // "peptide" (default) or "supplement"
   categories: PeptideCategory[];
   description: string;

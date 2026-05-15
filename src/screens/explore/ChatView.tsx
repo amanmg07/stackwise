@@ -8,6 +8,7 @@ import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { sendChatMessage, categorizeQuery } from "../../services/chatService";
 import { peptides as peptideDataset } from "../../data/peptides";
+import { extractPeptideIds } from "../../utils/peptideMatch";
 import { generateId } from "../../utils/id";
 import { colors, highlights, spacing } from "../../theme";
 import { ChatMessage } from "../../types";
@@ -93,13 +94,8 @@ export default function ChatView({ navigation }: Props) {
     const activePeptideIds = activeCycle?.peptides.map((p) => p.peptideId) || [];
     // Extract peptides mentioned in the user's question (distinct from
     // active_peptide_ids, which is what the user's current cycle has).
-    const lowered = text.toLowerCase();
-    const peptideIdsQueried = peptideDataset
-      .filter((p) => {
-        const names = [p.name, p.abbreviation].filter(Boolean) as string[];
-        return names.some((n) => lowered.includes(n.toLowerCase()));
-      })
-      .map((p) => p.id);
+    // Synonym/spacing-aware — see utils/peptideMatch.
+    const peptideIdsQueried = extractPeptideIds(text, peptideDataset);
     trackChatQuestion({
       questionLength: text.trim().length,
       activePeptideIds,

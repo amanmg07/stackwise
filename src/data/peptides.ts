@@ -6,6 +6,7 @@ const peptideData: Peptide[] = [
     id: "bpc157",
     name: "BPC-157",
     abbreviation: "BPC",
+    aliases: ["Body Protection Compound", "Body Protective Compound"],
     categories: ["recovery"],
     description:
       "A healing peptide made from a protein in your stomach. Speeds up recovery of muscles, tendons, ligaments, and gut lining. One of the most popular peptides for injury repair.",
@@ -38,6 +39,7 @@ const peptideData: Peptide[] = [
     id: "tb500",
     name: "TB-500",
     abbreviation: "TB-500",
+    aliases: ["Thymosin Beta 4", "Thymosin Beta-4", "TB4"],
     categories: ["recovery", "immune"],
     description:
       "A healing peptide based on Thymosin Beta-4, a protein your body naturally makes. Works throughout your entire body to repair tissue, reduce inflammation, and speed recovery. Great for injuries that are slow to heal.",
@@ -70,6 +72,7 @@ const peptideData: Peptide[] = [
     id: "cjc1295_nodac",
     name: "CJC-1295 (no DAC)",
     abbreviation: "Mod GRF 1-29",
+    aliases: ["Modified GRF 1-29", "CJC 1295 without DAC", "Mod GRF"],
     categories: ["muscle_gain", "fat_loss", "anti_aging"],
     description:
       "A growth hormone booster that triggers your body's natural GH pulses. The 'no DAC' version gives you short, natural-feeling GH spikes — the way your body is meant to release it.",
@@ -151,6 +154,7 @@ const peptideData: Peptide[] = [
     id: "ghkcu",
     name: "GHK-Cu",
     abbreviation: "GHK-Cu",
+    aliases: ["Copper Peptide", "GHK Copper", "Copper Tripeptide-1"],
     categories: ["anti_aging", "recovery"],
     description:
       "A copper peptide your body naturally makes, but levels drop by half after age 60. Boosts collagen, helps wounds heal faster, and fights signs of aging. Available as injections or skin creams.",
@@ -183,6 +187,7 @@ const peptideData: Peptide[] = [
     id: "semaglutide",
     name: "Semaglutide",
     abbreviation: "Sema",
+    aliases: ["Ozempic", "Wegovy", "Rybelsus"],
     categories: ["fat_loss"],
     description:
       "The active ingredient in Ozempic and Wegovy. Crushes appetite, slows digestion, and improves blood sugar control. FDA-approved for both diabetes and weight loss. Taken once weekly.",
@@ -223,6 +228,7 @@ const peptideData: Peptide[] = [
   {
     id: "tirzepatide",
     name: "Tirzepatide",
+    aliases: ["Mounjaro", "Zepbound"],
     categories: ["fat_loss"],
     description:
       "The active ingredient in Mounjaro and Zepbound. Even stronger than semaglutide for weight loss (20-25% body weight in trials). Works on two hunger pathways instead of one. Taken once weekly.",
@@ -380,6 +386,7 @@ const peptideData: Peptide[] = [
     id: "mk677",
     name: "MK-677",
     abbreviation: "Ibutamoren",
+    aliases: ["Nutrobal", "MK-0677"],
     categories: ["muscle_gain", "sleep"],
     description:
       "An oral GH booster — no injections needed. Raises growth hormone and IGF-1 levels for a full 24 hours from one pill. Popular for muscle gain and better sleep, but it will make you hungry.",
@@ -442,6 +449,7 @@ const peptideData: Peptide[] = [
     id: "tesamorelin",
     name: "Tesamorelin",
     abbreviation: "Tesa",
+    aliases: ["Egrifta"],
     categories: ["fat_loss", "muscle_gain", "anti_aging"],
     description:
       "An FDA-approved injectable that boosts your body's own growth hormone production. Burns stubborn belly fat — especially deep visceral fat — while supporting lean muscle growth through elevated GH levels.",
@@ -586,6 +594,7 @@ const peptideData: Peptide[] = [
     id: "ss31",
     name: "SS-31",
     abbreviation: "Elamipretide",
+    aliases: ["MTP-131", "Bendavia"],
     categories: ["anti_aging", "recovery", "cognitive"],
     description:
       "A peptide that targets and protects your mitochondria from the inside. Recently FDA-approved (2025) for a rare genetic condition. Keeps your cellular power plants running clean and efficiently.",
@@ -842,6 +851,7 @@ const peptideData: Peptide[] = [
     id: "igf1_lr3",
     name: "IGF-1 LR3",
     abbreviation: "IGF-1 LR3",
+    aliases: ["Long R3 IGF-1", "IGF-1 Long R3"],
     categories: ["muscle_gain", "recovery", "fat_loss"],
     description:
       "A modified version of insulin-like growth factor 1 that lasts much longer in the body. One of the most powerful peptides for building lean muscle and accelerating recovery. Works downstream of growth hormone — GH tells your liver to make IGF-1, but this gives it to you directly.",
@@ -899,6 +909,7 @@ const peptideData: Peptide[] = [
     id: "melanotan2",
     name: "Melanotan II",
     abbreviation: "MT-II",
+    aliases: ["Melanotan 2", "MT2", "MT-2"],
     categories: ["sexual_health", "fat_loss"],
     description:
       "Originally developed as a sunless tanning agent, Melanotan II turned out to also boost libido and reduce appetite. Works by activating melanocortin receptors throughout your body. One of the most popular peptides worldwide.",
