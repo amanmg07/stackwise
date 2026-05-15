@@ -16,6 +16,9 @@
       }
     },
     "production": {
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      },
       "ios": {
         "resourceClass": "medium"
       },
@@ -26,10 +29,6 @@
   },
   "submit": {
     "production": {
-      "ios": {
-        "appleId": "",
-        "ascAppId": ""
-      },
       "android": {
         "track": "production"
       }
