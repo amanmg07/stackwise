@@ -21,12 +21,26 @@ const SIDE_EFFECTS = [
 const SEVERITY_OPTIONS: AdverseEventSeverity[] = ["mild", "moderate", "severe"];
 const DURATION_OPTIONS: AdverseEventDuration[] = ["<1d", "1-3d", "4-7d", "1+wk"];
 
+// Map a 1–10 wellbeing score to the semantic palette so the value
+// stands out and reads at a glance: low = red, mid = amber, high =
+// green. Every metric on this screen is "higher is better"
+// (Terrible→Best, Beat up→Fully recovered, …) so one scale fits all.
+// Mirrors the goal-chip treatment (tinted pill + colored text).
+function scoreColor(value: number): string {
+  if (value <= 3) return colors.error;
+  if (value <= 6) return colors.warning;
+  return colors.success;
+}
+
 function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: string; value: number; onChange: (v: number) => void; lowLabel: string; highLabel: string }) {
+  const c = scoreColor(value);
   return (
     <View style={styles.ratingContainer}>
       <View style={styles.ratingHeader}>
         <Text style={styles.ratingLabel}>{label}</Text>
-        <Text style={styles.ratingValue}>{value}<Text style={styles.ratingValueMax}>/10</Text></Text>
+        <View style={[styles.valuePill, { backgroundColor: c + "18", borderColor: c + "55" }]}>
+          <Text style={[styles.ratingValue, { color: c }]}>{value}<Text style={styles.ratingValueMax}>/10</Text></Text>
+        </View>
       </View>
       <Slider
         style={styles.slider}
@@ -35,9 +49,9 @@ function RatingInput({ label, value, onChange, lowLabel, highLabel }: { label: s
         step={1}
         value={value}
         onValueChange={onChange}
-        minimumTrackTintColor={colors.accent}
+        minimumTrackTintColor={c}
         maximumTrackTintColor={colors.surface}
-        thumbTintColor={colors.accent}
+        thumbTintColor={c}
       />
       <View style={styles.ratingHints}>
         <Text style={styles.ratingHint}>{lowLabel}</Text>
@@ -63,13 +77,19 @@ function OptionalRating({
   highLabel: string;
 }) {
   const isSet = typeof value === "number";
+  // Only colorize once the user has actually set a value — an unset
+  // metric stays muted grey so "not rated" remains visually distinct
+  // and we don't imply a score the user never gave.
+  const c = isSet ? scoreColor(value as number) : colors.textSecondary;
   return (
     <View style={styles.ratingContainer}>
       <View style={styles.ratingHeader}>
         <Text style={styles.ratingLabel}>{label}</Text>
         {isSet ? (
           <TouchableOpacity onPress={() => onChange(undefined)}>
-            <Text style={styles.ratingValue}>{value}<Text style={styles.ratingValueMax}>/10 ✕</Text></Text>
+            <View style={[styles.valuePill, { backgroundColor: c + "18", borderColor: c + "55" }]}>
+              <Text style={[styles.ratingValue, { color: c }]}>{value}<Text style={styles.ratingValueMax}>/10 ✕</Text></Text>
+            </View>
           </TouchableOpacity>
         ) : (
           <Text style={styles.ratingValueMuted}>not rated</Text>
@@ -82,9 +102,9 @@ function OptionalRating({
         step={1}
         value={isSet ? value : 5}
         onValueChange={(v) => onChange(v)}
-        minimumTrackTintColor={isSet ? colors.accent : colors.border}
+        minimumTrackTintColor={isSet ? c : colors.border}
         maximumTrackTintColor={colors.surface}
-        thumbTintColor={isSet ? colors.accent : colors.textSecondary}
+        thumbTintColor={isSet ? c : colors.textSecondary}
       />
       <View style={styles.ratingHints}>
         <Text style={styles.ratingHint}>{lowLabel}</Text>
@@ -400,8 +420,12 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 12 },
   half: { flex: 1 },
   ratingContainer: { marginBottom: 18 },
-  ratingHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 },
+  ratingHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   ratingLabel: { fontSize: 14, color: colors.text },
+  valuePill: {
+    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8,
+    borderWidth: 1,
+  },
   ratingValue: { fontSize: 20, fontWeight: "800", color: colors.accent },
   ratingValueMax: { fontSize: 12, fontWeight: "600", color: colors.textSecondary },
   ratingValueMuted: { fontSize: 13, fontStyle: "italic", color: colors.textSecondary },
