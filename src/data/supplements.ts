@@ -677,7 +677,7 @@ export const supplements: Peptide[] = [
       },
     ],
     sideEffects: ["Mild bloating", "Feeling of fullness", "Allergic reaction if sensitive to source (bovine, marine, etc.)"],
-    stacksWith: ["vitamin_c", "hyaluronic_acid", "glycine_sleep"],
+    stacksWith: ["vitamin_c", "glycine_sleep"],
     halfLife: "Peptides absorbed within 1-2 hours. Tissue effects are cumulative.",
     storage: "Room temperature, dry place. Powder is very stable.",
     notes: "Marine collagen has the highest bioavailability. Bovine is most common and more affordable. Taking with vitamin C significantly improves collagen synthesis. Benefits are real but take 8-12 weeks to notice. Collagen is NOT a complete protein — don't count it toward your daily protein goal.",
@@ -802,7 +802,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "General health (most people)",
-        doseRange: "2,000-5,000 IU D3 + 100-200 mcg K2 (MK-7)",
+        doseRange: "2,000-5,000 IU D3 + 0.1-0.2 mg K2 (MK-7)",
         frequency: "Once daily",
         cycleDuration: "Ongoing (especially fall-spring in northern latitudes)",
         timing: "With a fat-containing meal. Morning preferred. Get blood levels checked — target 40-60 ng/mL 25(OH)D.",
