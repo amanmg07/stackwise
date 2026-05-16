@@ -66,3 +66,22 @@ export function extractPeptideIds(text: string, dataset: Peptide[]): string[] {
   }
   return ids;
 }
+
+/**
+ * Does `query` (a user-typed search string) match this compound?
+ *
+ * For search-as-you-type filter boxes — deliberately permissive,
+ * unlike extractPeptideIds (which guards against false positives in
+ * free-flowing prose). A partial, separator-insensitive substring
+ * against name / abbreviation / aliases: typing "bpc 157", "ozemp",
+ * or "body protection" all surface the right compound. Empty query
+ * matches everything (i.e. no filtering).
+ */
+export function matchesQuery(p: Peptide, query: string): boolean {
+  const q = normalizeCompact(query);
+  if (!q) return true;
+  const candidates = [p.name, p.abbreviation, ...(p.aliases ?? [])].filter(
+    Boolean
+  ) as string[];
+  return candidates.some((c) => normalizeCompact(c).includes(q));
+}

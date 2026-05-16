@@ -4,6 +4,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
+import { matchesQuery } from "../../utils/peptideMatch";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, CompoundType } from "../../types";
 
@@ -103,10 +104,7 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
 
   const filtered = useMemo(() => {
     return peptides.filter((p) => {
-      const matchSearch =
-        !search ||
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        (p.abbreviation?.toLowerCase().includes(search.toLowerCase()));
+      const matchSearch = matchesQuery(p, search);
       const matchCat = selectedCats.length === 0 || selectedCats.some((c) => p.categories.includes(c));
       const matchRoute = selectedRoutes.length === 0 || selectedRoutes.some((r) => p.routes.includes(r));
       const matchType = selectedType === "all" || (p.compoundType || "peptide") === selectedType;

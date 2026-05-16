@@ -7,6 +7,7 @@ import { generateId } from "../../utils/id";
 import { format, addWeeks, differenceInWeeks, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
+import { matchesQuery } from "../../utils/peptideMatch";
 import { protocolTemplates } from "../../data/protocolTemplates";
 import { trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { getInteractions } from "../../data/interactions";
@@ -430,10 +431,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
             peptideDB
               .filter((p) => (p.compoundType || "peptide") === showPicker)
               .filter((p) => !cyclePeptides.some((cp) => cp.peptideId === p.id))
-              .filter((p) =>
-                p.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
-                (p.abbreviation?.toLowerCase().includes(pickerSearch.toLowerCase()))
-              )
+              .filter((p) => matchesQuery(p, pickerSearch))
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((p) => (
                 <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => { addPeptide(p.id); setPickerSearch(""); }}>

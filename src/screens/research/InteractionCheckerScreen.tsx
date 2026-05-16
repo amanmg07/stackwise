@@ -4,6 +4,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides as peptideDB } from "../../data/peptides";
+import { matchesQuery } from "../../utils/peptideMatch";
 import { getInteractions, PeptideInteraction } from "../../data/interactions";
 import { colors, spacing, safeBottom } from "../../theme";
 
@@ -26,12 +27,7 @@ export default function InteractionCheckerScreen({ navigation }: any) {
     );
   };
 
-  const filteredPeptides = peptideDB.filter(
-    (p) =>
-      !search ||
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.abbreviation?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredPeptides = peptideDB.filter((p) => matchesQuery(p, search));
 
   const warnings = interactions.filter((i) => i.severity === "warning");
   const cautions = interactions.filter((i) => i.severity === "caution");

@@ -1,7 +1,12 @@
-import { extractPeptideIds, normalizeCompact } from "../utils/peptideMatch";
+import {
+  extractPeptideIds,
+  normalizeCompact,
+  matchesQuery,
+} from "../utils/peptideMatch";
 import { peptides } from "../data/peptides";
 
 const ids = (text: string) => extractPeptideIds(text, peptides);
+const byId = (id: string) => peptides.find((p) => p.id === id)!;
 
 describe("normalizeCompact", () => {
   it("strips punctuation, spacing and case", () => {
@@ -75,5 +80,38 @@ describe("extractPeptideIds — precision", () => {
   it("handles empty / whitespace input", () => {
     expect(ids("")).toEqual([]);
     expect(ids("   ")).toEqual([]);
+  });
+});
+
+describe("matchesQuery — search-as-you-type", () => {
+  const bpc = byId("bpc157");
+  const sema = byId("semaglutide");
+  const ghk = byId("ghkcu");
+
+  it("matches partial / prefix typing", () => {
+    expect(matchesQuery(bpc, "bpc")).toBe(true);
+    expect(matchesQuery(sema, "sem")).toBe(true);
+    expect(matchesQuery(sema, "ozemp")).toBe(true); // partial alias
+  });
+
+  it("is separator-insensitive", () => {
+    expect(matchesQuery(bpc, "bpc 157")).toBe(true);
+    expect(matchesQuery(bpc, "BPC-157")).toBe(true);
+    expect(matchesQuery(ghk, "ghk cu")).toBe(true);
+  });
+
+  it("matches via brand / chemical aliases", () => {
+    expect(matchesQuery(sema, "Wegovy")).toBe(true);
+    expect(matchesQuery(bpc, "body protection")).toBe(true);
+  });
+
+  it("empty query matches everything (no filter)", () => {
+    expect(matchesQuery(bpc, "")).toBe(true);
+    expect(matchesQuery(bpc, "   ")).toBe(true);
+  });
+
+  it("does not match unrelated queries", () => {
+    expect(matchesQuery(bpc, "tirzepatide")).toBe(false);
+    expect(matchesQuery(sema, "creatine")).toBe(false);
   });
 });
