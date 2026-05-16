@@ -18,6 +18,22 @@ Notifications.setNotificationHandler({
 
 const DAILY_REMINDER_TAG = "stackwise.daily";
 const OUTCOME_REMINDER_PREFIX = "stackwise.outcome.";
+const ANDROID_CHANNEL_ID = "default";
+
+/**
+ * Android 8+ drops any notification posted to a channel that doesn't
+ * exist. The scheduling code references channelId "default", so the
+ * channel must be created before anything is scheduled. Idempotent —
+ * setNotificationChannelAsync is safe to call repeatedly. No-op on iOS.
+ */
+async function ensureAndroidChannel(): Promise<void> {
+  if (Platform.OS !== "android") return;
+  await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
+    name: "Reminders",
+    importance: Notifications.AndroidImportance.DEFAULT,
+    sound: null,
+  });
+}
 
 /**
  * Ask the OS for notification permission. Returns true if granted.
@@ -42,6 +58,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
  */
 export async function scheduleDailyReminder(hour: number, minute: number): Promise<void> {
   try {
+    await ensureAndroidChannel();
     await cancelDailyReminder();
     await Notifications.scheduleNotificationAsync({
       identifier: DAILY_REMINDER_TAG,
@@ -50,12 +67,15 @@ export async function scheduleDailyReminder(hour: number, minute: number): Promi
         body: "Quick tap to log doses or how you're feeling — keeps your trends accurate.",
         sound: false,
       },
+      // expo-notifications (SDK 54) requires an explicit trigger `type`.
+      // The legacy `{ hour, minute, repeats: true }` shorthand is no
+      // longer recognized and silently never fires. DAILY repeats by
+      // definition, so no `repeats` flag. Works on iOS + Android.
       trigger: {
-        // Repeat daily at the chosen time. Platform-specific options
-        // both supported by Expo's unified API.
-        ...(Platform.OS === "ios"
-          ? { hour, minute, repeats: true } as any
-          : { hour, minute, repeats: true, channelId: "default" } as any),
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour,
+        minute,
+        channelId: ANDROID_CHANNEL_ID,
       },
     });
   } catch (e) {
@@ -81,6 +101,7 @@ export async function cancelDailyReminder(): Promise<void> {
  */
 export async function scheduleOutcomeReminders(cycle: Cycle): Promise<void> {
   try {
+    await ensureAndroidChannel();
     const start = parseISO(cycle.startDate + "T00:00:00");
     const now = new Date();
     for (const week of [4, 8, 12, 16] as const) {
@@ -96,7 +117,13 @@ export async function scheduleOutcomeReminders(cycle: Cycle): Promise<void> {
           body: "60 seconds — helps make your protocol data scientifically meaningful.",
           sound: false,
         },
-        trigger: { date: fireAt } as any,
+        // Same SDK 54 requirement: one-off date triggers need an
+        // explicit DATE type or they silently never fire.
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: fireAt,
+          channelId: ANDROID_CHANNEL_ID,
+        },
       });
     }
   } catch (e) {

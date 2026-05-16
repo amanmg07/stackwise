@@ -12,6 +12,7 @@ import {
   scheduleOutcomeReminders,
   cancelOutcomeRemindersForCycle,
   cancelOutcomeReminder,
+  scheduleDailyReminder,
 } from "../services/notificationsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
@@ -120,6 +121,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (needsMigration) appStorage.saveJournal(migrated);
       setSettings(s);
       setLoading(false);
+
+      // Re-arm the daily reminder on launch. The OS schedule isn't
+      // durable across reinstalls/OS clears, and users who enabled it
+      // in a build with the broken trigger have notificationsEnabled
+      // saved but no live schedule — without this they'd silently get
+      // nothing until manually toggling off/on. scheduleDailyReminder
+      // is idempotent (cancels any existing first), so this is safe to
+      // run every launch.
+      if (s.notificationsEnabled) {
+        const time = s.reminderTimes?.[0] || "20:00";
+        const [h, m] = time.split(":").map((x) => parseInt(x, 10));
+        scheduleDailyReminder(
+          Number.isFinite(h) ? h : 20,
+          Number.isFinite(m) ? m : 0,
+        );
+      }
     })();
 
     // Auth in background — don't block the UI on network requests
