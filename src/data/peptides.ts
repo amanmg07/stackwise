@@ -370,7 +370,7 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Fat loss",
-        doseRange: "0.3 mg",
+        doseRange: "1 mg",
         frequency: "1x daily",
         cycleDuration: "8-12 weeks",
         timing: "Morning on empty stomach, or before fasted cardio. Wait 20 min before eating.",
@@ -427,7 +427,7 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Sexual desire / arousal",
-        doseRange: "1.75 mg (FDA-approved dose). Start at 1 mg if nausea is a concern.",
+        doseRange: "1.75 mg (the single FDA-approved Vyleesi dose)",
         frequency: "As needed. Max once per day, max 8 times per month.",
         cycleDuration: "As needed (not for daily use)",
         timing: "At least 45 minutes before. Inject in the belly.",
@@ -844,7 +844,7 @@ const peptideData: Peptide[] = [
     stacksWith: ["kisspeptin", "pt141"],
     halfLife: "~2-4 minutes (very short)",
     storage: "Fridge at 2-8°C.",
-        notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues.",
+        notes: "FDA-approved for pituitary function testing (as Factrel). Very short half-life — pulsed delivery is key. If given continuously instead of pulsed, it actually SUPPRESSES hormones (that's how Lupron works for prostate cancer). Increasingly used as an HCG alternative in TRT since HCG supply issues. Note: the 2-3x/week bolus regimen is community TRT practice, not an evidence-validated protocol — clinical fertility efficacy requires pulsatile pump delivery (5-20 mcg every 90-120 min).",
   },
 
   {
@@ -936,7 +936,7 @@ const peptideData: Peptide[] = [
     stacksWith: ["pt141", "bpc157"],
     halfLife: "~1 hour in blood, but melanin effects last weeks",
     storage: "Powder: freezer, stable for years. Mixed: fridge at 2-8°C, use within 30 days.",
-        notes: "Not FDA-approved. PT-141 (Bremelanotide) was derived from MT-II as a targeted libido drug without tanning — it IS FDA-approved. MT-II darkens ALL skin including moles, so get moles checked regularly. Start very low (0.1 mg) to assess nausea tolerance. Extremely popular in Europe and Australia.",
+        notes: "Not FDA-approved. PT-141 (Bremelanotide) was derived from MT-II as a targeted libido drug without tanning — it IS FDA-approved. MT-II darkens ALL skin including moles, and peer-reviewed case reports link its use to new melanoma and changing melanocytic lesions — get a dermatologist skin/mole check before and during use, and avoid deliberate UV/tanning-bed exposure. Start very low (0.1 mg) to assess nausea tolerance. Extremely popular in Europe and Australia.",
   },
   {
     id: "sermorelin",
@@ -982,7 +982,7 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Immune restoration / anti-aging",
-        doseRange: "10-20 mg",
+        doseRange: "5-10 mg",
         frequency: "1x daily",
         cycleDuration: "10 days on, then repeat 2-3x per year",
         timing: "Morning. Short course cycle — not continuous use.",
@@ -1007,10 +1007,10 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Fat loss / metabolic boost",
-        doseRange: "50-150 mg",
-        frequency: "1-2x daily",
+        doseRange: "50-100 mg (no established human dose — experimental)",
+        frequency: "1x daily",
         cycleDuration: "8-12 weeks",
-        timing: "Morning with or without food. Some split dose AM/PM.",
+        timing: "Morning with or without food.",
       },
     ],
     sideEffects: ["Generally well tolerated", "Mild GI discomfort", "Headache (rare)", "Limited long-term human data"],
@@ -1235,7 +1235,7 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Maximum GH release / body recomposition",
-        doseRange: "0.2-0.5 mL per injection (from 12mg vial reconstituted with 3 mL bac water)",
+        doseRange: "0.1-0.25 mL per injection (from 12mg vial reconstituted with 3 mL bac water)",
         frequency: "1x daily before bed",
         cycleDuration: "8-12 weeks, then break",
         timing: "Empty stomach, 30 min before bed.",
@@ -1287,28 +1287,21 @@ const peptideData: Peptide[] = [
       "A mixture of low-molecular-weight neuropeptides and amino acids derived from porcine brain tissue. One of the most studied nootropic peptide compounds with over 200 clinical trials, primarily used for cognitive enhancement, TBI recovery, and neurodegenerative conditions.",
     mechanism:
       "Exhibits neurotrophic activity similar to BDNF, CNTF, and NGF. Promotes neuronal sprouting, synaptic repair, dendritic branching, and neuroplasticity. Reduces amyloid-beta aggregation and supports mitochondrial function in neurons.",
-    routes: ["nasal", "intramuscular"],
+    routes: ["intramuscular"],
     dosingProtocols: [
       {
-        purpose: "Cognitive enhancement / nootropic",
-        doseRange: "1-2 mL per nostril",
+        purpose: "Cognitive enhancement / TBI / neuro recovery",
+        doseRange: "5-10 mL IM (clinical trials use 10-30 mL IV for dementia/stroke)",
         frequency: "1x daily",
         cycleDuration: "10-20 day cycles, 2-3x per year",
-        timing: "Morning on empty stomach. Nasal spray formulation.",
-      },
-      {
-        purpose: "TBI / neuro recovery",
-        doseRange: "5-10 mL IM",
-        frequency: "1x daily",
-        cycleDuration: "20 days",
         timing: "Morning injection.",
       },
     ],
-    sideEffects: ["Nasal irritation", "Headache", "Dizziness", "Mild agitation", "Rare fever", "Derived from porcine tissue — allergy concern"],
+    sideEffects: ["Headache", "Dizziness", "Mild agitation", "Rare fever", "Derived from porcine tissue — allergy concern"],
     stacksWith: ["semax", "selank", "dihexa", "pe2228"],
     halfLife: "Peptide fragments vary; effects build cumulatively over the treatment cycle.",
     storage: "Refrigerate at 2-8°C. Protect from light. Ampules: use immediately once opened.",
-        notes: "Widely prescribed in Europe and Asia for stroke recovery, TBI, and Alzheimer's. Banned by some sports organizations. The nasal spray formulation is compounded and popular in the nootropic community. Effects are cumulative — expect results after 5-7 days of daily use.",
+        notes: "Widely prescribed in Europe and Asia for stroke recovery, TBI, and Alzheimer's. Banned by some sports organizations. Only IM/IV dosing is supported by the manufacturer label and clinical trials — the compounded intranasal 'spray' popular in nootropic circles has no validated dose and was removed. Effects are cumulative — expect results after 5-7 days of daily use.",
   },
   {
     id: "pinealon",
@@ -1318,11 +1311,11 @@ const peptideData: Peptide[] = [
       "A Khavinson tripeptide bioregulator (Glu-Asp-Arg) that targets the pineal gland. Normalizes melatonin synthesis and circadian rhythm regulation with neuroprotective properties. Part of the Russian bioregulator peptide family developed for age-related sleep disruption.",
     mechanism:
       "Regulates gene expression in pinealocytes, normalizing melatonin production without introducing exogenous melatonin. Supports circadian rhythm calibration, has antioxidant effects on brain tissue, and promotes healthy sleep architecture through natural pathways.",
-    routes: ["nasal", "oral"],
+    routes: ["oral", "subcutaneous"],
     dosingProtocols: [
       {
         purpose: "Sleep regulation",
-        doseRange: "10 mg capsule or 10-20 µg nasal",
+        doseRange: "10 mg oral (or 1-2 mg subcutaneous)",
         frequency: "1x daily before bed",
         cycleDuration: "10-30 days, repeat 2-3x per year",
         timing: "30-60 min before bed.",
@@ -1349,11 +1342,11 @@ const peptideData: Peptide[] = [
       "A synthetic tetrapeptide bioregulator targeting cerebral cortex tissue. Promotes gene expression related to neuronal health and repair, supports cognitive function, and provides neuroprotection against age-related decline.",
     mechanism:
       "Activates gene expression in cerebral cortex neurons related to neuronal repair, synaptic plasticity, and neuroprotection. Part of the Khavinson peptide bioregulator system — short peptides that regulate tissue-specific gene activity without hormonal side effects.",
-    routes: ["nasal", "subcutaneous"],
+    routes: ["oral", "subcutaneous"],
     dosingProtocols: [
       {
         purpose: "Cognitive enhancement",
-        doseRange: "10-20 µg nasal or 10 mg capsule",
+        doseRange: "10 mg oral (or 1-2 mg subcutaneous)",
         frequency: "1x daily",
         cycleDuration: "10-30 days, 2-3x per year",
         timing: "Morning for cognitive focus.",
@@ -1385,7 +1378,7 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Gut barrier restoration",
-        doseRange: "0.5-1 mg",
+        doseRange: "0.5 mg",
         frequency: "3x daily before meals",
         cycleDuration: "8-12 weeks",
         timing: "15 minutes before meals on empty stomach.",
