@@ -74,7 +74,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Performance / pumps",
-        doseRange: "6-8 g (pure L-citrulline) or 8-10 g (citrulline malate 2:1)",
+        doseRange: "3-5 g (pure L-citrulline) or 8 g (citrulline malate 2:1)",
         frequency: "Once daily, pre-workout",
         cycleDuration: "Ongoing",
         timing: "30-60 minutes before training on an empty stomach for best absorption.",
@@ -178,7 +178,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Performance & body composition",
-        doseRange: "2.5-6 g",
+        doseRange: "2.5-4 g",
         frequency: "Daily (split into 2 doses)",
         cycleDuration: "Ongoing",
         timing: "Pre-workout and with a meal. Take with food to reduce any GI discomfort.",
@@ -188,7 +188,7 @@ export const supplements: Peptide[] = [
     stacksWith: ["creatine_mono", "citrulline"],
     halfLife: "~6 hours.",
     storage: "Room temperature, dry place.",
-    notes: "The fishy smell side effect is dose-dependent and not everyone gets it. Betaine and creatine work through complementary pathways — stacking them may be more effective than either alone. Also known as trimethylglycine (TMG).",
+    notes: "The fishy smell side effect is dose-dependent and not everyone gets it. Betaine and creatine work through complementary pathways — stacking them may be more effective than either alone. Also known as trimethylglycine (TMG). Keep total intake at/under ~4 g/day — doses above that raise LDL and total cholesterol with no added performance benefit.",
   },
 
   // ===================== HORMONAL SUPPORT =====================
@@ -207,14 +207,14 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Stress & cortisol reduction",
-        doseRange: "300-600 mg (KSM-66 extract)",
+        doseRange: "300 mg (up to 600 mg) KSM-66 extract",
         frequency: "Once daily",
         cycleDuration: "8-12 weeks on, 2-4 weeks off",
         timing: "With breakfast or dinner. Some people prefer evening for sleep benefits. Take with food.",
       },
       {
         purpose: "Testosterone support",
-        doseRange: "600 mg (KSM-66)",
+        doseRange: "300-600 mg (KSM-66)",
         frequency: "Once daily",
         cycleDuration: "8-12 weeks on, 4 weeks off",
         timing: "Morning with food. Effects on testosterone typically show after 8+ weeks of consistent use.",
@@ -241,7 +241,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Testosterone & performance",
-        doseRange: "200-400 mg (standardized 2% eurycomanone)",
+        doseRange: "200-400 mg (standardized extract, ~1% eurycomanone — e.g., Physta/LJ100)",
         frequency: "Once daily",
         cycleDuration: "8-12 weeks on, 2-4 weeks off",
         timing: "Morning with food. Look for standardized extracts (100:1 or 200:1 concentration).",
@@ -267,7 +267,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Testosterone support",
-        doseRange: "300-600 mg",
+        doseRange: "300 mg (experimental — no established human dose; do not exceed)",
         frequency: "Once daily",
         cycleDuration: "6-8 weeks on, 4 weeks off",
         timing: "Morning with food. Cycling is important — don't run continuously.",
@@ -293,7 +293,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Estrogen balance",
-        doseRange: "100-200 mg",
+        doseRange: "100-150 mg",
         frequency: "Once daily",
         cycleDuration: "Ongoing or 8-12 week cycles",
         timing: "With a fat-containing meal for absorption. DIM is fat-soluble.",
@@ -303,7 +303,7 @@ export const supplements: Peptide[] = [
     stacksWith: ["tongkat_ali", "ashwagandha", "zinc_magnesium"],
     halfLife: "~2-6 hours.",
     storage: "Room temperature, dry place. Keep sealed.",
-    notes: "Start at 100 mg and assess. Men often use DIM to manage estrogen when running testosterone-boosting supplements. Women may use it for PMS or menopause support. Don't exceed 200 mg/day without blood work. Dark urine is a known harmless side effect.",
+    notes: "Start at 100 mg and assess. Men often use DIM to manage estrogen when running testosterone-boosting supplements. Women may use it for PMS or menopause support. Don't exceed 150 mg/day without blood work. Dark urine is a known harmless side effect.",
   },
   {
     id: "boron",
@@ -318,7 +318,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Hormone & joint support",
-        doseRange: "6-10 mg",
+        doseRange: "3 mg (up to 6 mg)",
         frequency: "Once daily",
         cycleDuration: "Ongoing",
         timing: "With any meal. Can be taken any time of day.",
@@ -344,7 +344,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Hormone & recovery support",
-        doseRange: "30 mg zinc, 450 mg magnesium, 10 mg B6",
+        doseRange: "15-30 mg zinc, 300 mg magnesium, 10 mg B6",
         frequency: "Once daily",
         cycleDuration: "Ongoing",
         timing: "30-60 minutes before bed on an empty stomach. Don't take with calcium or dairy (blocks zinc absorption).",
@@ -512,7 +512,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Anti-fatigue & mental performance",
-        doseRange: "200-600 mg (standardized to 3% rosavins, 1% salidroside)",
+        doseRange: "200-400 mg (standardized to 3% rosavins, 1% salidroside)",
         frequency: "Once daily",
         cycleDuration: "8-12 weeks on, 2-4 weeks off",
         timing: "Morning on an empty stomach. Avoid evening — it can be stimulating. Effects often noticed within the first week.",
@@ -592,7 +592,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Sleep & recovery",
-        doseRange: "200-400 mg elemental magnesium",
+        doseRange: "200 mg (up to 350 mg) elemental magnesium",
         frequency: "Once daily",
         cycleDuration: "Ongoing",
         timing: "30-60 minutes before bed. Take with or without food — glycinate is gentle on the stomach.",
@@ -670,7 +670,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Skin & joint health",
-        doseRange: "10-15 g",
+        doseRange: "5-10 g",
         frequency: "Once daily",
         cycleDuration: "Ongoing — benefits peak at 8-12 weeks",
         timing: "Any time. Mix into coffee, smoothies, or water. Take with vitamin C (50-100 mg) to support collagen synthesis. Best on an empty stomach or between meals.",
@@ -695,7 +695,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "General health & immune support",
-        doseRange: "500-1000 mg",
+        doseRange: "500 mg (up to 1,000 mg)",
         frequency: "1-2x daily",
         cycleDuration: "Ongoing",
         timing: "With meals to reduce GI upset. Split doses for better absorption (body saturates at ~200-500 mg per dose).",
@@ -749,7 +749,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Anti-aging / NAD+ restoration",
-        doseRange: "250-500 mg",
+        doseRange: "300-600 mg",
         frequency: "Once daily",
         cycleDuration: "Ongoing",
         timing: "Morning on an empty stomach. Sublingual absorption may be superior. Some prefer splitting into 2 doses.",
@@ -774,7 +774,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Antioxidant & skin protection",
-        doseRange: "4-12 mg",
+        doseRange: "4-6 mg (up to 12 mg for inflammation/performance)",
         frequency: "Once daily",
         cycleDuration: "Ongoing",
         timing: "With a fat-containing meal (it's fat-soluble). Morning preferred.",
@@ -802,7 +802,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "General health (most people)",
-        doseRange: "2,000-5,000 IU D3 + 0.1-0.2 mg K2 (MK-7)",
+        doseRange: "2,000-4,000 IU D3 + 0.18 mg K2 (MK-7)",
         frequency: "Once daily",
         cycleDuration: "Ongoing (especially fall-spring in northern latitudes)",
         timing: "With a fat-containing meal. Morning preferred. Get blood levels checked — target 40-60 ng/mL 25(OH)D.",
@@ -828,7 +828,7 @@ export const supplements: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "General health",
-        doseRange: "2-3 g combined EPA+DHA",
+        doseRange: "1-2 g combined EPA+DHA",
         frequency: "Once daily (or split AM/PM)",
         cycleDuration: "Ongoing",
         timing: "With a fat-containing meal to maximize absorption. Refrigerate liquid fish oil after opening.",
