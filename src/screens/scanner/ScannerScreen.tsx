@@ -19,6 +19,16 @@ import { callGroqProxy } from "../../utils/supabase";
 
 type ScanResult = ScanResultData & { error?: string };
 
+// Shown as a confirmation popup right before the camera opens (kept
+// off the empty-state page to reduce on-screen text).
+const PHOTO_TIPS = [
+  "Bright, even lighting — natural daylight works best; avoid backlight and harsh shadows",
+  "Plain background, face the camera straight on",
+  "Frame head-to-knee (or full body) and keep the shot steady and level",
+  "Fitted clothing so your physique is visible; relaxed pose, arms at your sides",
+  "No filters or edits — and use a similar setup each time so scans compare fairly",
+];
+
 function ShimmerBlock({ width, height, style }: { width: number | string; height: number; style?: any }) {
   const shimmer = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -364,25 +374,18 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             : "Take your first scan to start tracking visible changes over time."}
         </Text>
 
-        <View style={styles.photoTips}>
-          <View style={styles.photoTipsHeader}>
-            <Ionicons name="bulb-outline" size={16} color={colors.accent} />
-            <Text style={styles.photoTipsTitle}>How to take your photo</Text>
-          </View>
-          {[
-            "Bright, even lighting — natural daylight works best; avoid backlight and harsh shadows",
-            "Plain background, face the camera straight on",
-            "Frame head-to-knee (or full body) and keep the shot steady and level",
-            "Fitted clothing so your physique is visible; relaxed pose, arms at your sides",
-            "No filters or edits — and use a similar setup each time so scans compare fairly",
-          ].map((tip) => (
-            <Text key={tip} style={styles.photoTipsItem}>{`•  ${tip}`}</Text>
-          ))}
-        </View>
-
         <TouchableOpacity
           style={[styles.cameraBtn, usage.remaining === 0 && styles.btnDisabled]}
-          onPress={() => pickImage(true)}
+          onPress={() =>
+            Alert.alert(
+              "How to take your photo",
+              PHOTO_TIPS.map((t) => `•  ${t}`).join("\n\n"),
+              [
+                { text: "Cancel", style: "cancel" },
+                { text: "I understand", onPress: () => pickImage(true) },
+              ],
+            )
+          }
         >
           <Ionicons name="camera" size={22} color={colors.background} />
           <Text style={styles.cameraBtnText}>{hasHistory ? "New Scan" : "Take Photo"}</Text>
@@ -873,11 +876,4 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, marginTop: spacing.md,
   },
   disclaimerText: { fontSize: 12, color: colors.textSecondary, lineHeight: 17, flex: 1 },
-  photoTips: {
-    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: colors.border, marginBottom: spacing.lg,
-  },
-  photoTipsHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
-  photoTipsTitle: { fontSize: 13, fontWeight: "700", color: colors.text },
-  photoTipsItem: { fontSize: 12, color: colors.textSecondary, lineHeight: 18, marginBottom: 4 },
 });
