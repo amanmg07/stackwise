@@ -5,8 +5,11 @@ import { peptides } from "../../data/peptides";
 import { getSourcesForPeptide } from "../../data/peptideSources";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
+import { format, addWeeks } from "date-fns";
 import { colors, spacing, safeBottom } from "../../theme";
-import { trackPeptideViewed, trackPeptideBookmarked } from "../../services/analyticsService";
+import { trackPeptideViewed, trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
+import { generateId } from "../../utils/id";
+import { AdministrationRoute } from "../../types";
 
 const CATEGORY_COLORS: Record<string, string> = {
   recovery: "#4ade80",
@@ -23,7 +26,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function PeptideDetailScreen({ route, navigation }: any) {
   const { peptideId } = route.params;
   const peptide = peptides.find((p) => p.id === peptideId);
-  const { settings, updateSettings } = useApp();
+  const { settings, cycles, addCycle, updateCycle, journal } = useApp();
   const { showToast } = useToast();
   const [expandedProtocol, setExpandedProtocol] = useState<number | null>(0);
   const [showStorage, setShowStorage] = useState(false);
@@ -32,16 +35,6 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
   useEffect(() => {
     trackPeptideViewed(peptideId);
   }, [peptideId]);
-
-  const isSaved = settings.savedPeptides?.includes(peptideId);
-  const toggleSave = () => {
-    const saved = settings.savedPeptides || [];
-    updateSettings({
-      savedPeptides: isSaved ? saved.filter((id) => id !== peptideId) : [...saved, peptideId],
-    });
-    trackPeptideBookmarked(peptideId, isSaved ? "removed" : "saved");
-    showToast(isSaved ? "Removed from saved" : "Saved for later!");
-  };
 
   if (!peptide) {
     return (
@@ -53,6 +46,70 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
 
   const stackPeptides = peptides.filter((p) => peptide.stacksWith.includes(p.id));
 
+  // Add this compound straight to the user's cycle. If a cycle is
+  // active, merge into it (skip if already present); otherwise start a
+  // new active cycle containing just this compound. Mirrors the Self
+  // Scan add-to-cycle behavior.
+  const addToCycle = () => {
+    const parseDoseUnit = (s?: string): "mcg" | "mg" | "g" | "IU" => {
+      if (!s) return "mg";
+      if (/\biu\b/i.test(s)) return "IU";
+      if (/\bmcg\b/i.test(s) || /\bμg\b/.test(s)) return "mcg";
+      if (/\bg\b/i.test(s) && !/\bmg\b/i.test(s)) return "g";
+      return "mg";
+    };
+    const doseRange = peptide.dosingProtocols?.[0]?.doseRange;
+    const doseMatch = doseRange?.match(/([\d.,]+)/);
+    const cp = {
+      peptideId: peptide.id,
+      doseAmount: doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25,
+      doseUnit: parseDoseUnit(doseRange),
+      frequency: peptide.dosingProtocols?.[0]?.frequency || "daily",
+      route: (peptide.routes?.[0] || "subcutaneous") as AdministrationRoute,
+      timeOfDay: ["morning"],
+    };
+    const startDate = new Date().toISOString().split("T")[0];
+    const activeCycle = cycles.find((c) => c.isActive);
+
+    if (activeCycle) {
+      if (activeCycle.peptides.some((p) => p.peptideId === peptide.id)) {
+        showToast(`${peptide.name} is already in "${activeCycle.name}"`);
+        return;
+      }
+      const mergedPeptides = [...activeCycle.peptides, { ...cp, addedAt: startDate }];
+      updateCycle({ ...activeCycle, peptides: mergedPeptides });
+      trackCycleUpdated(activeCycle.id, mergedPeptides as any);
+      showToast(`Added ${peptide.name} to "${activeCycle.name}"`);
+      return;
+    }
+
+    // No active cycle — auto-create one with just this compound.
+    const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
+    const cycleId = generateId();
+    const inferredGoals = settings.goals || [];
+    addCycle({
+      id: cycleId,
+      name: peptide.name,
+      peptides: [cp],
+      startDate,
+      endDate,
+      isActive: true,
+      notes: `Started from ${peptide.name}`,
+      createdAt: new Date().toISOString(),
+      goals: inferredGoals,
+    });
+    trackCycleCreated({
+      cycleId,
+      name: peptide.name,
+      peptides: [cp] as any,
+      durationWeeks: 8,
+      goals: inferredGoals,
+      baseline: computeBaseline(journal),
+      sourceScanId: undefined,
+    });
+    showToast(`Started a cycle with ${peptide.name}`);
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
       {/* Header */}
@@ -62,12 +119,9 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
           {peptide.abbreviation && peptide.abbreviation !== peptide.name && (
             <Text style={styles.abbr}>{peptide.abbreviation}</Text>
           )}
-          <TouchableOpacity onPress={toggleSave} style={styles.saveBtn}>
-            <Ionicons
-              name={isSaved ? "bookmark" : "bookmark-outline"}
-              size={22}
-              color={isSaved ? colors.accent : colors.textSecondary}
-            />
+          <TouchableOpacity onPress={addToCycle} style={styles.addBtn} activeOpacity={0.7}>
+            <Ionicons name="add-circle" size={16} color={colors.background} />
+            <Text style={styles.addBtnText}>Add to cycle</Text>
           </TouchableOpacity>
         </View>
         {peptide.compoundType === "supplement" && (
@@ -306,7 +360,11 @@ const styles = StyleSheet.create({
   errorText: { color: colors.error, fontSize: 16, textAlign: "center", marginTop: 40 },
   header: { marginBottom: 10 },
   nameRow: { flexDirection: "row", alignItems: "baseline", gap: 10, flexWrap: "wrap", flex: 1 },
-  saveBtn: { marginLeft: "auto", padding: 4 },
+  addBtn: {
+    marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: colors.accent, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
+  },
+  addBtnText: { fontSize: 13, fontWeight: "700", color: colors.background },
   name: { fontSize: 28, fontWeight: "800", color: colors.text, flexShrink: 1 },
   abbr: { fontSize: 16, color: colors.textSecondary },
   blendBadge: {

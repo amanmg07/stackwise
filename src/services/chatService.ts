@@ -161,15 +161,6 @@ Peptides: ${activeCycle.peptides.map((p) => {
     if (parts.length > 0) {
       prompt += `\nUSER PROFILE: ${parts.join(", ")}`;
     }
-
-    // Bookmarked peptides
-    if (settings.savedPeptides && settings.savedPeptides.length > 0) {
-      const names = settings.savedPeptides.map((id) => {
-        const pep = peptides.find((p) => p.id === id);
-        return pep?.name || id;
-      });
-      prompt += `\nBOOKMARKED COMPOUNDS: ${names.join(", ")}`;
-    }
   }
 
   return prompt;
