@@ -307,7 +307,7 @@ const peptideData: Peptide[] = [
     stacksWith: ["ghkcu", "dsip", "thymalin"],
     halfLife: "Short, but the effects on your DNA last much longer than the peptide stays in your blood.",
     storage: "Powder: freezer 3 years, fridge 2 years. Mixed: fridge, use within 2-4 weeks. Don't freeze and thaw repeatedly.",
-        notes: "Run in short bursts, not continuously. A Russian study followed 266 elderly people for 6-8 years on Epithalon with no significant side effects. Often combined with GHK-Cu for a full anti-aging protocol.",
+        notes: "Run in short bursts, not continuously. A Russian study followed 266 elderly people for 6-8 years on Epithalon with no significant side effects. Often combined with GHK-Cu for a full anti-aging cycle.",
   },
   {
     id: "selank",
@@ -629,9 +629,9 @@ const peptideData: Peptide[] = [
     dosingProtocols: [
       {
         purpose: "Hormone stimulation / fertility (research)",
-        doseRange: "Varies widely by study protocol",
+        doseRange: "Varies widely by study cycle",
         frequency: "Single or repeated doses",
-        cycleDuration: "Per clinical protocol",
+        cycleDuration: "Per clinical cycle",
         timing: "Timed with clinical monitoring.",
       },
     ],
@@ -678,7 +678,7 @@ const peptideData: Peptide[] = [
       {
         purpose: "Senolytic therapy (research)",
         doseRange: "No established human dose (animal dose: 5 mg/kg)",
-        frequency: "Varies — some protocols use 3x/week",
+        frequency: "Varies — some cycles use 3x/week",
         cycleDuration: "Short courses (2-4 weeks)",
         timing: "Any time.",
       },
@@ -827,7 +827,7 @@ const peptideData: Peptide[] = [
     abbreviation: "GnRH",
     categories: ["hormone"],
     description:
-      "A synthetic copy of the GnRH hormone your brain naturally makes. Tells your pituitary to release LH and FSH — the hormones that drive testosterone and fertility. Popular in TRT protocols to keep natural hormone production alive.",
+      "A synthetic copy of the GnRH hormone your brain naturally makes. Tells your pituitary to release LH and FSH — the hormones that drive testosterone and fertility. Popular in TRT cycles to keep natural hormone production alive.",
     mechanism:
       "Identical to your body's own GnRH. When injected in pulses, it keeps your LH and FSH signaling active. This is why men on testosterone use it — it preserves testicular function and fertility while on TRT.",
     routes: ["subcutaneous", "nasal"],
@@ -929,7 +929,7 @@ const peptideData: Peptide[] = [
         doseRange: "0.5-1 mg",
         frequency: "As needed, 2-4 hours before activity",
         cycleDuration: "As needed",
-        timing: "2-4 hours before desired effect. Can combine with loading protocol.",
+        timing: "2-4 hours before desired effect. Can combine with loading cycle.",
       },
     ],
     sideEffects: ["Nausea (very common at first — fades with use)", "Facial flushing", "Spontaneous erections", "Darkening of moles and freckles", "Appetite suppression", "Fatigue", "New mole development"],
@@ -985,14 +985,14 @@ const peptideData: Peptide[] = [
         doseRange: "10-20 mg",
         frequency: "1x daily",
         cycleDuration: "10 days on, then repeat 2-3x per year",
-        timing: "Morning. Short course protocol — not continuous use.",
+        timing: "Morning. Short course cycle — not continuous use.",
       },
     ],
     sideEffects: ["Very well tolerated", "Rare injection site soreness", "Possible mild flu-like symptoms as immune system activates"],
     stacksWith: ["thymosin_a1", "epithalon", "kpv"],
     halfLife: "Short (hours). Effects build over the 10-day course.",
     storage: "Fridge at 2-8°C.",
-        notes: "Developed by Dr. Khavinson in Russia. In a landmark 15-year study, Thymalin + Epithalon reduced cardiovascular mortality by 50% in elderly patients. Used in Russian military and clinical medicine since the 1970s. Often paired with Epithalon in 10-day 'bioregulator' protocols.",
+        notes: "Developed by Dr. Khavinson in Russia. In a landmark 15-year study, Thymalin + Epithalon reduced cardiovascular mortality by 50% in elderly patients. Used in Russian military and clinical medicine since the 1970s. Often paired with Epithalon in 10-day 'bioregulator' cycles.",
   },
   {
     id: "amino1mq",
@@ -1170,7 +1170,7 @@ const peptideData: Peptide[] = [
     stacksWith: ["semaglutide", "cjc_ipa_blend"],
     halfLife: "Varies by component.",
     storage: "Fridge at 2-8°C after mixing.",
-        notes: "Contains: AOD-9604 + MOTS-c + Tesamorelin. Sold by RegenMD, Elite Health HRT, and others. Doses vary by vendor so follow their specific protocol. Do NOT combine with semaglutide/tirzepatide without medical supervision.",
+        notes: "Contains: AOD-9604 + MOTS-c + Tesamorelin. Sold by RegenMD, Elite Health HRT, and others. Doses vary by vendor so follow their specific cycle. Do NOT combine with semaglutide/tirzepatide without medical supervision.",
   },
   {
     id: "cognitive_blend",

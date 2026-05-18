@@ -297,7 +297,7 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={{ flex: 1 }}>
             <Text style={styles.settingLabel}>Share research data</Text>
             <Text style={styles.consentSubtext}>
-              Anonymized protocol & outcome data. Revoke anytime.
+              Anonymized cycle & outcome data. Revoke anytime.
             </Text>
           </View>
         </View>
@@ -322,7 +322,7 @@ export default function ProfileScreen({ navigation }: any) {
             <Ionicons name="repeat-outline" size={20} color={colors.accent} />
           </View>
           <Text style={inlineEmptyStyle.text}>
-            No cycles yet. Your protocol history will show up here once you start tracking.
+            No cycles yet. Your cycle history will show up here once you start tracking.
           </Text>
         </View>
       ) : (

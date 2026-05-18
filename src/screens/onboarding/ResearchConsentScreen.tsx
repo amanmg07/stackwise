@@ -32,7 +32,7 @@ export default function ResearchConsentScreen({ onDecided }: Props) {
         <Text style={styles.body}>
           We partner with healthcare research companies who study how peptides
           and supplements work in real-world use. Your consent lets us share
-          your <Text style={styles.bold}>de-identified</Text> protocol and
+          your <Text style={styles.bold}>de-identified</Text> cycle and
           outcome data with them.
         </Text>
 

@@ -22,10 +22,10 @@ export default function CycleTrackerScreen({ navigation }: any) {
         </View>
         <Text style={emptyStateStyle.title}>Ready when you are</Text>
         <Text style={emptyStateStyle.subtitle}>
-          Start a new cycle to track your protocol, log doses, and see how it's working.
+          Start a new cycle to track your cycle, log doses, and see how it's working.
         </Text>
         <Text style={emptyStateStyle.hint}>
-          Tip: try a pre-built protocol from the Home tab for a quick start.
+          Tip: try a pre-built cycle from the Home tab for a quick start.
         </Text>
         <TouchableOpacity
           style={emptyStateStyle.button}
@@ -246,7 +246,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
               <View style={{ flex: 1 }}>
                 <Text style={styles.checkInBannerTitle}>Week {dueWeek} check-in is due</Text>
                 <Text style={styles.checkInBannerDesc}>
-                  ~60-second standardized check-in. Helps track this protocol's outcome.
+                  ~60-second standardized check-in. Helps track this cycle's outcome.
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.accent} />
@@ -269,7 +269,7 @@ export default function CycleTrackerScreen({ navigation }: any) {
           )}
 
           {/* Today's peptides */}
-          <Text style={styles.sectionTitle}>Today's Protocol</Text>
+          <Text style={styles.sectionTitle}>Today's Cycle</Text>
           {activeCycle.peptides.map((cp) => {
             const pep = peptides.find((p) => p.id === cp.peptideId);
             const dosed = todayLogs.some((l) => l.peptideId === cp.peptideId);

@@ -18,14 +18,14 @@ export default function DisclaimerScreen({ onAccept }: Props) {
         <Text style={styles.title}>Built for People{"\n"}Who Do Their Research</Text>
 
         <Text style={styles.body}>
-          StackWise gives you the same peptide and supplement knowledge that clinics, researchers, and experienced users rely on — dosing protocols, mechanisms, stacking strategies, side effects, and more.
+          StackWise gives you the same peptide and supplement knowledge that clinics, researchers, and experienced users rely on — dosing cycles, mechanisms, stacking strategies, side effects, and more.
         </Text>
 
         <View style={styles.card}>
           <View style={styles.cardRow}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.cardText}>
-              <Text style={styles.bold}>Evidence-based data</Text> from published research and real-world protocols
+              <Text style={styles.bold}>Evidence-based data</Text> from published research and real-world cycles
             </Text>
           </View>
           <View style={styles.cardRow}>

@@ -11,7 +11,7 @@ const SLIDES = [
   {
     icon: "flask-outline" as const,
     title: "Welcome to StackWise",
-    subtitle: "Your all-in-one peptide & supplement guide. Browse compounds, build protocols, and get personalized recommendations.",
+    subtitle: "Your all-in-one peptide & supplement guide. Browse compounds, build cycles, and get personalized recommendations.",
   },
   {
     icon: "chatbubbles-outline" as const,

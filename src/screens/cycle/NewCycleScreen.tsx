@@ -154,7 +154,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
     const pep = peptideDB.find((p) => p.id === peptideId);
     const proto = pep?.dosingProtocols?.[0];
 
-    // Parse dose and unit from first protocol's doseRange (e.g. "3-5 g" → 3, "g")
+    // Parse dose and unit from first cycle's doseRange (e.g. "3-5 g" → 3, "g")
     const doseMatch = proto?.doseRange?.match(/([\d.,]+)/);
     const doseAmount = doseMatch ? parseFloat(doseMatch[1].replace(/,/g, "")) : 0.25;
     const doseUnit = parseDoseUnit(proto?.doseRange);
@@ -235,7 +235,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         startDate,
         endDate,
         isActive: true,
-        notes: template ? `Based on ${template.name} protocol` : "",
+        notes: template ? `Based on ${template.name} cycle` : "",
         createdAt: new Date().toISOString(),
         goals,
       });
@@ -309,7 +309,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
         <View style={styles.recBanner}>
           <Ionicons name="sparkles" size={14} color={colors.accent} />
           <Text style={styles.recBannerText}>
-            Pre-filled from {template.name} protocol. You can adjust values below.
+            Pre-filled from {template.name} cycle. You can adjust values below.
           </Text>
         </View>
       )}

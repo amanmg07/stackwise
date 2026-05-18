@@ -54,7 +54,7 @@ export default function CycleDetailScreen({ route }: any) {
           </View>
 
           {/* Peptide list */}
-          <Text style={styles.sectionTitle}>Protocol</Text>
+          <Text style={styles.sectionTitle}>Cycle</Text>
           {cycle.peptides.map((cp) => {
             const pep = peptides.find((p) => p.id === cp.peptideId);
             const doseCount = cycleLogs.filter((l) => l.peptideId === cp.peptideId).length;

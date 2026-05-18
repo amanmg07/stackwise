@@ -234,7 +234,7 @@ export const interactions: PeptideInteraction[] = [
   {
     peptideIds: ["thymalin", "epithalon"],
     severity: "info",
-    title: "Khavinson bioregulator protocol",
+    title: "Khavinson bioregulator cycle",
     detail: "The classic Russian longevity combo. Thymalin restores immune function while Epithalon supports telomeres. In long-term studies, this combination reduced mortality by 50%.",
   },
 

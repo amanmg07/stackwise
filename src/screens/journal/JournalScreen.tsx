@@ -492,10 +492,7 @@ export default function JournalScreen({ navigation }: any) {
                     <TouchableOpacity
                       key={id}
                       style={styles.recChip}
-                      onPress={() => navigation.navigate("ExploreTab", {
-                        screen: "PeptideDetail",
-                        params: { peptideId: id },
-                      })}
+                      onPress={() => navigation.navigate("PeptideDetail", { peptideId: id })}
                     >
                       <Text style={styles.recChipText}>{pep.name}</Text>
                       {pep.compoundType === "supplement" && (
@@ -549,7 +546,7 @@ export default function JournalScreen({ navigation }: any) {
             </View>
             <Text style={emptyStateStyle.title}>Your story starts here</Text>
             <Text style={emptyStateStyle.subtitle}>
-              Log how you feel today, and StackWise will start spotting trends across your protocol.
+              Log how you feel today, and StackWise will start spotting trends across your cycle.
             </Text>
             <Text style={emptyStateStyle.hint}>
               Tip: log 5+ days to unlock trend insights and tailored recommendations.

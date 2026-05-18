@@ -69,6 +69,12 @@ function JournalNavigator() {
     <JournalStack.Navigator screenOptions={screenOptions}>
       <JournalStack.Screen name="Journal" component={JournalScreen} options={{ headerShown: false }} />
       <JournalStack.Screen name="NewEntry" component={NewEntryScreen} options={{ title: "New Entry" }} />
+      {/* Detail flow registered locally so tapping a recommended
+          compound from Journal stays in the Journal stack — back
+          returns to Journal, not the Explore tab. */}
+      <JournalStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
+      <JournalStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />
+      <JournalStack.Screen name="Compare" component={CompareScreen} options={{ title: "Compare" }} />
     </JournalStack.Navigator>
   );
 }

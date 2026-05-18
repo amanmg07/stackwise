@@ -42,7 +42,7 @@ export default function LogDoseScreen({ route, navigation }: any) {
     if (newUnit === unit) return;
 
     // Always re-derive the amount from the cycle's recommended dose so the
-    // displayed value reflects the protocol's dose in the selected unit,
+    // displayed value reflects the cycle's dose in the selected unit,
     // not whatever the user has typed.
     if (initUnit === "IU" || newUnit === "IU") {
       // IU isn't a weight, so we can't convert across — show the recommendation

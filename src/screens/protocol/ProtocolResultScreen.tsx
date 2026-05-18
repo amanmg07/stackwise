@@ -28,7 +28,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
     })
     .filter((s) => s.score > 0)
     .filter((s) => {
-      // If route preferences provided, only show protocols where every peptide
+      // If route preferences provided, only show cycles where every peptide
       // has at least one route matching the user's preferences.
       // Supplements (oral) are always allowed regardless of route preference.
       if (!preferredRoutes || preferredRoutes.length === 0) return true;
@@ -43,7 +43,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
-      <Text style={styles.title}>Recommended Protocols</Text>
+      <Text style={styles.title}>Recommended Cycles</Text>
       <Text style={styles.subtitle}>
         Based on your selected goals
       </Text>
@@ -53,8 +53,8 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
           <View style={emptyStateStyle.icon}>
             <Ionicons name="search-outline" size={44} color={colors.accent} />
           </View>
-          <Text style={emptyStateStyle.title}>No Matching Protocols</Text>
-          <Text style={emptyStateStyle.subtitle}>Try selecting different goals to find protocols that match.</Text>
+          <Text style={emptyStateStyle.title}>No Matching Cycles</Text>
+          <Text style={emptyStateStyle.subtitle}>Try selecting different goals to find cycles that match.</Text>
         </View>
       )}
 
@@ -153,7 +153,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                 startDate,
                 endDate,
                 isActive: true,
-                notes: `Based on ${t.name} protocol`,
+                notes: `Based on ${t.name} cycle`,
                 createdAt: new Date().toISOString(),
                 goals: t.goals,
               });
@@ -172,7 +172,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
             }}
           >
             <Ionicons name="play" size={16} color={colors.background} />
-            <Text style={styles.startBtnText}>Start This Protocol</Text>
+            <Text style={styles.startBtnText}>Start This Cycle</Text>
           </TouchableOpacity>
         </View>
       ))}

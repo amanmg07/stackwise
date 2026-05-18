@@ -190,8 +190,8 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
         <Text style={styles.cardBody}>{peptide.mechanism}</Text>
       </View>
 
-      {/* Dosing Protocols */}
-      <Text style={styles.sectionTitle}>Dosing Protocols</Text>
+      {/* Dosing Cycles */}
+      <Text style={styles.sectionTitle}>Dosing Cycles</Text>
       {peptide.dosingProtocols.map((proto, i) => (
         <TouchableOpacity
           key={i}

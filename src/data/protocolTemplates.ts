@@ -31,7 +31,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
     id: "deep_fat_loss",
     name: "Deep Fat Loss",
     goals: ["fat_loss"],
-    description: "Serious fat loss protocol. Semaglutide kills your appetite while AOD-9604 directly targets fat burning.",
+    description: "Serious fat loss cycle. Semaglutide kills your appetite while AOD-9604 directly targets fat burning.",
     peptides: [
       { peptideId: "semaglutide", role: "Primary", suggestedDose: "0.25 mg escalating to 2.4 mg", suggestedFrequency: "1x per week", suggestedDuration: "16+ weeks" },
       { peptideId: "aod9604", role: "Support", suggestedDose: "0.3 mg", suggestedFrequency: "1x daily", suggestedDuration: "8-12 weeks" },
@@ -51,7 +51,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
     ],
     cycleDuration: "4-6 weeks (GHK-Cu daily, Epithalon in a short burst within)",
     difficulty: "beginner",
-    notes: "Both are among the safest peptides out there. GHK-Cu runs the full cycle while Epithalon is just a 10-20 day burst. Good starting point if you're new to anti-aging protocols.",
+    notes: "Both are among the safest peptides out there. GHK-Cu runs the full cycle while Epithalon is just a 10-20 day burst. Good starting point if you're new to anti-aging cycles.",
   },
   {
     id: "cognitive_edge",
@@ -151,7 +151,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
     ],
     cycleDuration: "8 weeks on, 4 weeks off",
     difficulty: "advanced",
-    notes: "The 'mitochondrial triad' — MOTS-c mimics exercise, SS-31 protects energy production, Humanin prevents cell death. All three are research-stage with limited human data. For experienced users comfortable with cutting-edge protocols.",
+    notes: "The 'mitochondrial triad' — MOTS-c mimics exercise, SS-31 protects energy production, Humanin prevents cell death. All three are research-stage with limited human data. For experienced users comfortable with cutting-edge cycles.",
   },
   {
     id: "trt_support",
@@ -206,7 +206,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
     notes: "PT-141 is FDA-approved as Vyleesi. Take 45+ min before. Start at 1 mg to test nausea tolerance. Don't use more than once per day or 8x per month. Don't use with uncontrolled high blood pressure.",
   },
 
-  // ── Mixed peptide + supplement protocols ──
+  // ── Mixed peptide + supplement cycles ──
 
   {
     id: "ultimate_recovery",
@@ -242,7 +242,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
   },
   {
     id: "deep_sleep_hybrid",
-    name: "Deep Sleep Protocol",
+    name: "Deep Sleep Cycle",
     goals: ["sleep", "recovery"],
     description: "DSIP peptide for deep sleep combined with the proven supplement sleep stack. Fall asleep faster and wake up recovered.",
     peptides: [
@@ -259,7 +259,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
     id: "skin_rejuvenation",
     name: "Skin Rejuvenation",
     goals: ["anti_aging"],
-    description: "GHK-Cu rebuilds collagen from the inside while collagen and vitamin C provide the raw materials. The complete skin protocol.",
+    description: "GHK-Cu rebuilds collagen from the inside while collagen and vitamin C provide the raw materials. The complete skin cycle.",
     peptides: [
       { peptideId: "ghkcu", role: "Primary", suggestedDose: "1-2 mg", suggestedFrequency: "1x daily", suggestedDuration: "4-6 weeks" },
       { peptideId: "collagen", role: "Primary", suggestedDose: "10-15 g", suggestedFrequency: "1x daily", suggestedDuration: "Ongoing" },
@@ -301,7 +301,7 @@ export const protocolTemplates: ProtocolTemplate[] = [
     notes: "Gonadorelin keeps your LH/FSH signaling alive — critical if you're on or considering TRT. Ashwagandha reduces cortisol (cortisol kills testosterone). Tongkat ali and boron both support free testosterone levels naturally.",
   },
 
-  // ── Supplement-only protocols ──
+  // ── Supplement-only cycles ──
 
   {
     id: "muscle_performance_stack",

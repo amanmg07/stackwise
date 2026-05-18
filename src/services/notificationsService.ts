@@ -97,7 +97,7 @@ export async function scheduleDailyReminder(times: DailyTime[]): Promise<boolean
       await Notifications.scheduleNotificationAsync({
         identifier: dailyId(t),
         content: {
-          title: "Log today's protocol",
+          title: "Log today's cycle",
           body: "Quick tap to log doses or how you're feeling — keeps your trends accurate.",
           sound: false,
         },
@@ -213,7 +213,7 @@ export async function scheduleOutcomeReminders(cycle: Cycle): Promise<void> {
         identifier: `${OUTCOME_REMINDER_PREFIX}${cycle.id}.${week}`,
         content: {
           title: `Week ${week} check-in for "${cycle.name}"`,
-          body: "60 seconds — helps make your protocol data scientifically meaningful.",
+          body: "60 seconds — helps make your cycle data scientifically meaningful.",
           sound: false,
         },
         // Same SDK 54 requirement: one-off date triggers need an

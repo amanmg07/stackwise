@@ -705,7 +705,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   : settings.goals || [];
                 addCycle({
                   id: cycleId,
-                  name: "Self Scan Protocol",
+                  name: "Self Scan Cycle",
                   peptides: cyclePeptides,
                   startDate,
                   endDate,
@@ -716,7 +716,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                 });
                 trackCycleCreated({
                   cycleId,
-                  name: "Self Scan Protocol",
+                  name: "Self Scan Cycle",
                   peptides: cyclePeptides as any,
                   durationWeeks: 8,
                   goals: inferredGoals,
@@ -729,7 +729,7 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   const scan = scans.find((s) => s.id === currentScanId);
                   if (scan) updateScan({ ...scan, resultingCycleId: cycleId });
                 }
-                Alert.alert("Cycle Started!", "Your Self Scan protocol is now active.", [
+                Alert.alert("Cycle Started!", "Your Self Scan cycle is now active.", [
                   { text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) },
                 ]);
               }}
