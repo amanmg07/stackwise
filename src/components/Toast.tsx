@@ -9,12 +9,13 @@ interface Props {
   duration?: number;
 }
 
-// Default 1200ms: the toast is a full-width banner at the top that
-// overlaps the nav back button, so it should clear quickly. Still long
-// enough to read a short confirmation ("Profile saved").
+// Bottom snackbar (above the tab bar) so it never covers the top-left
+// back button on any screen. 1200ms is a snappy, readable default for
+// a short confirmation ("Profile saved").
 export default function Toast({ message, visible, onHide, duration = 1200 }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-20)).current;
+  // Slides up from below.
+  const translateY = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
     if (visible) {
@@ -26,7 +27,7 @@ export default function Toast({ message, visible, onHide, duration = 1200 }: Pro
       const timer = setTimeout(() => {
         Animated.parallel([
           Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-          Animated.timing(translateY, { toValue: -20, duration: 200, useNativeDriver: true }),
+          Animated.timing(translateY, { toValue: 20, duration: 200, useNativeDriver: true }),
         ]).start(() => onHide());
       }, duration);
 
@@ -46,7 +47,9 @@ export default function Toast({ message, visible, onHide, duration = 1200 }: Pro
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 60 : 30,
+    // Sits above the bottom tab bar (~85 iOS / ~65 Android) so the
+    // top-left back button is never obscured on any screen.
+    bottom: Platform.OS === "ios" ? 100 : 80,
     left: 20, right: 20,
     backgroundColor: colors.success,
     borderRadius: 12,
