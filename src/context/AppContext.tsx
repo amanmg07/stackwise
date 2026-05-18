@@ -69,7 +69,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     weightUnit: "lbs",
     notificationsEnabled: false,
     reminderTimes: ["08:00", "20:00"],
-    savedPeptides: [],
     onboardingDone: false,
     demographicsDone: false,
     disclaimerAccepted: false,

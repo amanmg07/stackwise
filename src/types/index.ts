@@ -206,7 +206,6 @@ export interface UserSettings {
   weightUnit: "lbs" | "kg";
   notificationsEnabled: boolean;
   reminderTimes: string[];
-  savedPeptides: string[];
   onboardingDone: boolean;
   demographicsDone: boolean;
   disclaimerAccepted: boolean;

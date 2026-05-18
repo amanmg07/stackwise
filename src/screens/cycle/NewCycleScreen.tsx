@@ -108,7 +108,7 @@ export default function NewCycleScreen({ route, navigation }: any) {
     [],
   );
   const [showPicker, setShowPicker] = useState<false | "peptide" | "supplement">(false);
-  const [expandedCats, setExpandedCats] = useState<(PeptideCategory | "saved")[]>([]);
+  const [expandedCats, setExpandedCats] = useState<PeptideCategory[]>([]);
   const [pickerSearch, setPickerSearch] = useState("");
 
   // Auto-generate cycle name based on top categories of selected compounds
@@ -440,45 +440,12 @@ export default function NewCycleScreen({ route, navigation }: any) {
                     {p.compoundType === "supplement" && (
                       <Ionicons name="leaf-outline" size={13} color="#4ade80" />
                     )}
-                    {settings.savedPeptides.includes(p.id) && (
-                      <Ionicons name="bookmark" size={14} color={colors.accent} />
-                    )}
                   </View>
                   <Ionicons name="add" size={20} color={colors.accent} />
                 </TouchableOpacity>
               ))
           ) : (
           <>
-          {/* Saved peptides section */}
-          {settings.savedPeptides.length > 0 && (() => {
-            const savedAvailable = peptideDB
-              .filter((p) => (p.compoundType || "peptide") === showPicker)
-              .filter((p) => settings.savedPeptides.includes(p.id) && !cyclePeptides.some((cp) => cp.peptideId === p.id))
-              .sort((a, b) => a.name.localeCompare(b.name));
-            if (savedAvailable.length === 0) return null;
-            const expanded = expandedCats.includes("saved");
-            return (
-              <View style={styles.catSection}>
-                <TouchableOpacity
-                  style={styles.catHeader}
-                  onPress={() => setExpandedCats((prev) =>
-                    prev.includes("saved") ? prev.filter((c) => c !== "saved") : [...prev, "saved"]
-                  )}
-                >
-                  <Ionicons name="bookmark" size={18} color={colors.accent} />
-                  <Text style={[styles.catHeaderText, { color: colors.accent }]}>Saved ({savedAvailable.length})</Text>
-                  <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textSecondary} />
-                </TouchableOpacity>
-                {expanded && savedAvailable.map((p) => (
-                  <TouchableOpacity key={p.id} style={styles.pickerRow} onPress={() => addPeptide(p.id)}>
-                    <Text style={styles.pickerName}>{p.name}</Text>
-                    <Ionicons name="add" size={20} color={colors.accent} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            );
-          })()}
-
           {/* Category sections */}
           {CATEGORY_INFO.map((cat) => {
             const catPeptides = peptideDB
@@ -505,9 +472,6 @@ export default function NewCycleScreen({ route, navigation }: any) {
                       <Text style={styles.pickerName}>{p.name}</Text>
                       {p.compoundType === "supplement" && (
                         <Ionicons name="leaf-outline" size={13} color="#4ade80" />
-                      )}
-                      {settings.savedPeptides.includes(p.id) && (
-                        <Ionicons name="bookmark" size={14} color={colors.accent} />
                       )}
                     </View>
                     <Ionicons name="add" size={20} color={colors.accent} />

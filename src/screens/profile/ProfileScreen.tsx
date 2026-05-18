@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
-import { peptides as peptideDB } from "../../data/peptides";
 import { colors, highlights, spacing, safeBottom, inlineEmptyStyle } from "../../theme";
 import { syncResearchConsent } from "../../services/analyticsService";
 import { exportUserData, deleteServerData } from "../../utils/supabase";
@@ -283,42 +282,6 @@ export default function ProfileScreen({ navigation }: any) {
         </View>
       </View>
 
-      {/* Saved Peptides */}
-      <Text style={styles.sectionTitle}>Saved for Later</Text>
-      {(!settings.savedPeptides || settings.savedPeptides.length === 0) ? (
-        <View style={inlineEmptyStyle.container}>
-          <View style={inlineEmptyStyle.iconWrap}>
-            <Ionicons name="bookmark-outline" size={20} color={colors.accent} />
-          </View>
-          <Text style={inlineEmptyStyle.text}>
-            Nothing saved yet. Tap the bookmark icon on any compound to keep it here for later.
-          </Text>
-        </View>
-      ) : (
-        settings.savedPeptides.map((id) => {
-          const pep = peptideDB.find((p) => p.id === id);
-          if (!pep) return null;
-          return (
-            <TouchableOpacity
-              key={id}
-              style={styles.savedRow}
-              onPress={() => navigation.navigate("ExploreTab", {
-                screen: "PeptideDetail",
-                params: { peptideId: id },
-              })}
-            >
-              <View style={styles.savedInfo}>
-                <Text style={styles.savedName}>{pep.name}</Text>
-                <Text style={styles.savedCats} numberOfLines={1}>
-                  {pep.categories.map((c) => c.replace("_", " ")).join(", ")}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          );
-        })
-      )}
-
       <Text style={styles.sectionTitle}>Cycle History</Text>
 
       {cycles.length === 0 ? (
@@ -452,14 +415,6 @@ const styles = StyleSheet.create({
   cycleDates: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
   statusBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   statusText: { fontSize: 11, fontWeight: "700" },
-  savedRow: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: colors.border, marginBottom: 8,
-  },
-  savedInfo: { flex: 1 },
-  savedName: { fontSize: 15, fontWeight: "600", color: colors.text },
-  savedCats: { fontSize: 12, color: colors.textSecondary, marginTop: 2, textTransform: "capitalize" },
   emptyText: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
   dangerRow: {
     flexDirection: "row", alignItems: "center", gap: 12,

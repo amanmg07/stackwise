@@ -16,7 +16,6 @@ const DEFAULT_SETTINGS: UserSettings = {
   weightUnit: "lbs",
   notificationsEnabled: false,
   reminderTimes: ["08:00", "20:00"],
-  savedPeptides: [],
   onboardingDone: false,
   demographicsDone: false,
   disclaimerAccepted: false,
