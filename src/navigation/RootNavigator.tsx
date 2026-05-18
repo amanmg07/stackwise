@@ -85,6 +85,10 @@ function ProtocolNavigator() {
   return (
     <ProtocolStack.Navigator screenOptions={screenOptions}>
       <ProtocolStack.Screen name="ProtocolBuilder" component={ProtocolBuilderScreen} options={{ headerShown: false }} />
+      {/* Detail registered locally so tapping a compound in a
+          recommended cycle stays in the Home stack — back returns to
+          the results page, not a different tab. */}
+      <ProtocolStack.Screen name="PeptideDetail" component={PeptideDetailScreen} options={{ title: "Details" }} />
       <ProtocolStack.Screen name="ProtocolResult" component={ProtocolResultScreen} options={{ title: "Results" }} />
       <ProtocolStack.Screen name="NewCycle" component={NewCycleScreen} options={{ title: "New Cycle" }} />
       <ProtocolStack.Screen name="ReconCalculator" component={ReconCalculatorScreen} options={{ title: "Dosing Calculator" }} />

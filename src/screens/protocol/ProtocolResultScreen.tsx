@@ -95,7 +95,12 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
             const pep = peptideDB.find((p) => p.id === tp.peptideId);
             const isSupplement = pep?.compoundType === "supplement";
             return (
-              <View key={tp.peptideId} style={styles.pepRow}>
+              <TouchableOpacity
+                key={tp.peptideId}
+                style={styles.pepRow}
+                activeOpacity={0.7}
+                onPress={() => navigation.navigate("PeptideDetail", { peptideId: tp.peptideId })}
+              >
                 <View style={styles.pepInfo}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                     <Text style={styles.pepName}>{pep?.name || tp.peptideId}</Text>
@@ -107,7 +112,7 @@ export default function ProtocolResultScreen({ route, navigation }: any) {
                   <Text style={styles.pepDose}>{tp.suggestedDose}</Text>
                   <Text style={styles.pepFreq}>{tp.suggestedFrequency}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
 
