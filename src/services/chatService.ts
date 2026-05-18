@@ -1,6 +1,6 @@
 import { peptides } from "../data/peptides";
 import { Cycle, JournalEntry, ChatMessage, ScanRecord, UserSettings } from "../types";
-import { callGroqProxy } from "../utils/supabase";
+import { callGroqProxy, streamGroqProxy } from "../utils/supabase";
 import { extractPeptideIds } from "../utils/peptideMatch";
 
 function findMentionedPeptides(messages: ChatMessage[]): string[] {
@@ -179,16 +179,18 @@ function extractPeptideRefs(text: string): string[] {
   return extractPeptideIds(text, peptides);
 }
 
-export async function sendChatMessage(
-  messages: ChatMessage[],
-  context: {
-    activeCycle: Cycle | null;
-    recentJournal: JournalEntry[];
-    pastCycles?: Cycle[];
-    scans?: ScanRecord[];
-    settings?: UserSettings;
-  },
-): Promise<{ content: string; peptideRefs: string[] }> {
+type ChatContext = {
+  activeCycle: Cycle | null;
+  recentJournal: JournalEntry[];
+  pastCycles?: Cycle[];
+  scans?: ScanRecord[];
+  settings?: UserSettings;
+};
+
+const FALLBACK_REPLY = "I couldn't generate a response. Please try again.";
+
+/** Build the Groq chat-completions request body (system prompt + turns). */
+function buildGroqRequest(messages: ChatMessage[], context: ChatContext) {
   const mentionedIds = findMentionedPeptides(messages);
   const isFirstTurn = messages.filter((m) => m.role === "user").length <= 1;
   const systemPrompt = buildSystemPrompt(
@@ -209,17 +211,34 @@ export async function sendChatMessage(
     })),
   ];
 
-  const data = await callGroqProxy({
+  return {
     model: "llama-3.3-70b-versatile",
     messages: groqMessages,
     max_tokens: 1024,
     temperature: 0.7,
-  });
+  };
+}
 
-  const content =
-    data.choices?.[0]?.message?.content ||
-    "I couldn't generate a response. Please try again.";
-  const peptideRefs = extractPeptideRefs(content);
+export async function sendChatMessage(
+  messages: ChatMessage[],
+  context: ChatContext,
+): Promise<{ content: string; peptideRefs: string[] }> {
+  const data = await callGroqProxy(buildGroqRequest(messages, context));
+  const content = data.choices?.[0]?.message?.content || FALLBACK_REPLY;
+  return { content, peptideRefs: extractPeptideRefs(content) };
+}
 
-  return { content, peptideRefs };
+/**
+ * Streaming variant: invokes onDelta with each text fragment as it
+ * arrives, then resolves with the full content + extracted peptide
+ * refs (computed once on the complete text).
+ */
+export async function streamChatMessage(
+  messages: ChatMessage[],
+  context: ChatContext,
+  onDelta: (text: string) => void,
+): Promise<{ content: string; peptideRefs: string[] }> {
+  const streamed = await streamGroqProxy(buildGroqRequest(messages, context), onDelta);
+  const content = streamed || FALLBACK_REPLY;
+  return { content, peptideRefs: extractPeptideRefs(content) };
 }

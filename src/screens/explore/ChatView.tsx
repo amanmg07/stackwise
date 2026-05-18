@@ -6,7 +6,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides as peptideDB } from "../../data/peptides";
-import { sendChatMessage, categorizeQuery } from "../../services/chatService";
+import { streamChatMessage, categorizeQuery } from "../../services/chatService";
 import { peptides as peptideDataset } from "../../data/peptides";
 import { extractPeptideIds } from "../../utils/peptideMatch";
 import { generateId } from "../../utils/id";
@@ -39,6 +39,11 @@ export default function ChatView({ navigation }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  // In-progress assistant reply, rendered live but intentionally NOT
+  // part of `messages` so the per-change AsyncStorage persist effect
+  // doesn't fire on every streamed token. Committed to `messages` once
+  // the stream completes.
+  const [streamingText, setStreamingText] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [chatLoaded, setChatLoaded] = useState(false);
   const usage = useUsage("ai_chat");
@@ -108,10 +113,12 @@ export default function ChatView({ navigation }: Props) {
     setInput("");
     setLoading(true);
 
+    setStreamingText("");
     try {
-      const { content, peptideRefs } = await sendChatMessage(
+      const { content, peptideRefs } = await streamChatMessage(
         updated,
         { activeCycle, recentJournal, pastCycles, scans: recentScans, settings },
+        (delta) => setStreamingText((prev) => prev + delta),
       );
 
       const assistantMsg: ChatMessage = {
@@ -122,6 +129,7 @@ export default function ChatView({ navigation }: Props) {
         peptideRefs,
       };
       setMessages([...updated, assistantMsg]);
+      setStreamingText("");
       await trackUsage("ai_chat");
       usage.refresh();
     } catch (err: any) {
@@ -132,6 +140,7 @@ export default function ChatView({ navigation }: Props) {
         timestamp: new Date().toISOString(),
       };
       setMessages([...updated, errorMsg]);
+      setStreamingText("");
     } finally {
       setLoading(false);
     }
@@ -221,6 +230,12 @@ export default function ChatView({ navigation }: Props) {
   const bottomPadding = keyboardHeight > 0 ? keyboardHeight - tabBarHeight : 0;
   const keyboardOpen = keyboardHeight > 0;
 
+  // Append the in-progress reply as a synthetic, non-persisted bubble
+  // while it streams.
+  const listData: ChatMessage[] = streamingText
+    ? [...messages, { id: "__streaming__", role: "assistant", content: streamingText, timestamp: "" }]
+    : messages;
+
   return (
     <View style={styles.container}>
       {messages.length === 0 ? (
@@ -254,7 +269,7 @@ export default function ChatView({ navigation }: Props) {
       ) : (
         <FlatList
           ref={listRef}
-          data={messages}
+          data={listData}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
           contentContainerStyle={{ padding: spacing.md, paddingBottom: 8 }}
