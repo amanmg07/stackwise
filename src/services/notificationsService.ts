@@ -16,7 +16,32 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const DAILY_REMINDER_TAG = "stackwise.daily";
+const DAILY_REMINDER_PREFIX = "stackwise.daily";
+
+export type DailyTime = { hour: number; minute: number };
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const dailyId = (t: DailyTime) => `${DAILY_REMINDER_PREFIX}.${pad2(t.hour)}${pad2(t.minute)}`;
+
+/**
+ * Parse stored "HH:MM" reminder strings into {hour,minute}. Invalid
+ * entries are dropped; if nothing valid remains, falls back to the
+ * 8 AM + 8 PM default so a reminder is always scheduled.
+ */
+export function parseReminderTimes(times?: string[]): DailyTime[] {
+  const FALLBACK: DailyTime[] = [
+    { hour: 8, minute: 0 },
+    { hour: 20, minute: 0 },
+  ];
+  if (!times || times.length === 0) return FALLBACK;
+  const parsed = times
+    .map((t) => {
+      const [h, m] = String(t).split(":").map((x) => parseInt(x, 10));
+      return { hour: h, minute: Number.isFinite(m) ? m : 0 };
+    })
+    .filter((t) => Number.isInteger(t.hour) && t.hour >= 0 && t.hour <= 23 && t.minute >= 0 && t.minute <= 59);
+  return parsed.length ? parsed : FALLBACK;
+}
 const OUTCOME_REMINDER_PREFIX = "stackwise.outcome.";
 const ANDROID_CHANNEL_ID = "default";
 
@@ -53,41 +78,115 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 /**
- * Schedule a recurring daily reminder at the chosen hour/minute.
- * Idempotent: cancels any existing daily reminder first.
+ * Schedule a recurring reminder at EACH given time (e.g. 8 AM and
+ * 8 PM). Idempotent: clears all existing daily reminders first, then
+ * schedules one per time with a stable per-time identifier.
+ *
+ * Returns true only if, after scheduling, the OS reports EVERY
+ * requested reminder as queued — so a silent drop is detectable
+ * instead of looking identical to success (the "says 8:00 but never
+ * pings" class of failure).
  */
-export async function scheduleDailyReminder(hour: number, minute: number): Promise<void> {
+export async function scheduleDailyReminder(times: DailyTime[]): Promise<boolean> {
   try {
     await ensureAndroidChannel();
     await cancelDailyReminder();
-    await Notifications.scheduleNotificationAsync({
-      identifier: DAILY_REMINDER_TAG,
-      content: {
-        title: "Log today's protocol",
-        body: "Quick tap to log doses or how you're feeling — keeps your trends accurate.",
-        sound: false,
-      },
-      // expo-notifications (SDK 54) requires an explicit trigger `type`.
-      // The legacy `{ hour, minute, repeats: true }` shorthand is no
-      // longer recognized and silently never fires. DAILY repeats by
-      // definition, so no `repeats` flag. Works on iOS + Android.
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour,
-        minute,
-        channelId: ANDROID_CHANNEL_ID,
-      },
-    });
+    if (times.length === 0) return true;
+
+    for (const t of times) {
+      await Notifications.scheduleNotificationAsync({
+        identifier: dailyId(t),
+        content: {
+          title: "Log today's protocol",
+          body: "Quick tap to log doses or how you're feeling — keeps your trends accurate.",
+          sound: false,
+        },
+        // expo-notifications (SDK 54) requires an explicit trigger
+        // `type`. DAILY repeats at hour/minute by definition.
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          hour: t.hour,
+          minute: t.minute,
+          channelId: ANDROID_CHANNEL_ID,
+        },
+      });
+    }
+
+    // Verify the OS actually queued all of them.
+    const all = await Notifications.getAllScheduledNotificationsAsync();
+    const wanted = new Set(times.map(dailyId));
+    const present = all.filter(
+      (n) => typeof n.identifier === "string" && wanted.has(n.identifier),
+    ).length;
+    const ok = present === wanted.size;
+    if (!ok) {
+      Sentry.captureMessage(
+        "scheduleDailyReminder: not all reminders present after scheduling",
+        { level: "warning", extra: { wanted: wanted.size, present, scheduledCount: all.length } },
+      );
+    }
+    return ok;
   } catch (e) {
     Sentry.captureException(e);
+    return false;
   }
 }
 
+/**
+ * On-device ground truth for "why isn't my reminder firing": OS
+ * permission status, whether our daily reminder is actually queued,
+ * and when it should next fire (computed from hour/minute, since a
+ * DAILY trigger has no concrete date until it fires).
+ */
+export async function getNotificationDiagnostics(): Promise<{
+  permission: string;
+  canAskAgain: boolean;
+  dailyScheduled: boolean;
+  dailyCount: number;
+  totalScheduled: number;
+  nextFire: Date | null;
+}> {
+  try {
+    const perm = await Notifications.getPermissionsAsync();
+    const all = await Notifications.getAllScheduledNotificationsAsync();
+    const daily = all.filter(
+      (n) => typeof n.identifier === "string" && n.identifier.startsWith(DAILY_REMINDER_PREFIX),
+    );
+    let nextFire: Date | null = null;
+    for (const n of daily) {
+      const trig: any = n.trigger;
+      if (trig && typeof trig.hour === "number" && typeof trig.minute === "number") {
+        const d = new Date();
+        d.setHours(trig.hour, trig.minute, 0, 0);
+        if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 1);
+        if (!nextFire || d.getTime() < nextFire.getTime()) nextFire = d;
+      }
+    }
+    return {
+      permission: perm.status,
+      canAskAgain: perm.canAskAgain,
+      dailyScheduled: daily.length > 0,
+      dailyCount: daily.length,
+      totalScheduled: all.length,
+      nextFire,
+    };
+  } catch (e) {
+    Sentry.captureException(e);
+    return { permission: "unknown", canAskAgain: false, dailyScheduled: false, dailyCount: 0, totalScheduled: 0, nextFire: null };
+  }
+}
+
+/** Cancel every daily reminder (all per-time entries). */
 export async function cancelDailyReminder(): Promise<void> {
   try {
-    await Notifications.cancelScheduledNotificationAsync(DAILY_REMINDER_TAG);
+    const all = await Notifications.getAllScheduledNotificationsAsync();
+    await Promise.all(
+      all
+        .filter((n) => typeof n.identifier === "string" && n.identifier.startsWith(DAILY_REMINDER_PREFIX))
+        .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+    );
   } catch {
-    /* may not exist yet — fine */
+    /* nothing scheduled yet — fine */
   }
 }
 

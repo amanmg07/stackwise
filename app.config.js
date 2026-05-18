@@ -25,7 +25,19 @@ export default {
     },
     android: {
       package: "com.stackwse.app",
-      permissions: ["CAMERA_ROLL", "CAMERA"],
+      // POST_NOTIFICATIONS: required to display notifications on
+      // Android 13+ (without it, scheduled reminders silently never
+      // show). RECEIVE_BOOT_COMPLETED: re-arms scheduled reminders
+      // after a device reboot — without it the daily reminder stops
+      // firing until the app is reopened. The expo-notifications
+      // plugin normally injects these; declaring them explicitly so
+      // it doesn't depend on plugin behavior.
+      permissions: [
+        "CAMERA_ROLL",
+        "CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+      ],
       adaptiveIcon: {
         backgroundColor: "#0a0a0a",
         foregroundImage: "./assets/android-icon-foreground.png",

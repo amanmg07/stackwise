@@ -9,11 +9,24 @@ import {
   requestNotificationPermission,
   scheduleDailyReminder,
   cancelDailyReminder,
+  getNotificationDiagnostics,
+  parseReminderTimes,
 } from "../../services/notificationsService";
 import * as FileSystem from "expo-file-system";
 import { Share } from "react-native";
 
 const SUPPORT_EMAIL = "stackwse1@gmail.com";
+
+const DEFAULT_REMINDER_TIMES = ["08:00", "20:00"];
+
+/** "08:00" -> "8:00 AM", "20:00" -> "8:00 PM" for user-facing copy. */
+function formatReminderTime(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map((x) => parseInt(x, 10));
+  if (!Number.isFinite(h)) return hhmm;
+  const period = h < 12 ? "AM" : "PM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(Number.isFinite(m) ? m : 0).padStart(2, "0")} ${period}`;
+}
 
 const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   recovery: { label: "Recovery", icon: "bandage", color: "#4ade80" },
@@ -192,7 +205,7 @@ export default function ProfileScreen({ navigation }: any) {
             <Text style={styles.settingLabel}>Daily reminder</Text>
             <Text style={styles.consentSubtext}>
               {settings.notificationsEnabled
-                ? `Pings you at ${settings.reminderTimes?.[0] || "8:00 PM"}`
+                ? `Pings you at ${(settings.reminderTimes?.length ? settings.reminderTimes : DEFAULT_REMINDER_TIMES).map(formatReminderTime).join(" & ")}`
                 : "Off — turn on to get a daily nudge to log doses & journal"}
             </Text>
           </View>
@@ -210,14 +223,33 @@ export default function ProfileScreen({ navigation }: any) {
                   );
                   return;
                 }
-                // Default 8 PM; users can change in a future settings flow.
-                const time = settings.reminderTimes?.[0] || "20:00";
-                const [h, m] = time.split(":").map((s) => parseInt(s, 10));
-                await scheduleDailyReminder(h || 20, m || 0);
+                // Fires at every configured time (default 8 AM & 8 PM).
+                const times = settings.reminderTimes?.length
+                  ? settings.reminderTimes
+                  : DEFAULT_REMINDER_TIMES;
+                const ok = await scheduleDailyReminder(parseReminderTimes(times));
                 updateSettings({
                   notificationsEnabled: true,
-                  reminderTimes: [time],
+                  reminderTimes: times,
                 });
+                // Surface on-device ground truth instead of silently
+                // assuming it worked (the "says 8:00 but never pings"
+                // investigation).
+                const diag = await getNotificationDiagnostics();
+                if (!ok || !diag.dailyScheduled) {
+                  Alert.alert(
+                    "Reminders may not fire",
+                    `The OS didn't confirm the reminders were queued (permission: ${diag.permission}). On some Android phones, battery optimization blocks scheduled reminders — exclude StackWise from battery optimization. On iOS, check Settings ▸ Notifications ▸ StackWise.`,
+                  );
+                } else {
+                  const when = diag.nextFire
+                    ? diag.nextFire.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })
+                    : times.map(formatReminderTime).join(" & ");
+                  Alert.alert(
+                    "Reminders set",
+                    `${diag.dailyCount} daily reminder${diag.dailyCount === 1 ? "" : "s"} (${times.map(formatReminderTime).join(" & ")}). Next: ${when}.`,
+                  );
+                }
               } else {
                 await cancelDailyReminder();
                 updateSettings({ notificationsEnabled: false });

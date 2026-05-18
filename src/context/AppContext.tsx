@@ -13,6 +13,7 @@ import {
   cancelOutcomeRemindersForCycle,
   cancelOutcomeReminder,
   scheduleDailyReminder,
+  parseReminderTimes,
 } from "../services/notificationsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
@@ -129,12 +130,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // is idempotent (cancels any existing first), so this is safe to
       // run every launch.
       if (s.notificationsEnabled) {
-        const time = s.reminderTimes?.[0] || "20:00";
-        const [h, m] = time.split(":").map((x) => parseInt(x, 10));
-        scheduleDailyReminder(
-          Number.isFinite(h) ? h : 20,
-          Number.isFinite(m) ? m : 0,
-        );
+        // Re-arms every configured time (default 8 AM & 8 PM).
+        scheduleDailyReminder(parseReminderTimes(s.reminderTimes));
       }
     })();
 
