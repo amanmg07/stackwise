@@ -155,7 +155,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         onPress={() => navigation.navigate("ProtocolResult", { goals: userGoals, routes: selectedRoutes })}
       >
         <Ionicons name="flash" size={20} color={colors.background} />
-        <Text style={styles.buildBtnText}>View Recommended Protocols</Text>
+        <Text style={styles.buildBtnText}>View Recommended Cycles</Text>
       </TouchableOpacity>
 
       <Animated.View style={{ transform: [{ scale }], marginTop: 12, borderRadius: 14, overflow: "hidden" }}>
