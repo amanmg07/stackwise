@@ -12,7 +12,7 @@ import { saveScanImage } from "../../utils/scanImages";
 import { colors, highlights, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
-import { trackScanCompleted, trackCycleCreated, computeBaseline } from "../../services/analyticsService";
+import { trackScanCompleted, trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { checkLimit, trackUsage } from "../../services/usageLimits";
 import { useUsage } from "../../hooks/useUsage";
 import { callGroqProxy } from "../../utils/supabase";
@@ -95,7 +95,7 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
-  const { addCycle, scans, addScan, updateScan, deleteScan, settings, journal } = useApp();
+  const { addCycle, updateCycle, cycles, scans, addScan, updateScan, deleteScan, settings, journal } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -363,6 +363,22 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
             ? "Track visible changes over time. Take a scan regularly to see how your body and skin respond."
             : "Take your first scan to start tracking visible changes over time."}
         </Text>
+
+        <View style={styles.photoTips}>
+          <View style={styles.photoTipsHeader}>
+            <Ionicons name="bulb-outline" size={16} color={colors.accent} />
+            <Text style={styles.photoTipsTitle}>How to take your photo</Text>
+          </View>
+          {[
+            "Bright, even lighting — natural daylight works best; avoid backlight and harsh shadows",
+            "Plain background, face the camera straight on",
+            "Frame head-to-knee (or full body) and keep the shot steady and level",
+            "Fitted clothing so your physique is visible; relaxed pose, arms at your sides",
+            "No filters or edits — and use a similar setup each time so scans compare fairly",
+          ].map((tip) => (
+            <Text key={tip} style={styles.photoTipsItem}>{`•  ${tip}`}</Text>
+          ))}
+        </View>
 
         <TouchableOpacity
           style={[styles.cameraBtn, usage.remaining === 0 && styles.btnDisabled]}
@@ -646,6 +662,40 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   };
                 });
                 const startDate = new Date().toISOString().split("T")[0];
+
+                // If a cycle is already active, add the selected
+                // compounds to it instead of starting a new one. Only
+                // create a new cycle when there is no active cycle.
+                const activeCycle = cycles.find((c) => c.isActive);
+                if (activeCycle) {
+                  const existingIds = new Set(activeCycle.peptides.map((p) => p.peptideId));
+                  const toAdd = cyclePeptides
+                    .filter((cp) => !existingIds.has(cp.peptideId))
+                    .map((cp) => ({ ...cp, addedAt: startDate }));
+                  if (toAdd.length === 0) {
+                    Alert.alert(
+                      "Already in your cycle",
+                      `Every selected compound is already part of "${activeCycle.name}".`,
+                    );
+                    return;
+                  }
+                  const mergedPeptides = [...activeCycle.peptides, ...toAdd];
+                  updateCycle({ ...activeCycle, peptides: mergedPeptides });
+                  trackCycleUpdated(activeCycle.id, mergedPeptides as any);
+                  // Stamp the scan -> cycle link for scan history.
+                  if (currentScanId) {
+                    const scan = scans.find((s) => s.id === currentScanId);
+                    if (scan) updateScan({ ...scan, resultingCycleId: activeCycle.id });
+                  }
+                  Alert.alert(
+                    "Added to Cycle",
+                    `Added ${toAdd.length} to "${activeCycle.name}".`,
+                    [{ text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) }],
+                  );
+                  return;
+                }
+
+                // No active cycle — start a new one (original behavior).
                 const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
                 const cycleId = generateId();
                 // Derive primary goals from the scan's recommended
@@ -823,4 +873,11 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, marginTop: spacing.md,
   },
   disclaimerText: { fontSize: 12, color: colors.textSecondary, lineHeight: 17, flex: 1 },
+  photoTips: {
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.border, marginBottom: spacing.lg,
+  },
+  photoTipsHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+  photoTipsTitle: { fontSize: 13, fontWeight: "700", color: colors.text },
+  photoTipsItem: { fontSize: 12, color: colors.textSecondary, lineHeight: 18, marginBottom: 4 },
 });
