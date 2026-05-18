@@ -12,7 +12,7 @@ import { saveScanImage } from "../../utils/scanImages";
 import { colors, highlights, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
-import { trackScanCompleted, trackCycleCreated, computeBaseline } from "../../services/analyticsService";
+import { trackScanCompleted, trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { checkLimit, trackUsage } from "../../services/usageLimits";
 import { useUsage } from "../../hooks/useUsage";
 import { callGroqProxy } from "../../utils/supabase";
@@ -95,7 +95,7 @@ function SkeletonResults() {
 }
 
 export default function ScannerScreen({ navigation }: any) {
-  const { addCycle, scans, addScan, updateScan, deleteScan, settings, journal } = useApp();
+  const { addCycle, updateCycle, cycles, scans, addScan, updateScan, deleteScan, settings, journal } = useApp();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -646,6 +646,40 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   };
                 });
                 const startDate = new Date().toISOString().split("T")[0];
+
+                // If a cycle is already active, add the selected
+                // compounds to it instead of starting a new one. Only
+                // create a new cycle when there is no active cycle.
+                const activeCycle = cycles.find((c) => c.isActive);
+                if (activeCycle) {
+                  const existingIds = new Set(activeCycle.peptides.map((p) => p.peptideId));
+                  const toAdd = cyclePeptides
+                    .filter((cp) => !existingIds.has(cp.peptideId))
+                    .map((cp) => ({ ...cp, addedAt: startDate }));
+                  if (toAdd.length === 0) {
+                    Alert.alert(
+                      "Already in your cycle",
+                      `Every selected compound is already part of "${activeCycle.name}".`,
+                    );
+                    return;
+                  }
+                  const mergedPeptides = [...activeCycle.peptides, ...toAdd];
+                  updateCycle({ ...activeCycle, peptides: mergedPeptides });
+                  trackCycleUpdated(activeCycle.id, mergedPeptides as any);
+                  // Stamp the scan -> cycle link for scan history.
+                  if (currentScanId) {
+                    const scan = scans.find((s) => s.id === currentScanId);
+                    if (scan) updateScan({ ...scan, resultingCycleId: activeCycle.id });
+                  }
+                  Alert.alert(
+                    "Added to Cycle",
+                    `Added ${toAdd.length} to "${activeCycle.name}".`,
+                    [{ text: "View Cycle", onPress: () => navigation.navigate("CycleTab", { screen: "CycleTracker" }) }],
+                  );
+                  return;
+                }
+
+                // No active cycle — start a new one (original behavior).
                 const endDate = format(addWeeks(new Date(), 8), "yyyy-MM-dd");
                 const cycleId = generateId();
                 // Derive primary goals from the scan's recommended
