@@ -179,14 +179,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       scheduleOutcomeReminders(cycle);
     },
     updateCycle: (cycle) => persistCycles(cycles.map((c) => (c.id === cycle.id ? cycle : c))),
-    deleteCycle: (id) => {
+    deleteCycle: async (id) => {
       persistCycles(cycles.filter((c) => c.id !== id));
       persistLogs(doseLogs.filter((l) => l.cycleId !== id));
-      // Cascade to server-side events so a mistake-deleted cycle
-      // never reaches the buyer-facing dataset.
-      deleteCycleAnalytics(id);
       // Also cancel any pending outcome reminders for this cycle.
       cancelOutcomeRemindersForCycle(id);
+      // Awaited (was fire-and-forget) so the cascade-delete's
+      // verification + orphaned-event telemetry actually runs instead
+      // of failing silently. UI state already updated above, so this
+      // doesn't block the user.
+      await deleteCycleAnalytics(id);
     },
 
     addDoseLog: (log) => persistLogs([log, ...doseLogs]),

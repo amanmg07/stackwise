@@ -100,14 +100,44 @@ export async function deleteCycleAnalytics(cycleId: string): Promise<void> {
     const userId = await getCurrentUserId();
     if (!userId) return;
 
-    // RLS limits this to the caller's own rows by anon_id, so we don't
-    // need to filter explicitly here.
-    await supabase
+    // .select() makes the DELETE return the rows it actually removed
+    // (RETURNING). RLS (anon_id = auth.uid()) only lets a session
+    // delete events it owns, so events written under a PRIOR anonymous
+    // identity are silently left behind and this returns 0 rows with no
+    // error. Capturing the count lets us detect that instead of the
+    // delete failing invisibly. (A separate re-count would be useless —
+    // it'd be RLS-blind to the orphaned rows for the same reason.)
+    const { data, error } = await supabase
       .from("analytics_events")
       .delete()
       .in("event_type", ["cycle_created", "cycle_updated", "cycle_ended", "dose_logged"])
       .eq("anon_id", userId)
-      .filter("payload->>cycle_id", "eq", cycleId);
+      .filter("payload->>cycle_id", "eq", cycleId)
+      .select("id");
+
+    if (error) {
+      Sentry.captureException(error, {
+        extra: { where: "deleteCycleAnalytics", cycleId, currentUserId: userId },
+      });
+      return;
+    }
+
+    // 0 rows deleted while analytics consent is on is the signature of
+    // orphaned events (the anon identity rotated since the cycle was
+    // created). We can't recover them client-side; this telemetry
+    // quantifies how often it happens in prod so we can decide whether
+    // the durable fix (stable client id + server-side delete) is
+    // warranted. Can't fully distinguish this from "cycle never had
+    // events," but the consent-on aggregate frequency is the signal.
+    if ((data?.length ?? 0) === 0) {
+      const settings = await appStorage.loadSettings();
+      if (settings.analyticsConsent) {
+        Sentry.captureMessage(
+          "deleteCycleAnalytics removed 0 rows — likely orphaned events (anon identity divergence)",
+          { level: "warning", extra: { cycleId, currentUserId: userId } },
+        );
+      }
+    }
   } catch (e) {
     Sentry.captureException(e);
   }
