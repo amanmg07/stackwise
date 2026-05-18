@@ -30,7 +30,10 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   const { cycles, settings, updateSettings } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
   const userGoals = settings.goals || [];
-  const selectedRoutes = settings.preferredRoutes ?? ROUTES.map((r) => r.key);
+  // Default to nothing selected — the user opts in to each preferred
+  // administration route on the Home screen rather than starting with
+  // all five pre-selected.
+  const selectedRoutes = settings.preferredRoutes ?? [];
 
   // Gentle infinite pulse on the Self Scan button — flags it as the
   // marquee feature without being distracting. Scale 1 → 1.04 → 1
