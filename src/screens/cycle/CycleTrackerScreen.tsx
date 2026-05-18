@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { peptides } from "../../data/peptides";
 import { colors, highlights, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
+import InjectionGuide from "../../components/InjectionGuide";
 import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
 import { trackCycleEnded } from "../../services/analyticsService";
 import { OUTCOME_WEEKS, OutcomeWeek, CycleEndReason } from "../../types";
@@ -261,6 +262,11 @@ export default function CycleTrackerScreen({ navigation }: any) {
               Day {completedDays} of {totalDays} completed
             </Text>
           </View>
+
+          {/* Injection guide — only when a compound in this cycle is injected */}
+          {activeCycle.peptides.some((cp) => cp.route === "subcutaneous" || cp.route === "intramuscular") && (
+            <InjectionGuide />
+          )}
 
           {/* Today's peptides */}
           <Text style={styles.sectionTitle}>Today's Protocol</Text>
