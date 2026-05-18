@@ -117,6 +117,10 @@ const TAB_ICONS: Record<string, { focused: TabIconName; default: TabIconName }> 
 export default function RootNavigator() {
   return (
     <Tab.Navigator
+      // "history" so the back button/gesture returns to the screen the
+      // user was actually last on (across tabs), not the first tab.
+      // Default is "firstRoute", which sent every cross-tab back to Home.
+      backBehavior="history"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
