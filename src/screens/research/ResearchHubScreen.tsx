@@ -7,6 +7,9 @@ import { peptides } from "../../data/peptides";
 import { matchesQuery } from "../../utils/peptideMatch";
 import { colors, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, CompoundType } from "../../types";
+import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
+import { addCompoundToCycle } from "../../utils/cycleAdd";
 
 const CATEGORIES: { key: PeptideCategory | "all"; label: string }[] = [
   { key: "all", label: "All" },
@@ -57,6 +60,8 @@ const TYPE_FILTERS: { key: "all" | CompoundType; label: string; icon: keyof type
 ];
 
 export default function ResearchHubScreen({ navigation, embedded }: any) {
+  const { cycles, addCycle, updateCycle, journal, settings } = useApp();
+  const { showToast } = useToast();
   const [search, setSearch] = useState("");
   const [selectedCats, setSelectedCats] = useState<PeptideCategory[]>([]);
   const [selectedRoutes, setSelectedRoutes] = useState<AdministrationRoute[]>([]);
@@ -201,6 +206,17 @@ export default function ResearchHubScreen({ navigation, embedded }: any) {
             style={styles.card}
             onPress={() => navigation.navigate("PeptideDetail", { peptideId: item.id })}
           >
+            <TouchableOpacity
+              style={styles.cardAddBtn}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              onPress={() => showToast(addCompoundToCycle(
+                { cycles, addCycle, updateCycle, journal, goals: settings.goals, sourceLabel: "Browse" },
+                item,
+              ))}
+              accessibilityLabel={`Add ${item.name} to cycle`}
+            >
+              <Ionicons name="add-circle" size={22} color={colors.accent} />
+            </TouchableOpacity>
             <View style={styles.cardHeader}>
               <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
               {item.compoundType === "supplement" && (
@@ -315,7 +331,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     overflow: "hidden",
   },
-  cardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" },
+  cardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap", paddingRight: 28 },
+  cardAddBtn: { position: "absolute", top: 8, right: 8, zIndex: 2, padding: 4 },
   cardName: { fontSize: 17, fontWeight: "700", color: colors.text, flexShrink: 1 },
   cardAbbr: { fontSize: 13, color: colors.textSecondary, fontWeight: "500", flexShrink: 1 },
   blendBadge: {
