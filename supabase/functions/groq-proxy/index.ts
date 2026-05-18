@@ -76,6 +76,22 @@ Deno.serve(async (req) => {
       body: JSON.stringify(body),
     });
 
+    // Streaming passthrough: when the caller asked for an SSE stream
+    // (the AI chat), forward Groq's event-stream body as-is instead of
+    // buffering the whole response. Non-stream callers (scan services)
+    // don't set `stream`, so they still get buffered JSON unchanged.
+    if (body?.stream) {
+      return new Response(groqResponse.body, {
+        status: groqResponse.status,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
     const groqData = await groqResponse.json();
 
     return new Response(JSON.stringify(groqData), {
