@@ -5,11 +5,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { streamChatMessage, categorizeQuery } from "../../services/chatService";
 import { peptides as peptideDataset } from "../../data/peptides";
 import { extractPeptideIds } from "../../utils/peptideMatch";
 import { generateId } from "../../utils/id";
+import { addCompoundToCycle } from "../../utils/cycleAdd";
 import { colors, highlights, spacing } from "../../theme";
 import { ChatMessage } from "../../types";
 import { appStorage } from "../../utils/storage";
@@ -30,7 +32,8 @@ interface Props {
 }
 
 export default function ChatView({ navigation }: Props) {
-  const { cycles, journal, scans, settings } = useApp();
+  const { cycles, journal, scans, settings, addCycle, updateCycle } = useApp();
+  const { showToast } = useToast();
   const activeCycle = cycles.find((c) => c.isActive) || null;
   const pastCycles = cycles.filter((c) => !c.isActive);
   const recentJournal = [...journal].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
@@ -154,14 +157,25 @@ export default function ChatView({ navigation }: Props) {
           const pep = peptideDB.find((p) => p.id === id);
           if (!pep) return null;
           return (
-            <TouchableOpacity
-              key={id}
-              style={styles.refChip}
-              onPress={() => navigation.navigate("PeptideDetail", { peptideId: id })}
-            >
-              <Ionicons name="flask-outline" size={12} color={colors.accent} />
-              <Text style={styles.refChipText}>{pep.name}</Text>
-            </TouchableOpacity>
+            <View key={id} style={styles.refChip}>
+              <TouchableOpacity
+                onPress={() => showToast(addCompoundToCycle(
+                  { cycles, addCycle, updateCycle, journal, goals: settings.goals, sourceLabel: "AI chat" },
+                  pep,
+                ))}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
+                accessibilityLabel={`Add ${pep.name} to cycle`}
+              >
+                <Ionicons name="add-circle" size={15} color={colors.accent} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.refChipMain}
+                onPress={() => navigation.navigate("PeptideDetail", { peptideId: id })}
+              >
+                <Ionicons name="flask-outline" size={12} color={colors.accent} />
+                <Text style={styles.refChipText}>{pep.name}</Text>
+              </TouchableOpacity>
+            </View>
           );
         })}
       </View>
@@ -372,6 +386,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.accent + "40",
   },
   refChipText: { fontSize: 12, color: colors.accent, fontWeight: "600" },
+  refChipMain: { flexDirection: "row", alignItems: "center", gap: 4 },
   typingRow: {
     flexDirection: "row", alignItems: "center", gap: 8,
     paddingHorizontal: spacing.md, paddingVertical: 8,
