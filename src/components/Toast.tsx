@@ -9,7 +9,10 @@ interface Props {
   duration?: number;
 }
 
-export default function Toast({ message, visible, onHide, duration = 2000 }: Props) {
+// Default 1200ms: the toast is a full-width banner at the top that
+// overlaps the nav back button, so it should clear quickly. Still long
+// enough to read a short confirmation ("Profile saved").
+export default function Toast({ message, visible, onHide, duration = 1200 }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-20)).current;
 
