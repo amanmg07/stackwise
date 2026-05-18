@@ -27,6 +27,26 @@ const STARTERS = [
   "Compare CJC-1295 vs MK-677",
 ];
 
+// Deliberative phrasings — these are the user *asking about* adding,
+// not commanding it. Suppress the auto-add path for these so a
+// question isn't misread as a command and silently edits the cycle.
+const DELIBERATIVE = /\b(should i|do you (think|recommend|reckon)|is it (worth|safe|ok|okay|a good idea|wise)|would (it|you)|what if i|better to|worth (it|adding)|thinking (about|of))\b/i;
+// Imperative add-verb + an explicit cycle/stack target.
+const ADD_VERB = /\b(add|put|include|throw in|stick|drop|append)\b/i;
+const CYCLE_TARGET = /\b(cycle|stack|protocol|regimen|rotation|routine)\b/i;
+
+/**
+ * Returns resolved compound ids if the message is an explicit command
+ * to add compound(s) to the user's cycle ("add BPC-157 to my stack"),
+ * else []. Strict by design: needs an add verb AND a cycle target AND
+ * a resolvable compound, and is suppressed on deliberative phrasing.
+ */
+function detectAddToCycleIds(text: string): string[] {
+  if (DELIBERATIVE.test(text)) return [];
+  if (!ADD_VERB.test(text) || !CYCLE_TARGET.test(text)) return [];
+  return extractPeptideIds(text, peptideDataset);
+}
+
 interface Props {
   navigation: any;
 }
@@ -84,6 +104,56 @@ export default function ChatView({ navigation }: Props) {
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
+
+    const trimmed = text.trim();
+
+    // Explicit "add X to my cycle" command → perform it directly: no
+    // LLM call, no AI rate-limit consumption. Detect+auto-add per the
+    // product decision; detection is strict (see detectAddToCycleIds).
+    const addIds = detectAddToCycleIds(trimmed);
+    if (addIds.length > 0) {
+      const userMsg: ChatMessage = {
+        id: generateId(),
+        role: "user",
+        content: trimmed,
+        timestamp: new Date().toISOString(),
+      };
+      const updated = [...messages, userMsg];
+      setMessages(updated);
+      setInput("");
+
+      const statuses = addIds
+        .map((id) => {
+          const pep = peptideDB.find((p) => p.id === id);
+          if (!pep) return null;
+          return addCompoundToCycle(
+            { cycles, addCycle, updateCycle, journal, goals: settings.goals, sourceLabel: "AI chat" },
+            pep,
+          );
+        })
+        .filter((s): s is string => !!s);
+
+      if (statuses.length > 0) showToast(statuses[statuses.length - 1]);
+
+      const assistantMsg: ChatMessage = {
+        id: generateId(),
+        role: "assistant",
+        content:
+          statuses.length > 0
+            ? statuses.map((s) => `✅ ${s}`).join("\n")
+            : "I couldn't find that compound in the library — try its exact name.",
+        timestamp: new Date().toISOString(),
+      };
+      setMessages([...updated, assistantMsg]);
+
+      trackChatQuestion({
+        questionLength: trimmed.length,
+        activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
+        queryCategory: categorizeQuery(trimmed),
+        peptideIdsQueried: addIds,
+      });
+      return;
+    }
 
     // Daily rate limit
     const gate = await checkLimit("ai_chat");
