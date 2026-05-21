@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { peptides } from "../../data/peptides";
@@ -7,7 +7,7 @@ import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
 import { format, addWeeks } from "date-fns";
 import { colors, spacing, safeBottom } from "../../theme";
-import { trackPeptideViewed, trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
+import { trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { generateId } from "../../utils/id";
 import { AdministrationRoute } from "../../types";
 
@@ -31,10 +31,6 @@ export default function PeptideDetailScreen({ route, navigation }: any) {
   const [expandedProtocol, setExpandedProtocol] = useState<number | null>(0);
   const [showStorage, setShowStorage] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-
-  useEffect(() => {
-    trackPeptideViewed(peptideId);
-  }, [peptideId]);
 
   if (!peptide) {
     return (

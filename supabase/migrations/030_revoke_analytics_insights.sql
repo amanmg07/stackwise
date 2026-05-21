@@ -1,0 +1,26 @@
+-- ============================================================
+-- Defense-in-depth: REVOKE the analytics_insights view from
+-- client roles (audit finding F9).
+--
+-- Migration 006 explicitly REVOKEd research_cycles_* from
+-- PUBLIC/authenticated/anon, and migrations 011/012/017/020/021/022/
+-- 023 do the same for every research_* view. analytics_insights
+-- never received the same treatment.
+--
+-- Why it's currently safe: analytics_insights selects from
+-- analytics_events, which has NO SELECT policy in its RLS. So when
+-- queried by anon/authenticated roles, RLS filters out every
+-- underlying row and the view returns nothing useful. Functionally
+-- inaccessible today.
+--
+-- Why we revoke anyway: if a future migration ever grants a SELECT
+-- policy on analytics_events (e.g. "users can read their own
+-- events"), this view would suddenly start returning aggregate data
+-- to any authenticated client. Explicit REVOKE removes that
+-- conditional vulnerability and matches the posture every other
+-- buyer-facing view already has.
+--
+-- Safe to re-run.
+-- ============================================================
+
+REVOKE ALL ON public.analytics_insights FROM PUBLIC, authenticated, anon;

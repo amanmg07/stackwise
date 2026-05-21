@@ -14,6 +14,7 @@ import {
   cancelOutcomeReminder,
   scheduleDailyReminder,
   parseReminderTimes,
+  cancelAllStackwiseNotifications,
 } from "../services/notificationsService";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
@@ -251,6 +252,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       persistBloodwork([]);
       persistOutcomes([]);
       appStorage.clearAll();
+      // Cancel scheduled reminders so the OS doesn't fire "Week 4
+      // check-in for 'My Cycle'" for cycles the user just wiped
+      // (audit finding F8). Fire-and-forget on purpose — the user
+      // shouldn't wait for the OS notification cancel to return.
+      cancelAllStackwiseNotifications();
     },
   };
 

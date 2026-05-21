@@ -95,8 +95,8 @@ function isValidPayload(eventType: string, payload: Record<string, any>): boolea
       // negatives) is what we filter.
       return BLOODWORK_NUMERIC_FIELDS.every((k) => optNonNeg(payload[k]));
     default:
-      // Lightweight events (peptide_viewed, chat_question, etc.)
-      // don't have hard validation. Allow them through.
+      // Lightweight events (chat_question, etc.) don't have hard
+      // validation. Allow them through.
       return true;
   }
 }
@@ -127,11 +127,21 @@ export async function trackEvent(
     const userId = await getCurrentUserId();
     if (!userId) return;
 
-    await supabase.from("analytics_events").insert({
+    // Capture the insert response so RLS-denied or otherwise failing
+    // inserts don't silently disappear (audit finding F10). The
+    // insert itself doesn't throw on RLS denial — it resolves with an
+    // error in the response — so without this check, server-side
+    // ingest failures are invisible.
+    const { error: insertError } = await supabase.from("analytics_events").insert({
       anon_id: userId,
       event_type: eventType,
       payload,
     });
+    if (insertError) {
+      Sentry.captureException(insertError, {
+        extra: { where: "trackEvent", eventType },
+      });
+    }
   } catch (e) {
     // Analytics should never crash the app
     Sentry.captureException(e);
@@ -480,6 +490,44 @@ function serializeCompound(cp: CyclePeptide) {
 }
 
 // ── Convenience wrappers ──────────────────────────────────────────
+//
+// Payload key-casing convention (audit finding F12):
+//
+// Event payloads are a HISTORICAL MIX of camelCase and snake_case
+// — not a clean design. The split (and the matching view reads) is:
+//
+//   cycle_created / cycle_updated  → snake (cycle_id, peptide_ids,
+//     duration_weeks, template_id, source_scan_id, compounds, ...)
+//   cycle_ended    → MIX: snake (cycle_id, expected_days, ...) plus
+//     legacy camelCase peptideIds + durationDays (kept for back-compat
+//     with pre-rename views — DO NOT change without updating
+//     research_cycles_ended and the analytics_insights retention
+//     branches together).
+//   dose_logged    → snake (every key).
+//   journal_entry  → MIX: camelCase scores (sleepQuality, energyLevel,
+//     recoveryScore, mood, activePeptideIds, sideEffects) + snake
+//     metrics (weight_unit, body_fat, skin_quality, joint_comfort,
+//     libido, strength, sleep_hours, journal_entry_id, cycle_id).
+//   scan_compared  → MIX: snake ids (scan_id, earlier_scan_id) +
+//     camelCase metrics (daysBetween, changesImproved, ...).
+//   cycle_outcome / bloodwork_logged / chat_question  → snake (every
+//     key) — all added after the convention split.
+//
+// When ADDING a new payload key:
+//   1. Match the case of nearby keys in the same event_type.
+//   2. Mirror the exact key in every view that reads it (research_*
+//      and analytics_insights). Postgres is case-sensitive in
+//      payload->>'key' lookups.
+//   3. If unsure, snake_case is the project default; only use
+//      camelCase when adding a sibling field to an existing
+//      camelCase cluster (don't introduce new camelCase fields in
+//      otherwise-snake events).
+//
+// A full normalization would require re-emitting every existing event
+// type in snake_case AND rewriting every view to read both
+// (COALESCE(payload->>'snake', payload->>'camel')) until historical
+// rows age out. Deferred — not worth the migration risk for a
+// cosmetic improvement.
 
 interface CycleCreatedInput {
   cycleId: string;
@@ -621,12 +669,10 @@ export function trackJournalEntry(input: JournalEntryInput) {
   });
 }
 
-export function trackScanCompleted(scanId: string, recommendedCategories: string[]) {
-  trackEvent("scan_completed", {
-    scan_id: scanId,
-    recommended_categories: recommendedCategories,
-  });
-}
+// Removed trackScanCompleted (audit finding F11): no view ever
+// consumed this event, so it was pure privacy footprint with no
+// buyer value. Legacy events stay in analytics_events until a scan
+// is deleted (deleteScanAnalytics still cleans them up for backfill).
 
 export function trackScanCompared(data: {
   scanId: string;
@@ -650,9 +696,12 @@ export function trackScanCompared(data: {
   });
 }
 
-export function trackPeptideViewed(peptideId: string) {
-  trackEvent("peptide_viewed", { peptide_id: peptideId });
-}
+// Removed trackPeptideViewed (audit finding F11+F13): no view
+// consumed this event, and per-screen-view emissions accumulated as
+// dead privacy footprint with no cycle_id anchor for cascade
+// deletion. If buyers ever want this signal, re-add the emission
+// alongside a paired research_* view (and decide whether per-view
+// or per-session is the right granularity).
 
 interface ChatQuestionInput {
   questionLength: number;

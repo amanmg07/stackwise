@@ -12,7 +12,7 @@ import { saveScanImage } from "../../utils/scanImages";
 import { colors, highlights, spacing, safeTop, safeBottom } from "../../theme";
 import { PeptideCategory, AdministrationRoute, ScanObservation, ScanResultData } from "../../types";
 import { CATEGORY_INFO, CONFIDENCE_LABELS, CONFIDENCE_COLORS } from "./scanConstants";
-import { trackScanCompleted, trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
+import { trackCycleCreated, trackCycleUpdated, computeBaseline } from "../../services/analyticsService";
 import { checkLimit, trackUsage } from "../../services/usageLimits";
 import { useUsage } from "../../hooks/useUsage";
 import { callGroqProxy } from "../../utils/supabase";
@@ -298,7 +298,11 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
           });
           if (Platform.OS === "ios") setImageUri(savedPath);
           setCurrentScanId(id);
-          trackScanCompleted(id, parsed.recommendedCategories || []);
+          // Removed trackScanCompleted (audit finding F11): no view
+          // consumed scan_completed events. trackUsage still records
+          // the rate-limit counter; scan_compared still emits when
+          // the user actually compares scans (research value lives
+          // there).
           await trackUsage("self_scan");
           usage.refresh();
         } catch (e) {
