@@ -110,7 +110,11 @@ export async function deleteCycleAnalytics(cycleId: string): Promise<void> {
     const { data, error } = await supabase
       .from("analytics_events")
       .delete()
-      .in("event_type", ["cycle_created", "cycle_updated", "cycle_ended", "dose_logged"])
+      // cycle_outcome + bloodwork_logged are also tied to a cycle by
+      // payload.cycle_id; without them the cycle's check-ins and
+      // labs orphan in research_cycle_outcomes / research_bloodwork
+      // after the cycle itself is gone (audit finding F3).
+      .in("event_type", ["cycle_created", "cycle_updated", "cycle_ended", "dose_logged", "cycle_outcome", "bloodwork_logged"])
       .eq("anon_id", userId)
       .filter("payload->>cycle_id", "eq", cycleId)
       .select("id");
@@ -212,12 +216,23 @@ export async function deleteScanAnalytics(scanId: string): Promise<void> {
   try {
     const userId = await getCurrentUserId();
     if (!userId) return;
+    // 1) Events keyed to this scan as its primary (scan_id).
     await supabase
       .from("analytics_events")
       .delete()
       .in("event_type", ["scan_completed", "scan_compared"])
       .eq("anon_id", userId)
       .filter("payload->>scan_id", "eq", scanId);
+    // 2) scan_compared events that reference this scan as the
+    // *earlier* point (audit finding F4). Without this, deleting an
+    // earlier scan leaves dangling earlier_scan_id references in the
+    // later scans' comparison events.
+    await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("event_type", "scan_compared")
+      .eq("anon_id", userId)
+      .filter("payload->>earlier_scan_id", "eq", scanId);
   } catch (e) {
     Sentry.captureException(e);
   }
