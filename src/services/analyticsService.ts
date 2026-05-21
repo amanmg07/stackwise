@@ -23,6 +23,25 @@ const ANALYTICS_ENABLED_IN_DEV =
 const MIN_DOSE = 0.0001;
 const MAX_DOSE = 100000;
 
+// Number must be present, finite, and within [lo, hi].
+const inRange = (v: any, lo: number, hi: number): boolean =>
+  typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
+// Same, but absent (undefined/null) is also OK — for optional fields.
+const optInRange = (v: any, lo: number, hi: number): boolean =>
+  v === undefined || v === null || inRange(v, lo, hi);
+// Optional finite, non-negative (for lab values where negatives are
+// biologically impossible and NaN/Infinity are pure garbage).
+const optNonNeg = (v: any): boolean =>
+  v === undefined || v === null ||
+  (typeof v === "number" && Number.isFinite(v) && v >= 0);
+
+const BLOODWORK_NUMERIC_FIELDS = [
+  "testosterone_total", "testosterone_free", "estradiol", "shbg",
+  "igf1", "tsh", "hba1c", "fasting_glucose", "fasting_insulin",
+  "total_cholesterol", "ldl", "hdl", "triglycerides", "hs_crp",
+  "alt", "ast", "creatinine",
+] as const;
+
 function isValidPayload(eventType: string, payload: Record<string, any>): boolean {
   switch (eventType) {
     case "dose_logged":
@@ -39,10 +58,42 @@ function isValidPayload(eventType: string, payload: Record<string, any>): boolea
     case "cycle_ended":
       return typeof payload.cycle_id === "string" && payload.cycle_id.length > 0;
     case "journal_entry":
+      // Broadened: every core score validated 1-10 (was only sleep+
+      // energy); subjective metrics validated if present; weight /
+      // body_fat / sleep_hours bounded if present. Weight range covers
+      // both lbs and kg so the unit-tracking column stays the source
+      // of truth.
       return (
-        typeof payload.sleepQuality === "number" && payload.sleepQuality >= 1 && payload.sleepQuality <= 10 &&
-        typeof payload.energyLevel === "number" && payload.energyLevel >= 1 && payload.energyLevel <= 10
+        inRange(payload.sleepQuality, 1, 10) &&
+        inRange(payload.energyLevel, 1, 10) &&
+        inRange(payload.recoveryScore, 1, 10) &&
+        inRange(payload.mood, 1, 10) &&
+        optInRange(payload.skin_quality, 1, 10) &&
+        optInRange(payload.joint_comfort, 1, 10) &&
+        optInRange(payload.libido, 1, 10) &&
+        optInRange(payload.strength, 1, 10) &&
+        optInRange(payload.weight, 20, 700) &&
+        optInRange(payload.body_fat, 0, 70) &&
+        optInRange(payload.sleep_hours, 0, 24)
       );
+    case "cycle_outcome":
+      return (
+        typeof payload.cycle_id === "string" && payload.cycle_id.length > 0 &&
+        [4, 8, 12, 16].includes(payload.week_number) &&
+        inRange(payload.overall_score, 1, 10) &&
+        inRange(payload.goal_progress_score, 1, 10) &&
+        inRange(payload.energy_score, 1, 10) &&
+        inRange(payload.recovery_score, 1, 10) &&
+        typeof payload.would_repeat === "boolean" &&
+        ["none", "mild", "moderate", "severe"].includes(payload.side_effect_severity)
+      );
+    case "bloodwork_logged":
+      // All lab fields optional; if present they must be finite and
+      // non-negative. Domain-specific upper bounds are deliberately
+      // not enforced here — extreme-but-real lab values are real
+      // signal buyers want to see; pure garbage (NaN/Infinity/strings/
+      // negatives) is what we filter.
+      return BLOODWORK_NUMERIC_FIELDS.every((k) => optNonNeg(payload[k]));
     default:
       // Lightweight events (peptide_viewed, chat_question, etc.)
       // don't have hard validation. Allow them through.

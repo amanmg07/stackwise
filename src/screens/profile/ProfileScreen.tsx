@@ -65,11 +65,11 @@ export default function ProfileScreen({ navigation }: any) {
 
   const confirmClear = () => {
     Alert.alert(
-      "Clear All Data",
-      "This will permanently delete all cycles, dose logs, and journal entries. This cannot be undone.",
+      "Clear data on this device?",
+      "Wipes all cycles, dose logs, journal entries, scans, and bloodwork from this device. Anonymous data already sent to our servers (if you opted into analytics) is NOT removed — use 'Delete Server Data' below for that. This cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete Everything", style: "destructive", onPress: clearAllData },
+        { text: "Clear this device", style: "destructive", onPress: clearAllData },
       ]
     );
   };
