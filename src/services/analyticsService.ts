@@ -272,6 +272,13 @@ export async function syncCoMedications(
   other: string,
 ): Promise<boolean> {
   try {
+    // Same consent gate as syncUserProfile — co-medications are
+    // sensitive health data and must not ship to the server when the
+    // user has opted out of analytics. (Previously this function
+    // upserted unconditionally, which leaked meds for opted-out users.)
+    const settings = await appStorage.loadSettings();
+    if (!settings.analyticsConsent) return true;
+
     const userId = await getCurrentUserId();
     if (!userId) return false;
     const { error } = await supabase.from("user_profiles").upsert({

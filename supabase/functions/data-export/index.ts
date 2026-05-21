@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await admin
       .from("user_profiles")
-      .select("anon_id, age, gender, goals, experience_level, analytics_consent, research_consent, research_consent_at, created_at, updated_at")
+      .select("anon_id, age, gender, goals, experience_level, analytics_consent, research_consent, research_consent_at, co_medications, co_medications_other, created_at, updated_at")
       .eq("anon_id", user.id)
       .maybeSingle();
 
