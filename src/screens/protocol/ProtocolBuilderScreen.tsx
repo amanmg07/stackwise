@@ -46,6 +46,14 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   const { cycles, doseLogs, journal, outcomes } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
 
+  // Ticket 2.3: past cycles surface as one-tap "Run again" chips
+  // beneath the active-cycle card. We don't store templates separately
+  // — past cycles ARE the templates. Newest first, capped at 5.
+  const pastCycles = cycles
+    .filter((c) => !c.isActive)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 5);
+
   const streak = computeStreak(journal, doseLogs);
   const todayKey = format(new Date(), "yyyy-MM-dd");
   const todayEntry = journal.find((e) => e.date === todayKey);
@@ -230,6 +238,39 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         )}
       </View>
 
+      {/* Past cycles → one-tap "Run again" chips (ticket 2.3).
+          Bypasses the goals/routes flow because the user has already
+          declared what they want — past cycles are the templates. */}
+      {pastCycles.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Run a past cycle again</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipRow}
+          >
+            {pastCycles.map((c) => (
+              <TouchableOpacity
+                key={c.id}
+                style={styles.cycleChip}
+                onPress={() =>
+                  navigation.navigate("CycleTab", {
+                    screen: "NewCycle",
+                    params: { cloneFromCycleId: c.id },
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                <Ionicons name="refresh" size={14} color={colors.accent} />
+                <Text style={styles.cycleChipText} numberOfLines={1}>
+                  {c.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       {/* Build a new cycle */}
       <TouchableOpacity
         style={styles.buildBtn}
@@ -339,6 +380,29 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   selfScanBtnText: { fontSize: 16, fontWeight: "700", color: "#fcd34d" },
+
+  // Ticket 2.3 — past cycles as run-again chips.
+  chipRow: {
+    gap: 8,
+    paddingVertical: 4,
+  },
+  cycleChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: colors.accent + "30",
+    maxWidth: 200,
+  },
+  cycleChipText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.accent,
+  },
 
   // Ticket 1.6 — notification-tap dose-log review surface.
   undoCard: {
