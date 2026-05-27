@@ -1,8 +1,9 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import * as Sentry from "@sentry/react-native";
-import { addDays, parseISO } from "date-fns";
-import { Cycle } from "../types";
+import { addDays, differenceInCalendarDays, parseISO } from "date-fns";
+import { Cycle, DoseLog, JournalEntry } from "../types";
+import { computeStreak } from "../utils/streak";
 
 // All scheduled notifications fire as alerts in the system tray.
 // Sounds + badges off by default — opt-in via OS settings if the user
@@ -87,7 +88,14 @@ export async function requestNotificationPermission(): Promise<boolean> {
  * instead of looking identical to success (the "says 8:00 but never
  * pings" class of failure).
  */
-export async function scheduleDailyReminder(times: DailyTime[]): Promise<boolean> {
+/** Default reminder body — used when no state-aware wrapper is called. */
+const DEFAULT_REMINDER_BODY =
+  "Quick tap to log doses or how you're feeling — keeps your trends accurate.";
+
+export async function scheduleDailyReminder(
+  times: DailyTime[],
+  body: string = DEFAULT_REMINDER_BODY,
+): Promise<boolean> {
   try {
     await ensureAndroidChannel();
     await cancelDailyReminder();
@@ -98,7 +106,7 @@ export async function scheduleDailyReminder(times: DailyTime[]): Promise<boolean
         identifier: dailyId(t),
         content: {
           title: "Log today's cycle",
-          body: "Quick tap to log doses or how you're feeling — keeps your trends accurate.",
+          body,
           sound: false,
         },
         // expo-notifications (SDK 54) requires an explicit trigger
@@ -263,4 +271,92 @@ export async function cancelAllStackwiseNotifications(): Promise<void> {
   } catch (e) {
     Sentry.captureException(e);
   }
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Personalized reminder copy (ticket 1.4).
+//
+// The daily reminder used to fire the same generic string every day.
+// Users learn to mute generic reminders within ~3 days. State-aware
+// copy keeps the reminder feeling like the app pays attention:
+//
+//   1. Yesterday missed (high-leverage recovery prompt — the moment
+//      users decide whether to come back or churn)
+//   2. Streak ≥ 3 (loss-aversion reinforcement)
+//   3. New cycle, less than 7 days in (curiosity hook on a fresh stack)
+//   4. Default
+//
+// Copy is baked in at schedule time — local OS notifications can't be
+// re-written between schedule and fire. AppContext re-arms on app
+// foreground (throttled ≤ once/hour) so the next morning's reminder
+// reflects current state.
+// ────────────────────────────────────────────────────────────────────
+
+export interface ReminderState {
+  /** Current consecutive logged-day count from computeStreak. */
+  streak: number;
+  /** True if there was ≥1 journal or dose log on the local yesterday. */
+  yesterdayLogged: boolean;
+  /** True if there's ≥1 log today already. */
+  todayLogged: boolean;
+  /** Active cycle context, when one exists. */
+  activeCycle?: { name: string; daysIntoCycle: number };
+}
+
+/** Pure body-picker — extracted for unit testing. */
+export function pickReminderBody(state: ReminderState): string {
+  // Recovery prompt fires only when both yesterday and today are
+  // missing — if today is logged we already won, no need to nag.
+  if (!state.yesterdayLogged && !state.todayLogged) {
+    return "You skipped yesterday. Tap to log how today's going.";
+  }
+  if (state.streak >= 3) {
+    return `Day ${state.streak} of your streak — keep it going.`;
+  }
+  if (
+    state.activeCycle &&
+    state.activeCycle.daysIntoCycle >= 0 &&
+    state.activeCycle.daysIntoCycle < 7
+  ) {
+    return `How's the first week of "${state.activeCycle.name}" going?`;
+  }
+  return DEFAULT_REMINDER_BODY;
+}
+
+/**
+ * Wrapper around scheduleDailyReminder that derives state-aware copy
+ * from the current journal / doseLogs / cycles. Existing callers can
+ * keep using scheduleDailyReminder(times) for backward compat — only
+ * the personalized path goes through here.
+ */
+export async function scheduleDailyReminderForState(input: {
+  times: DailyTime[];
+  journal: JournalEntry[];
+  doseLogs: DoseLog[];
+  cycles: Cycle[];
+  now?: Date;
+}): Promise<boolean> {
+  const now = input.now ?? new Date();
+  const streakInfo = computeStreak(input.journal, input.doseLogs, now);
+  // last7 is oldest-first, today is index 6 → yesterday is index 5.
+  const yesterdayLogged = streakInfo.last7[5]?.logged ?? false;
+
+  const activeCycle = input.cycles.find((c) => c.isActive);
+  const activeCycleInfo = activeCycle
+    ? {
+        name: activeCycle.name,
+        daysIntoCycle: differenceInCalendarDays(
+          now,
+          parseISO(activeCycle.startDate + "T00:00:00"),
+        ),
+      }
+    : undefined;
+
+  const body = pickReminderBody({
+    streak: streakInfo.current,
+    yesterdayLogged,
+    todayLogged: streakInfo.todayLogged,
+    activeCycle: activeCycleInfo,
+  });
+  return scheduleDailyReminder(input.times, body);
 }

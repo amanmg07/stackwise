@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import { AppState as RNAppState, AppStateStatus } from "react-native";
 import { Cycle, DoseLog, JournalEntry, UserSettings, ScanRecord, Bloodwork, CycleOutcome } from "../types";
 import {
   deleteCycleAnalytics,
@@ -12,7 +13,7 @@ import {
   scheduleOutcomeReminders,
   cancelOutcomeRemindersForCycle,
   cancelOutcomeReminder,
-  scheduleDailyReminder,
+  scheduleDailyReminderForState,
   parseReminderTimes,
   cancelAllStackwiseNotifications,
 } from "../services/notificationsService";
@@ -123,16 +124,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSettings(s);
       setLoading(false);
 
-      // Re-arm the daily reminder on launch. The OS schedule isn't
-      // durable across reinstalls/OS clears, and users who enabled it
-      // in a build with the broken trigger have notificationsEnabled
-      // saved but no live schedule — without this they'd silently get
-      // nothing until manually toggling off/on. scheduleDailyReminder
-      // is idempotent (cancels any existing first), so this is safe to
-      // run every launch.
+      // Re-arm the daily reminder on launch with state-aware copy
+      // (ticket 1.4 — was generic "Quick tap to log doses"). The OS
+      // schedule isn't durable across reinstalls/OS clears, and copy
+      // is baked in at schedule time, so re-arming on every launch
+      // keeps the next morning's reminder current to the user's state.
       if (s.notificationsEnabled) {
-        // Re-arms every configured time (default 8 AM & 8 PM).
-        scheduleDailyReminder(parseReminderTimes(s.reminderTimes));
+        scheduleDailyReminderForState({
+          times: parseReminderTimes(s.reminderTimes),
+          journal: migrated,
+          doseLogs: d,
+          cycles: c,
+        });
       }
     })();
 
@@ -148,6 +151,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         Sentry.captureException(e);
       }
     })();
+  }, []);
+
+  // ── Foreground re-arm (ticket 1.4) ─────────────────────────────
+  // Daily-reminder copy is baked in at schedule time, so we re-arm
+  // when the user re-opens the app to make the next morning's body
+  // reflect current streak / yesterday-missed / new-cycle state.
+  // Throttled at one re-arm per hour so a chatty user pulling down
+  // the notification center repeatedly doesn't trigger constant
+  // cancel+reschedule churn.
+  //
+  // Refs mirror state so the listener attaches once (empty deps)
+  // and still reads fresh data each fire — re-registering on every
+  // journal/doseLog state change would mean adding+removing the
+  // OS listener constantly.
+  const journalRef = useRef(journal);
+  const doseLogsRef = useRef(doseLogs);
+  const cyclesRef = useRef(cycles);
+  useEffect(() => { journalRef.current = journal; }, [journal]);
+  useEffect(() => { doseLogsRef.current = doseLogs; }, [doseLogs]);
+  useEffect(() => { cyclesRef.current = cycles; }, [cycles]);
+
+  useEffect(() => {
+    const lastRearm = { value: 0 };
+    const THROTTLE_MS = 60 * 60 * 1000;
+    const sub = RNAppState.addEventListener("change", async (state: AppStateStatus) => {
+      if (state !== "active") return;
+      const now = Date.now();
+      if (now - lastRearm.value < THROTTLE_MS) return;
+      lastRearm.value = now;
+      try {
+        const s = await appStorage.loadSettings();
+        if (!s.notificationsEnabled) return;
+        await scheduleDailyReminderForState({
+          times: parseReminderTimes(s.reminderTimes),
+          journal: journalRef.current,
+          doseLogs: doseLogsRef.current,
+          cycles: cyclesRef.current,
+        });
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+    });
+    return () => sub.remove();
   }, []);
 
   // Persist helpers
