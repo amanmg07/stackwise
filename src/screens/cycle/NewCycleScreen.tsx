@@ -34,6 +34,12 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const communityStack = route.params?.communityStack;
   const editCycleId = route.params?.editCycleId;
   const editCycle = editCycleId ? cycles.find((c) => c.id === editCycleId) : null;
+  // Ticket 1.5: cloneFromCycleId pre-populates name + peptides +
+  // goals from a completed cycle so the second run is one tap from
+  // the CycleSummary screen. NEVER reuses the source cycle's id —
+  // this is a brand-new cycle, not an edit.
+  const cloneFromCycleId = route.params?.cloneFromCycleId;
+  const cloneSource = cloneFromCycleId ? cycles.find((c) => c.id === cloneFromCycleId) : null;
 
   const parseDoseUnit = (doseStr?: string): "mcg" | "mg" | "g" | "IU" => {
     if (!doseStr) return "mg";
@@ -45,6 +51,18 @@ export default function NewCycleScreen({ route, navigation }: any) {
   };
 
   const buildInitialPeptides = (): CyclePeptide[] => {
+    if (cloneSource) {
+      // Strip per-peptide addedAt so the new cycle's day-numbering
+      // doesn't inherit the source's mid-cycle additions.
+      return cloneSource.peptides.map((cp) => ({
+        peptideId: cp.peptideId,
+        doseAmount: cp.doseAmount,
+        doseUnit: cp.doseUnit,
+        frequency: cp.frequency,
+        route: cp.route,
+        timeOfDay: cp.timeOfDay,
+      }));
+    }
     if (template) {
       return template.peptides.map((tp) => {
         const pep = peptideDB.find((p) => p.id === tp.peptideId);
@@ -79,12 +97,17 @@ export default function NewCycleScreen({ route, navigation }: any) {
   };
 
   const [name, setName] = useState(
-    editCycle?.name || template?.name || communityStack?.name || ""
+    editCycle?.name || cloneSource?.name || template?.name || communityStack?.name || ""
   );
   const [durationWeeks, setDurationWeeks] = useState(() => {
     if (editCycle) {
       return String(
         differenceInWeeks(parseISO(editCycle.endDate), parseISO(editCycle.startDate)) || 8
+      );
+    }
+    if (cloneSource) {
+      return String(
+        differenceInWeeks(parseISO(cloneSource.endDate), parseISO(cloneSource.startDate)) || 8
       );
     }
     return String(
@@ -96,13 +119,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
     editCycle ? editCycle.peptides : buildInitialPeptides()
   );
   const [nameManuallyEdited, setNameManuallyEdited] = useState(
-    !!(editCycle?.name || template?.name || communityStack?.name)
+    !!(editCycle?.name || cloneSource?.name || template?.name || communityStack?.name)
   );
-  // Per-cycle goals. Defaults: existing cycle's goals → template's goals
+  // Per-cycle goals. Defaults: existing cycle → clone source → template
   // → user's profile goals → [] (user picks). PeptideCategory and Goal
   // share their string values, so template.goals are usable as Goal[].
   const [goals, setGoals] = useState<Goal[]>(
     editCycle?.goals ||
+    cloneSource?.goals ||
     (template?.goals as Goal[] | undefined) ||
     settings.goals ||
     [],

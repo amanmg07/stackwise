@@ -126,6 +126,11 @@ export default function CycleTrackerScreen({ navigation }: any) {
         completedDays,
         totalDosesLogged: cycleLogs.length,
       });
+      // Ticket 1.5: route the user into the cycle-summary payoff
+      // screen instead of dropping them on an empty cycle tracker.
+      // replace() rather than navigate() so the back button doesn't
+      // return them to a tracker that no longer has an active cycle.
+      navigation.replace("CycleSummary", { cycleId: activeCycle.id });
     };
     if (!endingEarly) {
       finalize("completed");
