@@ -238,6 +238,14 @@ export interface UserSettings {
   // below; "other" lets them free-text anything not covered.
   coMedications?: string[];
   coMedicationsOther?: string;
+  /**
+   * App Store rate-prompt gate (ticket 2.5). Set true after the
+   * first outcome check-in fires StoreReview.requestReview() so we
+   * never re-trigger the system prompt for the same user — Apple
+   * caps it at 3 calls/year anyway, and we want the budget reserved
+   * for the highest-positivity moment (post-outcome).
+   */
+  hasRequestedReview?: boolean;
 }
 
 /** Common drug/supplement categories that can confound peptide effects. */

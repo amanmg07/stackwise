@@ -10,6 +10,7 @@ import {
   deleteBloodworkAnalytics,
   trackDoseLogged,
 } from "../services/analyticsService";
+import { tryRequestStoreReview } from "../services/storeReview";
 import {
   scheduleOutcomeReminders,
   cancelOutcomeRemindersForCycle,
@@ -315,6 +316,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       persistOutcomes([entry, ...outcomes]);
       // User completed this milestone — cancel its scheduled reminder.
       cancelOutcomeReminder(entry.cycleId, entry.weekNumber);
+      // Ticket 2.5: first outcome check-in is the peak-positivity
+      // moment for asking for an App Store review (the user just
+      // spent 60 seconds describing what went well in their cycle).
+      // Only flip the persisted flag if the OS confirmed the prompt
+      // would actually surface — otherwise (simulator, Expo Go, or
+      // Apple's per-year cap already hit) we retry on the next
+      // check-in. Apple's hard cap of 3 calls/year still applies on
+      // top, so this can't spam.
+      if (!settings.hasRequestedReview) {
+        tryRequestStoreReview().then((fired) => {
+          if (fired) persistSettings({ ...settings, hasRequestedReview: true });
+        });
+      }
     },
     deleteOutcome: (id) => {
       persistOutcomes(outcomes.filter((o) => o.id !== id));
