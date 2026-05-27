@@ -8,6 +8,7 @@ import {
   deleteScanAnalytics,
   deleteOutcomeAnalytics,
   deleteBloodworkAnalytics,
+  trackDoseLogged,
 } from "../services/analyticsService";
 import {
   scheduleOutcomeReminders,
@@ -16,7 +17,11 @@ import {
   scheduleDailyReminderForState,
   parseReminderTimes,
   cancelAllStackwiseNotifications,
+  setupNotificationCategories,
+  ACTION_LOG_DOSES,
 } from "../services/notificationsService";
+import * as Notifications from "expo-notifications";
+import { buildQuickDoseLogs } from "../utils/quickDoseLog";
 import { File } from "expo-file-system";
 import { appStorage } from "../utils/storage";
 import { ensureAuth } from "../utils/supabase";
@@ -171,6 +176,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { journalRef.current = journal; }, [journal]);
   useEffect(() => { doseLogsRef.current = doseLogs; }, [doseLogs]);
   useEffect(() => { cyclesRef.current = cycles; }, [cycles]);
+
+  // ── Notification categories + dose-action response listener
+  // (ticket 1.6) ──────────────────────────────────────────────────
+  // Registers the daily-reminder notification category at startup
+  // (idempotent) and listens for the "✓ I took today's doses" action.
+  // On tap: batch-create DoseLog entries for every peptide in the
+  // active cycle that doesn't have a log today, tagged quickLogged=true
+  // so the buyer dataset can filter. The undo card on Home is the
+  // safety net for misclicks.
+  useEffect(() => {
+    setupNotificationCategories();
+
+    const sub = Notifications.addNotificationResponseReceivedListener((resp) => {
+      if (resp.actionIdentifier !== ACTION_LOG_DOSES) return;
+      const active = cyclesRef.current.find((c) => c.isActive);
+      if (!active) return;
+      const newLogs = buildQuickDoseLogs(active, doseLogsRef.current);
+      if (newLogs.length === 0) return;
+      const updated = [...newLogs, ...doseLogsRef.current];
+      setDoseLogs(updated);
+      appStorage.saveDoseLogs(updated);
+      for (const log of newLogs) {
+        trackDoseLogged({
+          doseLogId: log.id,
+          cycleId: log.cycleId,
+          peptideId: log.peptideId,
+          amount: log.amount,
+          unit: log.unit,
+          route: log.route,
+          quickLogged: true,
+        });
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     const lastRearm = { value: 0 };

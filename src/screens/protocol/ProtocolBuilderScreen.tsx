@@ -50,6 +50,19 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   const todayKey = format(new Date(), "yyyy-MM-dd");
   const todayEntry = journal.find((e) => e.date === todayKey);
 
+  // Ticket 1.6: surface notification-tap doses so the user can review
+  // / undo if a misclick happened. Filter on quickLogged + today's
+  // local date; the card auto-hides at midnight when these doses
+  // stop being "today".
+  const todayQuickLoggedDoses = doseLogs.filter((l) => {
+    if (!l.quickLogged) return false;
+    try {
+      return format(parseISO(l.timestamp), "yyyy-MM-dd") === todayKey;
+    } catch {
+      return false;
+    }
+  });
+
   const dosedToday = activeCycle
     ? selectPeptidesDosedToday(activeCycle, doseLogs)
     : new Set<string>();
@@ -96,6 +109,27 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           onPressTodayDot={() => navigation.navigate("JournalTab", { screen: "NewEntry" })}
         />
       </View>
+
+      {/* Notification quick-log undo card (ticket 1.6). Auto-hides
+          when these doses stop being "today" — no manual dismiss. */}
+      {todayQuickLoggedDoses.length > 0 && (
+        <TouchableOpacity
+          style={styles.undoCard}
+          onPress={() => navigation.navigate("CycleTab")}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="notifications-outline" size={20} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.undoCardTitle}>
+              Logged {todayQuickLoggedDoses.length} dose{todayQuickLoggedDoses.length === 1 ? "" : "s"} from your reminder
+            </Text>
+            <Text style={styles.undoCardDesc}>
+              Tap to review — swipe-left on the cycle tracker to undo any that weren't quite right.
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+        </TouchableOpacity>
+      )}
 
       {/* Milestone surface — due banner > upcoming countdown > nothing */}
       {activeCycle && dueWeek !== null && (
@@ -305,4 +339,15 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   selfScanBtnText: { fontSize: 16, fontWeight: "700", color: "#fcd34d" },
+
+  // Ticket 1.6 — notification-tap dose-log review surface.
+  undoCard: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    backgroundColor: colors.accent + "10",
+    borderRadius: 12, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.accent + "30",
+    marginBottom: spacing.md,
+  },
+  undoCardTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
+  undoCardDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 4, lineHeight: 16 },
 });

@@ -92,6 +92,45 @@ export async function requestNotificationPermission(): Promise<boolean> {
 const DEFAULT_REMINDER_BODY =
   "Quick tap to log doses or how you're feeling — keeps your trends accurate.";
 
+/**
+ * Notification category for the daily reminder (ticket 1.6). Attached
+ * via categoryIdentifier so the long-press / drop-down on iOS exposes
+ * the "✓ I took today's doses" action button. On Android the action
+ * shows as an inline button under the body.
+ *
+ * opensAppToForeground: false — the system handles the action without
+ * launching the app to foreground; AppContext's response listener
+ * processes it on next foreground (or immediately if app is already
+ * running). The undo card on Home is the safety net.
+ */
+export const DAILY_CATEGORY = "stackwise.daily";
+export const ACTION_LOG_DOSES = "LOG_DOSES";
+
+/**
+ * Register the daily-reminder notification category. Call once at app
+ * startup. Categories are idempotent — re-registration overwrites
+ * with the same shape, no leftover state.
+ */
+export async function setupNotificationCategories(): Promise<void> {
+  try {
+    await Notifications.setNotificationCategoryAsync(DAILY_CATEGORY, [
+      {
+        identifier: ACTION_LOG_DOSES,
+        buttonTitle: "✓ I took today's doses",
+        options: {
+          opensAppToForeground: false,
+          // Doses aren't destructive (we tag quickLogged + undo card),
+          // so this stays default-style. Not authentication-required
+          // — peptide tracking isn't sensitive enough to gate behind
+          // Face ID on every tap.
+        },
+      },
+    ]);
+  } catch (e) {
+    Sentry.captureException(e);
+  }
+}
+
 export async function scheduleDailyReminder(
   times: DailyTime[],
   body: string = DEFAULT_REMINDER_BODY,
@@ -108,6 +147,9 @@ export async function scheduleDailyReminder(
           title: "Log today's cycle",
           body,
           sound: false,
+          // Attach the dose-action category so the long-press drop-down
+          // exposes the "✓ I took today's doses" button (ticket 1.6).
+          categoryIdentifier: DAILY_CATEGORY,
         },
         // expo-notifications (SDK 54) requires an explicit trigger
         // `type`. DAILY repeats at hour/minute by definition.

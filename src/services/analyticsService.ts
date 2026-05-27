@@ -45,13 +45,19 @@ const BLOODWORK_NUMERIC_FIELDS = [
 function isValidPayload(eventType: string, payload: Record<string, any>): boolean {
   switch (eventType) {
     case "dose_logged":
+      // quick_logged (added with ticket 1.6 notification quick-log)
+      // is the capture-fidelity tag for dose logs — true means
+      // notification-action batch-log (no site/source/notes review),
+      // false/undefined means hand-entered. Validated as boolean if
+      // present; older payloads without the field still pass.
       return (
         typeof payload.cycle_id === "string" && payload.cycle_id.length > 0 &&
         typeof payload.peptide_id === "string" && payload.peptide_id.length > 0 &&
         typeof payload.amount === "number" &&
         Number.isFinite(payload.amount) &&
         payload.amount > MIN_DOSE &&
-        payload.amount < MAX_DOSE
+        payload.amount < MAX_DOSE &&
+        (payload.quick_logged === undefined || typeof payload.quick_logged === "boolean")
       );
     case "cycle_created":
     case "cycle_updated":
@@ -613,6 +619,8 @@ interface DoseLoggedInput {
   site?: string;
   /** Vendor / brand / lab — first-class confounder for outcome analysis. */
   source?: string;
+  /** True for notification-action batch-logs (ticket 1.6). Default false. */
+  quickLogged?: boolean;
 }
 
 export function trackDoseLogged(input: DoseLoggedInput) {
@@ -625,6 +633,7 @@ export function trackDoseLogged(input: DoseLoggedInput) {
     route: input.route,
     site: input.site,
     source: input.source,
+    quick_logged: input.quickLogged ?? false,
   });
 }
 

@@ -96,6 +96,15 @@ export interface DoseLog {
   // variable of concern, not free-text metadata. Optional — users
   // who don't know or don't care can leave it blank.
   source?: string;
+  /**
+   * True for doses created by the notification-action quick-log
+   * (ticket 1.6) — values are inherited from the cycle's prescribed
+   * peptide config (amount/unit/route) without per-dose review of
+   * site/source/notes. Buyer aggregates that need high-fidelity
+   * dose-response data must filter on quickLogged !== true; aggregates
+   * that measure adherence can include both.
+   */
+  quickLogged?: boolean;
 }
 
 /** Standardized check-in week numbers per the Architecture Spec. */
