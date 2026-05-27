@@ -15,6 +15,7 @@ import OutcomeCheckInScreen from "../screens/cycle/OutcomeCheckInScreen";
 import JournalScreen from "../screens/journal/JournalScreen";
 import NewEntryScreen from "../screens/journal/NewEntryScreen";
 import ProtocolBuilderScreen from "../screens/protocol/ProtocolBuilderScreen";
+import ProtocolPickerScreen from "../screens/protocol/ProtocolPickerScreen";
 import ProtocolResultScreen from "../screens/protocol/ProtocolResultScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import EditDemographicsScreen from "../screens/profile/EditDemographicsScreen";
@@ -85,6 +86,7 @@ function ProtocolNavigator() {
   return (
     <ProtocolStack.Navigator screenOptions={screenOptions}>
       <ProtocolStack.Screen name="ProtocolBuilder" component={ProtocolBuilderScreen} options={{ headerShown: false }} />
+      <ProtocolStack.Screen name="ProtocolPicker" component={ProtocolPickerScreen} options={{ title: "Build a Cycle" }} />
       {/* Detail registered locally so tapping a compound in a
           recommended cycle stays in the Home stack — back returns to
           the results page, not a different tab. */}

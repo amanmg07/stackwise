@@ -1,43 +1,63 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Platform, Animated, Easing } from "react-native";
+// ────────────────────────────────────────────────────────────────────
+// Home / "Today" surface (ticket 1.1).
+//
+// Was a stack configurator that asked "what do you want to build?"
+// Now answers "what do you do right now?" within ~1 second of open.
+// Layout: header, streak strip, today's doses (or empty state),
+// today's journal status, milestone banner, build-a-cycle CTA,
+// Self Scan CTA.
+//
+// The route is still named `ProtocolBuilder` so deep links from
+// outside this stack continue to land here — the cycle-build flow
+// moved to ProtocolPickerScreen.
+// ────────────────────────────────────────────────────────────────────
+
+import React, { useEffect, useRef } from "react";
+import {
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image,
+  Animated, Easing,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { format, parseISO } from "date-fns";
 import { useApp } from "../../context/AppContext";
 import { colors, highlights, spacing, safeTop, safeBottom } from "../../theme";
-import { AdministrationRoute } from "../../types";
-import GlassCard from "../../components/GlassCard";
+import { peptides as peptideDB } from "../../data/peptides";
+import { StreakStrip } from "../../components/StreakStrip";
+import { DoseRow } from "../../components/DoseRow";
+import { computeStreak } from "../../utils/streak";
+import {
+  computeDueWeek,
+  computeNextMilestone,
+  selectPeptidesDosedToday,
+  cycleDayNumber,
+  cycleTotalDays,
+} from "../../utils/cycleSelectors";
 
-const ROUTES: { key: AdministrationRoute; label: string; icon: keyof typeof Ionicons.glyphMap; color: string }[] = [
-  { key: "subcutaneous", label: "SubQ Injection", icon: "medkit-outline", color: "#4ade80" },
-  { key: "intramuscular", label: "IM Injection", icon: "fitness-outline", color: "#60a5fa" },
-  { key: "oral", label: "Oral", icon: "nutrition-outline", color: "#facc15" },
-  { key: "nasal", label: "Nasal", icon: "water-outline", color: "#c084fc" },
-  { key: "topical", label: "Topical", icon: "hand-left-outline", color: "#f472b6" },
-];
-
-const GOAL_DISPLAY: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-  recovery: { label: "Recovery", icon: "bandage-outline", color: "#4ade80" },
-  fat_loss: { label: "Fat Loss", icon: "flame-outline", color: "#f87171" },
-  muscle_gain: { label: "Muscle Gain", icon: "barbell-outline", color: "#60a5fa" },
-  anti_aging: { label: "Anti-Aging", icon: "sparkles-outline", color: "#c084fc" },
-  sleep: { label: "Sleep", icon: "moon-outline", color: "#818cf8" },
-  cognitive: { label: "Cognitive", icon: "bulb-outline", color: "#facc15" },
-  immune: { label: "Immune Health", icon: "shield-checkmark-outline", color: "#2dd4bf" },
-  sexual_health: { label: "Sexual Health", icon: "heart-outline", color: "#f472b6" },
-};
+/** Map a mood score (1–10) to the closest quick-log emoji. */
+function moodEmoji(mood: number): string {
+  if (mood <= 3) return "😞";
+  if (mood <= 6) return "😐";
+  if (mood <= 9) return "🙂";
+  return "🤩";
+}
 
 export default function ProtocolBuilderScreen({ navigation }: any) {
-  const { cycles, settings, updateSettings } = useApp();
+  const { cycles, doseLogs, journal, outcomes } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
-  const userGoals = settings.goals || [];
-  // Default to nothing selected — the user opts in to each preferred
-  // administration route on the Home screen rather than starting with
-  // all five pre-selected.
-  const selectedRoutes = settings.preferredRoutes ?? [];
 
-  // Gentle infinite pulse on the Self Scan button — flags it as the
-  // marquee feature without being distracting. Scale 1 → 1.04 → 1
-  // over ~1.6s using native driver.
+  const streak = computeStreak(journal, doseLogs);
+  const todayKey = format(new Date(), "yyyy-MM-dd");
+  const todayEntry = journal.find((e) => e.date === todayKey);
+
+  const dosedToday = activeCycle
+    ? selectPeptidesDosedToday(activeCycle, doseLogs)
+    : new Set<string>();
+  const dueWeek = activeCycle ? computeDueWeek(activeCycle, outcomes) : null;
+  const nextMilestone = activeCycle ? computeNextMilestone(activeCycle, outcomes) : null;
+
+  // Gentle infinite pulse on Self Scan — flags the marquee feature
+  // without being distracting. Preserved from the prior layout.
   const pulse = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loop = Animated.loop(
@@ -51,16 +71,9 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   }, [pulse]);
   const scale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
 
-  const toggleRoute = (route: AdministrationRoute) => {
-    const updated = selectedRoutes.includes(route)
-      ? selectedRoutes.filter((r) => r !== route)
-      : [...selectedRoutes, route];
-    updateSettings({ preferredRoutes: updated });
-  };
-
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
-      {/* Welcome header */}
+      {/* Header */}
       <View style={styles.headerRow}>
         <View style={{ width: 32 }} />
         <View style={styles.headerCenter}>
@@ -74,90 +87,128 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Active cycle quick card */}
-      {activeCycle && (
-        <TouchableOpacity onPress={() => navigation.navigate("CycleTab")} activeOpacity={0.7}>
-          <GlassCard style={styles.activeCycleCard}>
-            <View style={styles.activeCycleDot} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.activeCycleLabel}>Active Cycle</Text>
-              <Text style={styles.activeCycleName}>{activeCycle.name}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </GlassCard>
+      {/* Streak strip — top of the home column so the loss-aversion
+          signal is the first thing the user reads. */}
+      <View style={{ marginBottom: spacing.md }}>
+        <StreakStrip
+          info={streak}
+          onPressOpen={() => navigation.navigate("JournalTab")}
+          onPressTodayDot={() => navigation.navigate("JournalTab", { screen: "NewEntry" })}
+        />
+      </View>
+
+      {/* Milestone surface — due banner > upcoming countdown > nothing */}
+      {activeCycle && dueWeek !== null && (
+        <TouchableOpacity
+          style={styles.dueBanner}
+          onPress={() =>
+            navigation.navigate("CycleTab", {
+              screen: "OutcomeCheckIn",
+              params: { cycleId: activeCycle.id, weekNumber: dueWeek },
+            })
+          }
+          activeOpacity={0.7}
+        >
+          <Ionicons name="checkmark-circle-outline" size={22} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.dueBannerTitle}>Week {dueWeek} check-in is due</Text>
+            <Text style={styles.dueBannerDesc}>~60 seconds. Helps track this cycle's outcome.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.accent} />
         </TouchableOpacity>
       )}
-
-      {/* Your Goals (from profile) */}
-      <TouchableOpacity onPress={() => navigation.navigate("EditDemographics")} activeOpacity={0.7}>
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>Your Goals</Text>
-          <View style={styles.editHint}>
-            <Ionicons name="create-outline" size={14} color={colors.accent} />
-            <Text style={styles.editHintText}>Edit</Text>
-          </View>
+      {activeCycle && dueWeek === null && nextMilestone && (
+        <View style={styles.countdownCard}>
+          <Ionicons name="hourglass-outline" size={16} color={colors.textSecondary} />
+          <Text style={styles.countdownText}>
+            Week {nextMilestone.week} check-in in {nextMilestone.daysAway} day{nextMilestone.daysAway === 1 ? "" : "s"}
+          </Text>
         </View>
-        {userGoals.length > 0 ? (
-          <View style={styles.goalsGrid}>
-            {userGoals.map((g) => {
-              const info = GOAL_DISPLAY[g];
-              if (!info) return null;
-              return (
-                <GlassCard key={g} style={[styles.goalCard, Platform.OS === "ios" ? { borderColor: info.color } : {}]}>
-                  <Ionicons name={info.icon} size={28} color={info.color} />
-                  <Text style={[styles.goalLabel, { color: info.color }]}>{info.label}</Text>
-                </GlassCard>
-              );
-            })}
-          </View>
-        ) : (
-          <View style={styles.setGoalsBtn}>
-            <Ionicons name="add-circle-outline" size={16} color={colors.accent} />
-            <Text style={styles.setGoalsBtnText}>Tap to set your goals</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-
-      {/* Route preferences */}
-      {userGoals.length > 0 && (
-        <>
-          <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Preferred administration</Text>
-          <View style={styles.routeGrid}>
-            {ROUTES.map((r, i) => {
-              const selected = selectedRoutes.includes(r.key);
-              const isInjection = i < 2;
-              return (
-                <TouchableOpacity
-                  key={r.key}
-                  style={isInjection ? styles.routeWrapLarge : styles.routeWrapSmall}
-                  onPress={() => toggleRoute(r.key)}
-                  activeOpacity={0.7}
-                >
-                  <GlassCard
-                    style={[
-                      styles.routeChip,
-                      selected ? { borderColor: r.color, borderWidth: 1.5 } : styles.routeChipInactive,
-                    ]}
-                  >
-                    <Ionicons name={r.icon} size={isInjection ? 24 : 20} color={selected ? r.color : colors.textSecondary} />
-                    <Text style={[styles.routeLabel, selected ? { color: r.color } : styles.routeLabelInactive]}>{r.label}</Text>
-                  </GlassCard>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </>
       )}
 
+      {/* Today's doses */}
+      {activeCycle ? (
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.sectionHeaderRow}
+            onPress={() => navigation.navigate("CycleTab")}
+            activeOpacity={0.7}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sectionTitle}>Today's Cycle</Text>
+              <Text style={styles.sectionSubtitle}>
+                {activeCycle.name} · Day {cycleDayNumber(activeCycle)} of {cycleTotalDays(activeCycle)}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+          {activeCycle.peptides.map((cp) => (
+            <DoseRow
+              key={cp.peptideId}
+              cyclePeptide={cp}
+              peptide={peptideDB.find((p) => p.id === cp.peptideId)}
+              dosed={dosedToday.has(cp.peptideId)}
+              onPress={() =>
+                navigation.navigate("CycleTab", {
+                  screen: "LogDose",
+                  params: { cycleId: activeCycle.id, peptideId: cp.peptideId },
+                })
+              }
+            />
+          ))}
+        </View>
+      ) : (
+        <View style={styles.emptyCycleCard}>
+          <Text style={styles.emptyCycleTitle}>No active cycle</Text>
+          <Text style={styles.emptyCycleDesc}>
+            Start one to see today's doses, check-ins, and progress here.
+          </Text>
+        </View>
+      )}
+
+      {/* Today's journal */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Today's Journal</Text>
+        {todayEntry ? (
+          <TouchableOpacity
+            style={styles.journalLoggedRow}
+            onPress={() => navigation.navigate("JournalTab", { screen: "NewEntry", params: { entryId: todayEntry.id } })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.journalEmoji}>{moodEmoji(todayEntry.mood)}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.journalLoggedTitle}>Logged today</Text>
+              <Text style={styles.journalLoggedDesc}>
+                Mood {todayEntry.mood}/10 · sleep {todayEntry.sleepQuality}/10 · energy {todayEntry.energyLevel}/10
+              </Text>
+            </View>
+            <Ionicons name="create-outline" size={18} color={colors.accent} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.journalCta}
+            onPress={() => navigation.navigate("JournalTab", { screen: "NewEntry" })}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
+            <Text style={styles.journalCtaText}>Log today's mood</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Build a new cycle */}
       <TouchableOpacity
-        style={[styles.buildBtn, (userGoals.length === 0 || selectedRoutes.length === 0) && styles.buildBtnDisabled]}
-        disabled={userGoals.length === 0 || selectedRoutes.length === 0}
-        onPress={() => navigation.navigate("ProtocolResult", { goals: userGoals, routes: selectedRoutes })}
+        style={styles.buildBtn}
+        onPress={() => navigation.navigate("ProtocolPicker")}
+        activeOpacity={0.85}
       >
         <Ionicons name="flash" size={20} color={colors.background} />
-        <Text style={styles.buildBtnText}>View Recommended Cycles</Text>
+        <Text style={styles.buildBtnText}>
+          {activeCycle ? "Build a new cycle" : "Start your first cycle"}
+        </Text>
       </TouchableOpacity>
 
+      {/* Self Scan */}
       <Animated.View style={{ transform: [{ scale }], marginTop: 12, borderRadius: 14, overflow: "hidden" }}>
         <TouchableOpacity
           onPress={() => navigation.navigate("ScannerTab")}
@@ -174,7 +225,6 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
-
     </ScrollView>
   );
 }
@@ -185,60 +235,74 @@ const styles = StyleSheet.create({
   headerCenter: { alignItems: "center", flex: 1 },
   headerLogo: { width: 140, height: 140, resizeMode: "contain" },
   profileBtn: { padding: 4 },
-  welcome: { fontSize: 24, fontWeight: "900", color: colors.accent, letterSpacing: -0.5 },
-  activeCycleCard: {
+
+  section: { marginBottom: spacing.lg },
+  sectionHeaderRow: {
+    flexDirection: "row", alignItems: "center", gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: "700", color: colors.text },
+  sectionSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+
+  // Empty-cycle state when no active cycle exists.
+  emptyCycleCard: {
+    backgroundColor: colors.surface, borderRadius: 14, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
+    marginBottom: spacing.lg,
+  },
+  emptyCycleTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
+  emptyCycleDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 4, lineHeight: 17 },
+
+  // Outcome check-in DUE banner (urgent).
+  dueBanner: {
+    flexDirection: "row", alignItems: "center", gap: spacing.sm,
+    backgroundColor: colors.accent + "12",
+    borderColor: colors.accent + "40",
+    borderWidth: 1, borderRadius: 14, padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  dueBannerTitle: { fontSize: 14, fontWeight: "700", color: colors.accent },
+  dueBannerDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+
+  // Upcoming-milestone countdown (informational).
+  countdownCard: {
+    flexDirection: "row", alignItems: "center", gap: spacing.sm,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 12,
+    borderWidth: 1, borderColor: colors.border,
+    marginBottom: spacing.md,
+  },
+  countdownText: { fontSize: 13, color: colors.textSecondary },
+
+  // Today's journal — logged-state row.
+  journalLoggedRow: {
     flexDirection: "row", alignItems: "center", gap: 12,
-    borderRadius: 14, padding: 16, marginBottom: 24,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.success + "40",
   },
-  activeCycleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.success },
-  activeCycleLabel: { fontSize: 11, color: colors.success, fontWeight: "600", textTransform: "uppercase" },
-  activeCycleName: { fontSize: 16, fontWeight: "700", color: colors.text, marginTop: 2 },
-  sectionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
-  editHint: { flexDirection: "row", alignItems: "center", gap: 4 },
-  editHintText: { fontSize: 13, fontWeight: "600", color: colors.accent },
-  sectionTitle: {
-    fontSize: 20, fontWeight: "700", color: colors.text,
+  journalEmoji: { fontSize: 28 },
+  journalLoggedTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
+  journalLoggedDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+
+  // Today's journal — not-yet-logged CTA.
+  journalCta: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    backgroundColor: colors.accent + "10",
+    borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.accent + "30",
   },
-  sectionDesc: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
-  goalsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
-  goalCard: {
-    width: "48.5%", borderRadius: 14,
-    padding: 18, alignItems: "center", gap: 8,
-  },
-  goalLabel: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
-  setGoalsBtn: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: colors.surface, borderRadius: 12, padding: 16,
-    borderWidth: 1, borderColor: colors.accent + "30", marginBottom: 24,
-  },
-  setGoalsBtnText: { fontSize: 14, fontWeight: "600", color: colors.accent },
-  routeGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginBottom: 24 },
-  routeWrapLarge: { width: "48.5%" },
-  routeWrapSmall: { width: "32%" },
-  routeChip: {
-    alignItems: "center", gap: 6, paddingVertical: 16, borderRadius: 14,
-    position: "relative",
-  },
-  routeLabel: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
-  routeChipInactive: {},
-  routeLabelInactive: { color: colors.textSecondary },
+  journalCtaText: { fontSize: 14, fontWeight: "600", color: colors.accent },
+
+  // Primary CTA (build a new cycle).
   buildBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     backgroundColor: colors.accent, borderRadius: 14, padding: 18,
   },
-  buildBtnDisabled: { opacity: 0.4 },
   buildBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
+
+  // Self Scan (secondary, pulsed).
   selfScanBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     padding: 18,
   },
-  // Bright yellow text + icon on the translucent tint — looks like
-  // yellow glass over the dark surface.
   selfScanBtnText: { fontSize: 16, fontWeight: "700", color: "#fcd34d" },
-  linkRow: {
-    flexDirection: "row", alignItems: "center", gap: 14,
-    borderRadius: 14, padding: 16, marginBottom: 8,
-  },
-  linkTitle: { fontSize: 15, fontWeight: "600", color: colors.text },
-  linkDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
 });
