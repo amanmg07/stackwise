@@ -44,6 +44,7 @@ export function parseReminderTimes(times?: string[]): DailyTime[] {
   return parsed.length ? parsed : FALLBACK;
 }
 const OUTCOME_REMINDER_PREFIX = "stackwise.outcome.";
+const WEEKLY_DIGEST_ID = "stackwise.weekly_digest";
 const ANDROID_CHANNEL_ID = "default";
 
 /**
@@ -303,6 +304,44 @@ export async function cancelOutcomeReminder(cycleId: string, weekNumber: number)
     );
   } catch {
     /* fine */
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Weekly digest reminder (ticket 2.1) — Sunday 9 AM local.
+//
+// Fires once per week regardless of the user's daily-reminder times.
+// Tap opens the app to wherever they last were; the digest card on
+// Home is what they're actually looking for — natural app behavior
+// is good enough (deep-link routing can come later if conversion is
+// weak).
+//
+// Idempotent: cancels the existing one first, so re-scheduling on
+// every launch is safe.
+// ────────────────────────────────────────────────────────────────────
+export async function scheduleWeeklyDigestReminder(): Promise<void> {
+  try {
+    await ensureAndroidChannel();
+    await Notifications.cancelScheduledNotificationAsync(WEEKLY_DIGEST_ID).catch(() => {});
+    await Notifications.scheduleNotificationAsync({
+      identifier: WEEKLY_DIGEST_ID,
+      content: {
+        title: "Your week in StackWise",
+        body: "3 quick observations from this past week — tap to see them.",
+        sound: false,
+      },
+      // WEEKLY repeats on the same weekday + hour + minute.
+      // expo-notifications uses 1=Sunday for the weekday field.
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+        weekday: 1,
+        hour: 9,
+        minute: 0,
+        channelId: ANDROID_CHANNEL_ID,
+      },
+    });
+  } catch (e) {
+    Sentry.captureException(e);
   }
 }
 

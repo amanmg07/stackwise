@@ -69,6 +69,7 @@ function buildSystemPrompt(
   scans?: ScanRecord[],
   settings?: UserSettings,
   isFirstTurn: boolean = true,
+  mode: "chat" | "digest" = "chat",
 ): string {
   // Full details only for mentioned peptides — trimmed to essentials
   const detailed = peptides
@@ -83,7 +84,29 @@ function buildSystemPrompt(
       halfLife: p.halfLife,
     }));
 
-  let prompt = `You are StackWise AI, a knowledgeable peptide and supplement advisor built into the StackWise app. You help users understand peptides, supplements, dosing protocols, stacking strategies, side effects, and cycle planning.
+  // Ticket 2.1 — digest mode produces a 3-bullet weekly summary
+  // instead of an interactive answer. Tracking-framed only (no
+  // dosing changes, no causal claims) to stay inside the ad-policy
+  // / medical-claim boundary.
+  let prompt =
+    mode === "digest"
+      ? `You are StackWise AI generating a weekly digest for the user.
+
+Summarize this user's last 7 days of journal entries, doses, and active cycle in EXACTLY 3 bullets:
+1. One thing trending UP (sleep / energy / recovery / mood / adherence) — cite a specific number
+2. One thing trending DOWN or worth attention — cite a specific number
+3. One small suggestion about tracking or logging behavior — NEVER about specific dosing or compound recommendations
+
+Output format — exactly three bullets, each prefixed with "• ", separated by a single newline. No preamble, no closing line.
+
+RULES:
+- Each bullet ≤ 15 words
+- Personal: reference the user's actual numbers from the context below
+- Tracking-framed only: "your sleep averaged 7.8/10" — never "sleep improved BECAUSE OF [compound]"
+- No medical advice. No dosing changes. No causal claims about peptides or supplements.
+- If the last 7 days have very thin data, lean on what's available rather than padding.
+`
+      : `You are StackWise AI, a knowledgeable peptide and supplement advisor built into the StackWise app. You help users understand peptides, supplements, dosing protocols, stacking strategies, side effects, and cycle planning.
 
 The app includes both research peptides (BPC-157, GHK-Cu, Semaglutide, etc.) and evidence-based supplements (creatine, ashwagandha, magnesium, lion's mane, etc.). Recommend whichever is most appropriate — or both when a combined approach works best.
 
@@ -97,9 +120,10 @@ RULES:
 - Friendly, confident, knowledgeable tone
 `;
 
-  // Compound index is large — include only on the first turn so subsequent
-  // turns rely on conversation history + the targeted detailed block below.
-  if (isFirstTurn) {
+  // Compound index is large — include only on the first turn of chat
+  // mode. Digest mode never needs it (it's summarizing the user's
+  // own data, not answering compound questions).
+  if (isFirstTurn && mode === "chat") {
     const indexWithType = peptides.map((p) => {
       const type = p.compoundType === "supplement" ? "[supplement]" : "[peptide]";
       return `${p.name}${p.abbreviation && p.abbreviation !== p.name ? ` (${p.abbreviation})` : ""} ${type}: ${p.categories.join(", ")}`;
@@ -107,7 +131,7 @@ RULES:
     prompt += `\nCOMPOUND INDEX (name [type]: categories):\n${indexWithType}\n`;
   }
 
-  if (detailed.length > 0) {
+  if (detailed.length > 0 && mode === "chat") {
     prompt += `\nDETAILED INFO FOR REFERENCED COMPOUNDS:\n${JSON.stringify(detailed, null, 0)}\n`;
   }
 
@@ -176,6 +200,8 @@ type ChatContext = {
   pastCycles?: Cycle[];
   scans?: ScanRecord[];
   settings?: UserSettings;
+  /** "chat" (default) or "digest" (ticket 2.1 weekly summary). */
+  mode?: "chat" | "digest";
 };
 
 const FALLBACK_REPLY = "I couldn't generate a response. Please try again.";
@@ -192,6 +218,7 @@ function buildGroqRequest(messages: ChatMessage[], context: ChatContext) {
     context.scans,
     context.settings,
     isFirstTurn,
+    context.mode ?? "chat",
   );
 
   const groqMessages = [
@@ -205,8 +232,12 @@ function buildGroqRequest(messages: ChatMessage[], context: ChatContext) {
   return {
     model: "llama-3.3-70b-versatile",
     messages: groqMessages,
-    max_tokens: 1024,
-    temperature: 0.7,
+    // Digest is bounded by the 3-bullet rule — shorter cap leaves no
+    // room for the model to over-elaborate.
+    max_tokens: context.mode === "digest" ? 320 : 1024,
+    // Lower temperature for digest = more deterministic, sticks to
+    // the user's actual numbers instead of riffing.
+    temperature: context.mode === "digest" ? 0.4 : 0.7,
   };
 }
 
@@ -232,4 +263,32 @@ export async function streamChatMessage(
   const streamed = await streamGroqProxy(buildGroqRequest(messages, context), onDelta);
   const content = streamed || FALLBACK_REPLY;
   return { content, peptideRefs: extractPeptideRefs(content) };
+}
+
+/**
+ * Ticket 2.1 — generate a 3-bullet weekly digest. One-shot call,
+ * non-streaming (the user sees the result post-hoc, character-by-
+ * character would be empty theater). The system prompt comes from
+ * buildSystemPrompt(mode: "digest"); the user-role message is a
+ * stable template so the model has something to respond to.
+ */
+export async function generateWeeklyDigest(context: {
+  activeCycle: Cycle | null;
+  recentJournal: JournalEntry[];
+  pastCycles?: Cycle[];
+  scans?: ScanRecord[];
+  settings?: UserSettings;
+}): Promise<string> {
+  const messages: ChatMessage[] = [
+    {
+      id: "digest-prompt",
+      role: "user",
+      content: "Generate my weekly digest based on the context above.",
+      timestamp: new Date().toISOString(),
+    },
+  ];
+  const data = await callGroqProxy(
+    buildGroqRequest(messages, { ...context, mode: "digest" }),
+  );
+  return data.choices?.[0]?.message?.content?.trim() || "";
 }

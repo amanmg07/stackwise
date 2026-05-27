@@ -20,6 +20,7 @@ import {
   cancelAllStackwiseNotifications,
   setupNotificationCategories,
   ACTION_LOG_DOSES,
+  scheduleWeeklyDigestReminder,
 } from "../services/notificationsService";
 import * as Notifications from "expo-notifications";
 import { buildQuickDoseLogs } from "../utils/quickDoseLog";
@@ -142,6 +143,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           doseLogs: d,
           cycles: c,
         });
+        // Ticket 2.1 — Sunday 9 AM weekly digest reminder. Same
+        // notificationsEnabled gate so it tracks the daily-reminder
+        // setting; if users want it independently, that's a separate
+        // toggle for a future build.
+        scheduleWeeklyDigestReminder();
       }
     })();
 

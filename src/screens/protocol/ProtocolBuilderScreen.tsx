@@ -12,7 +12,7 @@
 // moved to ProtocolPickerScreen.
 // ────────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Image,
   Animated, Easing,
@@ -33,6 +33,12 @@ import {
   cycleDayNumber,
   cycleTotalDays,
 } from "../../utils/cycleSelectors";
+import {
+  getOrGenerateWeeklyDigest,
+  loadDigestDismissed,
+  markDigestDismissed,
+  DigestResult,
+} from "../../services/weeklyDigest";
 
 /** Map a mood score (1–10) to the closest quick-log emoji. */
 function moodEmoji(mood: number): string {
@@ -43,8 +49,40 @@ function moodEmoji(mood: number): string {
 }
 
 export default function ProtocolBuilderScreen({ navigation }: any) {
-  const { cycles, doseLogs, journal, outcomes } = useApp();
+  const { cycles, doseLogs, journal, outcomes, scans, settings } = useApp();
   const activeCycle = cycles.find((c) => c.isActive);
+
+  // Ticket 2.1 — weekly AI digest. On mount, check cache (fast path)
+  // and only spend Groq tokens if a new week needs one and the user
+  // has ≥3 journal entries to summarize. Dismiss state is per-week,
+  // so the card returns after the next Sunday digest fires.
+  const [digest, setDigest] = useState<DigestResult | null>(null);
+  const [digestDismissed, setDigestDismissed] = useState<boolean>(true);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const result = await getOrGenerateWeeklyDigest({
+        journal, doseLogs, cycles, scans, outcomes, settings,
+      });
+      if (cancelled) return;
+      setDigest(result);
+      if (result) {
+        const wasDismissed = await loadDigestDismissed(result.weekKey);
+        if (!cancelled) setDigestDismissed(wasDismissed);
+      }
+    })();
+    return () => { cancelled = true; };
+    // Deliberately empty deps — digest is generated once per session
+    // mount. Cache + per-week key ensures we don't regenerate when
+    // home re-renders due to other state changes (logging a dose, etc.).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const dismissDigest = () => {
+    if (!digest) return;
+    markDigestDismissed(digest.weekKey);
+    setDigestDismissed(true);
+  };
 
   // Ticket 2.3: past cycles surface as one-tap "Run again" chips
   // beneath the active-cycle card. We don't store templates separately
@@ -107,6 +145,27 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           <Ionicons name="person-circle-outline" size={32} color={colors.accent} />
         </TouchableOpacity>
       </View>
+
+      {/* Ticket 2.1 — weekly AI digest card. Above the streak strip
+          because this is the "AI talks first" surface — the only
+          card whose mere presence is the engagement event. Auto-
+          hides when generation is skipped (<3 entries) or after the
+          user dismisses for the week. */}
+      {digest && !digestDismissed && (
+        <View style={styles.digestCard}>
+          <View style={styles.digestHeader}>
+            <Ionicons name="sparkles-outline" size={18} color={colors.accent} />
+            <Text style={styles.digestTitle}>Your week in StackWise</Text>
+            <TouchableOpacity
+              onPress={dismissDigest}
+              hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+            >
+              <Ionicons name="close" size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.digestBody}>{digest.content}</Text>
+        </View>
+      )}
 
       {/* Streak strip — top of the home column so the loss-aversion
           signal is the first thing the user reads. */}
@@ -380,6 +439,35 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   selfScanBtnText: { fontSize: 16, fontWeight: "700", color: "#fcd34d" },
+
+  // Ticket 2.1 — weekly AI digest card.
+  digestCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.accent + "30",
+    marginBottom: spacing.md,
+  },
+  digestHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: spacing.sm,
+  },
+  digestTitle: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.accent,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  digestBody: {
+    fontSize: 14,
+    color: colors.text,
+    lineHeight: 21,
+  },
 
   // Ticket 2.3 — past cycles as run-again chips.
   chipRow: {
