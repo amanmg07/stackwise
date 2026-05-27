@@ -61,7 +61,7 @@ function ScoreSlider({
 export default function OutcomeCheckInScreen({ route, navigation }: any) {
   const cycleId: string = route.params?.cycleId;
   const weekNumber: OutcomeWeek = route.params?.weekNumber;
-  const { cycles, addOutcome } = useApp();
+  const { cycles, addOutcome, scans } = useApp();
   const { showToast } = useToast();
   const cycle = cycles.find((c) => c.id === cycleId);
 
@@ -109,7 +109,37 @@ export default function OutcomeCheckInScreen({ route, navigation }: any) {
     addOutcome(entry);
     trackOutcome(entry);
     showToast(`Week ${weekNumber} check-in saved!`);
-    navigation.goBack();
+
+    // Ticket 2.2: piggyback on the outcome-completion peak moment to
+    // re-prompt for the Self Scan. Scans are StackWise's most
+    // visceral "wow" surface and they've had zero scheduled
+    // re-engagement until now. Two variants:
+    //   - User scanned during this cycle → "Take a new scan to see
+    //     visible changes since cycle start." Tap routes to scanner
+    //     where the existing ScanCompareScreen surfaces the diff.
+    //   - User hasn't scanned yet → "Take a baseline now so the next
+    //     check-in can show changes." Sets up the next milestone.
+    // 'Skip' navigates back as before; the prompt is opt-in.
+    const cycleStartScans = scans.filter((s) => s.date >= cycle.startDate);
+    const hasBaseline = cycleStartScans.length > 0;
+    Alert.alert(
+      hasBaseline ? "See what's changed?" : "Take a baseline scan?",
+      hasBaseline
+        ? `Take a new scan and compare it side-by-side with your week-${cycleStartScans.length > 1 ? cycleStartScans.length - 1 : 0}-of-cycle baseline. ~30 seconds.`
+        : "A scan now means the next check-in can show you side-by-side visible changes. ~30 seconds.",
+      [
+        { text: "Skip", style: "cancel", onPress: () => navigation.goBack() },
+        {
+          text: "Scan now",
+          onPress: () => {
+            // Pop the outcome check-in first so back-from-scanner doesn't
+            // return here, then cross-tab into the scanner.
+            navigation.goBack();
+            navigation.getParent()?.navigate("ScannerTab");
+          },
+        },
+      ],
+    );
   };
 
   return (
