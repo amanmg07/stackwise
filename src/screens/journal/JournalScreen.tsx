@@ -8,6 +8,8 @@ import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, parseISO } from "date-fns";
 import { JournalEntry, normalizeSideEffects } from "../../types";
+import { StreakStrip } from "../../components/StreakStrip";
+import { computeStreak } from "../../utils/streak";
 
 
 interface Insight {
@@ -457,9 +459,10 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
 const PAGE_SIZE = 7;
 
 export default function JournalScreen({ navigation }: any) {
-  const { journal, settings, deleteJournalEntry } = useApp();
+  const { journal, doseLogs, settings, deleteJournalEntry } = useApp();
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal, settings.weightUnit);
+  const streak = computeStreak(journal, doseLogs);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const handleNewEntry = () => navigation.navigate("NewEntry");
@@ -531,6 +534,13 @@ export default function JournalScreen({ navigation }: any) {
         }
         ListHeaderComponent={<>
           <Text style={styles.journalTitle}>Journal</Text>
+          {/* Streak strip — daily-habit retention surface. Today's
+              empty dot deep-links straight into NewEntry; on this
+              screen the rest of the strip is a no-op (we're already
+              on Journal). The strip also lives on Home (ticket 1.1). */}
+          <View style={{ marginBottom: spacing.md }}>
+            <StreakStrip info={streak} onPressTodayDot={handleNewEntry} />
+          </View>
           {header()}
           {sorted.length >= 3 && <TrendChart entries={sorted} />}
           {sorted.length > 0 && (
