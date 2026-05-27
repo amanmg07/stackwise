@@ -63,6 +63,14 @@ function isValidPayload(eventType: string, payload: Record<string, any>): boolea
       // body_fat / sleep_hours bounded if present. Weight range covers
       // both lbs and kg so the unit-tracking column stays the source
       // of truth.
+      //
+      // entry_mode (added with ticket 1.3 quick-log) is the
+      // capture-fidelity tag — "quick" means mood-keyed pre-fills
+      // (lower fidelity), "full" means the user moved each slider.
+      // Buyer aggregates that need high-fidelity data must filter on
+      // entry_mode = 'full' or dedupe to the latest event per
+      // journal_entry_id. Validated as one of the two values if
+      // present; older payloads without the field still pass.
       return (
         inRange(payload.sleepQuality, 1, 10) &&
         inRange(payload.energyLevel, 1, 10) &&
@@ -74,7 +82,10 @@ function isValidPayload(eventType: string, payload: Record<string, any>): boolea
         optInRange(payload.strength, 1, 10) &&
         optInRange(payload.weight, 20, 700) &&
         optInRange(payload.body_fat, 0, 70) &&
-        optInRange(payload.sleep_hours, 0, 24)
+        optInRange(payload.sleep_hours, 0, 24) &&
+        (payload.entry_mode === undefined ||
+          payload.entry_mode === "quick" ||
+          payload.entry_mode === "full")
       );
     case "cycle_outcome":
       return (
@@ -635,6 +646,14 @@ interface JournalEntryInput {
   activePeptideIds: string[];
   /** Either legacy string[] or structured AdverseEvent[]. */
   sideEffects?: string[] | AdverseEvent[];
+  /**
+   * Capture fidelity (ticket 1.3). "quick" = mood-keyed pre-fills from
+   * the one-tap emoji row; "full" = user explicitly moved each slider.
+   * Default for legacy callers is "full" — old emissions stay tagged
+   * as the high-fidelity case so buyer aggregates aren't suddenly
+   * polluted by historic data being miscategorized.
+   */
+  entryMode?: "quick" | "full";
 }
 
 export function trackJournalEntry(input: JournalEntryInput) {
@@ -666,6 +685,7 @@ export function trackJournalEntry(input: JournalEntryInput) {
     activePeptideIds: input.activePeptideIds,
     // Structured: [{ effect, severity?, duration? }, ...]
     sideEffects,
+    entry_mode: input.entryMode ?? "full",
   });
 }
 

@@ -18,6 +18,36 @@ const SIDE_EFFECTS = [
   "Skin tingling", "Jitters", "Dry mouth",
 ];
 
+// ────────────────────────────────────────────────────────────────────
+// Quick-log presets (ticket 1.3).
+//
+// Each emoji maps to a 4-tuple of mood-keyed pre-fills for the four
+// mandatory scores (sleep / energy / recovery / mood). Designed so the
+// auto-fill is *believable* without being neutral:
+//   - "Bad" lands in the 2–3 band, not a flat 1
+//   - "Good" lands in the 7–8 band, not a flat 8
+//   - the four scores are correlated but not identical so the data
+//     doesn't look like obvious autofill in the buyer dataset.
+//
+// Every quick-log emission is tagged `entry_mode: "quick"` so buyer
+// aggregates that need high-fidelity sliders can filter these out.
+// See [[project_analytics_data_integrity]] for the data-moat rule.
+// ────────────────────────────────────────────────────────────────────
+interface QuickPreset {
+  mood: number;
+  sleep: number;
+  energy: number;
+  recovery: number;
+  emoji: string;
+  label: string;
+}
+const QUICK_PRESETS: QuickPreset[] = [
+  { mood: 2,  sleep: 3, energy: 2, recovery: 3,  emoji: "😞", label: "Bad" },
+  { mood: 5,  sleep: 5, energy: 5, recovery: 5,  emoji: "😐", label: "Meh" },
+  { mood: 8,  sleep: 8, energy: 7, recovery: 8,  emoji: "🙂", label: "Good" },
+  { mood: 10, sleep: 9, energy: 10, recovery: 9, emoji: "🤩", label: "Great" },
+];
+
 const SEVERITY_OPTIONS: AdverseEventSeverity[] = ["mild", "moderate", "severe"];
 const DURATION_OPTIONS: AdverseEventDuration[] = ["<1d", "1-3d", "4-7d", "1+wk"];
 
@@ -147,6 +177,26 @@ export default function NewEntryScreen({ route, navigation }: any) {
   });
   const [notes, setNotes] = useState(existing?.notes || "");
 
+  // ── Quick-log state machine (ticket 1.3) ─────────────────────────
+  //  "quick"  → new entry, emoji row visible, full form hidden
+  //  "saved"  → user just tapped an emoji; entry exists; "Add detail"
+  //             button switches the screen into refine-mode
+  //  "full"   → full slider form visible. Either the user explicitly
+  //             skipped quick-log, opened a refine-flow from "saved",
+  //             or is editing an existing entry (skips "quick"
+  //             entirely so we never re-prompt for mood on something
+  //             that's already been captured).
+  type EntryMode = "quick" | "saved" | "full";
+  const [entryMode, setEntryMode] = useState<EntryMode>(existing ? "full" : "quick");
+  const [savedId, setSavedId] = useState<string | null>(existing?.id ?? null);
+  const [savedPreset, setSavedPreset] = useState<QuickPreset | null>(null);
+  // The entry's date is locked at mount so a session that straddles
+  // midnight (user opens at 11:58 PM, refines past 12:00 AM) writes
+  // the entry to its original local day, not the new one.
+  const [currentEntryDate] = useState<string>(
+    () => existing?.date || format(new Date(), "yyyy-MM-dd"),
+  );
+
   const toggleSideEffect = (effect: string) => {
     setSideEffects((prev) => {
       const next = new Map(prev);
@@ -171,10 +221,16 @@ export default function NewEntryScreen({ route, navigation }: any) {
   const save = () => {
     const parsedWeight = weight ? parseFloat(weight) : undefined;
     const parsedBodyFat = bodyFat ? parseFloat(bodyFat) : undefined;
+    // savedId (set by quick-log) or existing.id both mean "we're updating
+    // an entry that already exists in the journal store" — same code
+    // path, same analytics tag ("full" — this code runs when the user
+    // explicitly committed the slider form).
+    const id = savedId || existing?.id || generateId();
+    const isUpdate = !!(savedId || existing);
     const entry = {
-      id: existing?.id || generateId(),
+      id,
       cycleId: activeCycle?.id,
-      date: existing?.date || format(new Date(), "yyyy-MM-dd"),
+      date: currentEntryDate,
       weight: parsedWeight,
       bodyFat: parsedBodyFat,
       sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
@@ -192,50 +248,78 @@ export default function NewEntryScreen({ route, navigation }: any) {
       scaleV2: true,
     };
 
-    if (existing) {
+    const trackPayload = {
+      journalEntryId: entry.id,
+      cycleId: activeCycle?.id,
+      sleepQuality,
+      energyLevel,
+      recoveryScore,
+      mood,
+      weight: parsedWeight,
+      weightUnit: settings.weightUnit,
+      bodyFat: parsedBodyFat,
+      skinQuality,
+      jointComfort,
+      libido,
+      strength,
+      sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
+      activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
+      sideEffects: sideEffects.size > 0 ? [...sideEffects.values()] : undefined,
+      entryMode: "full" as const,
+    };
+
+    if (isUpdate) {
       updateJournalEntry(entry);
-      trackJournalEntry({
-        journalEntryId: entry.id,
-        cycleId: activeCycle?.id,
-        sleepQuality,
-        energyLevel,
-        recoveryScore,
-        mood,
-        weight: parsedWeight,
-        weightUnit: settings.weightUnit,
-        bodyFat: parsedBodyFat,
-        skinQuality,
-        jointComfort,
-        libido,
-        strength,
-        sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
-        activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
-        sideEffects: sideEffects.size > 0 ? [...sideEffects.values()] : undefined,
-      });
+      trackJournalEntry(trackPayload);
       showToast("Entry updated!");
     } else {
       addJournalEntry(entry);
-      trackJournalEntry({
-        journalEntryId: entry.id,
-        cycleId: activeCycle?.id,
-        sleepQuality,
-        energyLevel,
-        recoveryScore,
-        mood,
-        weight: parsedWeight,
-        weightUnit: settings.weightUnit,
-        bodyFat: parsedBodyFat,
-        skinQuality,
-        jointComfort,
-        libido,
-        strength,
-        sleepHours: sleepHours ? parseFloat(sleepHours) : undefined,
-        activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
-        sideEffects: sideEffects.size > 0 ? [...sideEffects.values()] : undefined,
-      });
+      trackJournalEntry(trackPayload);
       showToast("Entry saved!");
     }
     navigation.goBack();
+  };
+
+  // ── Quick-log auto-save ──────────────────────────────────────────
+  // One-tap save with mood-keyed pre-fills. Entry is committed
+  // immediately; the user can refine via "Add detail" or just leave.
+  const quickLogSave = (preset: QuickPreset) => {
+    // Push pre-fills into the form state so if the user opts to
+    // refine, the sliders start where the emoji put them.
+    setSleepQuality(preset.sleep);
+    setEnergyLevel(preset.energy);
+    setRecoveryScore(preset.recovery);
+    setMood(preset.mood);
+
+    const id = generateId();
+    const entry = {
+      id,
+      cycleId: activeCycle?.id,
+      date: currentEntryDate,
+      sleepQuality: preset.sleep,
+      energyLevel: preset.energy,
+      recoveryScore: preset.recovery,
+      mood: preset.mood,
+      notes: "",
+      createdAt: new Date().toISOString(),
+      scaleV2: true,
+    };
+    addJournalEntry(entry);
+    trackJournalEntry({
+      journalEntryId: id,
+      cycleId: activeCycle?.id,
+      sleepQuality: preset.sleep,
+      energyLevel: preset.energy,
+      recoveryScore: preset.recovery,
+      mood: preset.mood,
+      weightUnit: settings.weightUnit,
+      activePeptideIds: activeCycle?.peptides.map((p) => p.peptideId) || [],
+      entryMode: "quick",
+    });
+    showToast(`Saved ${preset.emoji} — tap to add detail`);
+    setSavedId(id);
+    setSavedPreset(preset);
+    setEntryMode("saved");
   };
 
   return (
@@ -245,6 +329,56 @@ export default function NewEntryScreen({ route, navigation }: any) {
         {existing ? format(parseISO(existing.date), "EEEE, MMMM d") : format(new Date(), "EEEE, MMMM d")}
       </Text>
 
+      {/* ── Quick-log fast path (ticket 1.3) ────────────────────── */}
+      {entryMode === "quick" && (
+        <View style={styles.quickLogCard}>
+          <Text style={styles.quickLogTitle}>How was today?</Text>
+          <View style={styles.quickLogRow}>
+            {QUICK_PRESETS.map((p) => (
+              <TouchableOpacity
+                key={p.label}
+                style={styles.quickLogBtn}
+                onPress={() => quickLogSave(p)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`Log mood: ${p.label}`}
+              >
+                <Text style={styles.quickLogEmoji}>{p.emoji}</Text>
+                <Text style={styles.quickLogLabel}>{p.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <TouchableOpacity
+            style={styles.quickLogSkipBtn}
+            onPress={() => setEntryMode("full")}
+          >
+            <Text style={styles.quickLogSkipText}>Skip → log detailed entry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {entryMode === "saved" && savedPreset && (
+        <View style={styles.savedCard}>
+          <View style={styles.savedHeader}>
+            <Text style={styles.savedEmoji}>{savedPreset.emoji}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.savedTitle}>Saved · {savedPreset.label}</Text>
+              <Text style={styles.savedSubtitle}>
+                Done in one tap. Want to refine? Add detail below.
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.refineBtn}
+            onPress={() => setEntryMode("full")}
+          >
+            <Ionicons name="create-outline" size={16} color={colors.accent} />
+            <Text style={styles.refineBtnText}>Add detail to refine</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {entryMode === "full" && <>
       <View style={styles.row}>
         <View style={styles.half}>
           <Text style={styles.label}>Weight ({settings.weightUnit})</Text>
@@ -395,8 +529,9 @@ export default function NewEntryScreen({ route, navigation }: any) {
 
       <TouchableOpacity style={styles.saveBtn} onPress={save}>
         <Ionicons name="checkmark" size={20} color={colors.background} />
-        <Text style={styles.saveBtnText}>{existing ? "Update Entry" : "Save Entry"}</Text>
+        <Text style={styles.saveBtnText}>{(savedId || existing) ? "Update Entry" : "Save Entry"}</Text>
       </TouchableOpacity>
+      </>}
     </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -466,4 +601,96 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent, borderRadius: 14, padding: 18, marginTop: 32,
   },
   saveBtnText: { fontSize: 16, fontWeight: "700", color: colors.background },
+
+  // ── Quick-log + saved-state UI (ticket 1.3) ─────────────────────
+  quickLogCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 8,
+  },
+  quickLogTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.text,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  quickLogRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 12,
+  },
+  quickLogBtn: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 6,
+  },
+  quickLogEmoji: { fontSize: 32 },
+  quickLogLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  quickLogSkipBtn: {
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  quickLogSkipText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    fontStyle: "italic",
+  },
+  savedCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.success + "40",
+    marginBottom: 24,
+    gap: 14,
+  },
+  savedHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  savedEmoji: { fontSize: 36 },
+  savedTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  savedSubtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  refineBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: colors.accent + "12",
+    borderWidth: 1,
+    borderColor: colors.accent + "30",
+  },
+  refineBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.accent,
+  },
 });
