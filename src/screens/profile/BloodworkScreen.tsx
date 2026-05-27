@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
   KeyboardAvoidingView, Platform, Alert,
@@ -71,6 +71,29 @@ const GROUPS: FieldGroup[] = [
 export default function BloodworkScreen({ navigation }: any) {
   const { bloodwork, addBloodwork, deleteBloodwork, cycles } = useApp();
   const { showToast } = useToast();
+
+  // Ticket 2.4: per-marker trend computation. Sort entries chrono-
+  // logically, then for each marker collect every (date, value) pair
+  // where the value is a finite number. Keep markers with ≥2 entries.
+  const markerTrends = useMemo(() => {
+    const sorted = [...bloodwork].sort((a, b) => a.date.localeCompare(b.date));
+    type Trend = {
+      key: keyof Bloodwork;
+      label: string;
+      unit: string;
+      values: { date: string; value: number }[];
+    };
+    const out: Trend[] = [];
+    for (const f of GROUPS.flatMap((g) => g.fields)) {
+      const vals = sorted
+        .map((b) => ({ date: b.date, value: (b as any)[f.key] as number | undefined }))
+        .filter((v): v is { date: string; value: number } => typeof v.value === "number" && Number.isFinite(v.value));
+      if (vals.length >= 2) {
+        out.push({ key: f.key, label: f.label, unit: f.unit, values: vals });
+      }
+    }
+    return out;
+  }, [bloodwork]);
 
   const [showForm, setShowForm] = useState(false);
   const [drawnOn, setDrawnOn] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -209,6 +232,49 @@ export default function BloodworkScreen({ navigation }: any) {
           </View>
         )}
 
+        {/* Trends (ticket 2.4): per-marker before→after view for any
+            marker the user has logged twice. Surfaces the payoff of
+            past logging — turning the screen from a write-only form
+            into something with read value, which is what pulls users
+            back to log their next lab. Neutral arrow color (no
+            good/bad implication) because direction-of-good varies
+            per marker (HDL up = good; LDL down = good; testosterone
+            depends on goal). User interprets. */}
+        {markerTrends.length > 0 && (
+          <View style={styles.trendsSection}>
+            <Text style={styles.trendsHeader}>Trends</Text>
+            <Text style={styles.trendsSubheader}>
+              Markers you've logged at least twice.
+            </Text>
+            {markerTrends.map((t) => {
+              const first = t.values[0];
+              const last = t.values[t.values.length - 1];
+              const delta = last.value - first.value;
+              const pct = first.value !== 0 ? (delta / first.value) * 100 : 0;
+              const arrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
+              return (
+                <View key={t.key as string} style={styles.trendRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.trendLabel}>{t.label}</Text>
+                    <Text style={styles.trendDates}>
+                      {format(parseISO(first.date), "MMM d")} → {format(parseISO(last.date), "MMM d")}
+                      {t.values.length > 2 ? ` · ${t.values.length} entries` : ""}
+                    </Text>
+                  </View>
+                  <View style={styles.trendValuesCol}>
+                    <Text style={styles.trendValues}>
+                      {first.value} → {last.value} <Text style={styles.trendUnit}>{t.unit}</Text>
+                    </Text>
+                    <Text style={styles.trendDelta}>
+                      {arrow} {Math.abs(pct).toFixed(0)}%
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         {bloodwork.length > 0 && (
           <>
             <Text style={styles.historyHeader}>History ({bloodwork.length})</Text>
@@ -302,6 +368,31 @@ const styles = StyleSheet.create({
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
     textTransform: "uppercase", letterSpacing: 1, marginTop: spacing.xl, marginBottom: spacing.sm,
   },
+
+  // Ticket 2.4 — per-marker trend section.
+  trendsSection: { marginTop: spacing.xl },
+  trendsHeader: {
+    fontSize: 13, fontWeight: "700", color: colors.textSecondary,
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: 4,
+  },
+  trendsSubheader: { fontSize: 12, color: colors.textSecondary, marginBottom: spacing.sm },
+  trendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 6,
+    gap: 12,
+  },
+  trendLabel: { fontSize: 14, fontWeight: "600", color: colors.text },
+  trendDates: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+  trendValuesCol: { alignItems: "flex-end" },
+  trendValues: { fontSize: 13, fontWeight: "700", color: colors.text },
+  trendUnit: { fontSize: 11, fontWeight: "500", color: colors.textSecondary },
+  trendDelta: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   entryCard: {
     backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: colors.border, marginBottom: 8,
