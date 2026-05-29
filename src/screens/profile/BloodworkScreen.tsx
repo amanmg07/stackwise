@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Swipeable } from "react-native-gesture-handler";
 import { useApp } from "../../context/AppContext";
 import { useToast } from "../../context/ToastContext";
@@ -97,8 +98,25 @@ export default function BloodworkScreen({ navigation }: any) {
 
   const [showForm, setShowForm] = useState(false);
   const [drawnOn, setDrawnOn] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [labName, setLabName] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
+
+  /**
+   * Bloodwork date picker (UX Batch 2). Replaced the prior plain-text
+   * "YYYY-MM-DD" input that silently accepted garbage like "2025/13/45"
+   * and corrupted the dataset. The native picker can't represent an
+   * invalid date so this also doubles as input validation.
+   *
+   * On iOS the inline spinner is dismissed by tapping outside; on
+   * Android the dialog auto-dismisses on Done/Cancel.
+   */
+  const onDateChange = (event: DateTimePickerEvent, selected?: Date) => {
+    if (Platform.OS === "android") setShowDatePicker(false);
+    if (event.type === "set" && selected) {
+      setDrawnOn(format(selected, "yyyy-MM-dd"));
+    }
+  };
 
   const activeCycle = cycles.find((c) => c.isActive);
 
@@ -176,13 +194,26 @@ export default function BloodworkScreen({ navigation }: any) {
         ) : (
           <View style={styles.formCard}>
             <Text style={styles.label}>Date drawn</Text>
-            <TextInput
+            <TouchableOpacity
               style={styles.input}
-              value={drawnOn}
-              onChangeText={setDrawnOn}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={colors.textSecondary}
-            />
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`Date drawn: ${format(parseISO(drawnOn), "MMMM d, yyyy")}. Tap to change.`}
+            >
+              <Text style={styles.dateInputText}>
+                {format(parseISO(drawnOn), "EEEE, MMMM d, yyyy")}
+              </Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={parseISO(drawnOn)}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                maximumDate={new Date()}
+                onChange={onDateChange}
+              />
+            )}
 
             <Text style={styles.label}>Lab (optional)</Text>
             <TextInput
@@ -348,6 +379,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background, borderRadius: 10, padding: 12,
     fontSize: 14, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
+  // Text content inside the TouchableOpacity-as-date-input (the
+  // pseudo-input that opens DateTimePicker on tap).
+  dateInputText: { fontSize: 14, color: colors.text },
   group: { marginTop: 14 },
   groupTitle: {
     fontSize: 13, fontWeight: "700", color: colors.accent,

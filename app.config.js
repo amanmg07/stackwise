@@ -60,6 +60,10 @@ export default {
           color: "#0a0a0a",
         },
       ],
+      // Native date picker (Bloodwork screen). Doesn't ship in Expo
+      // Go — requires a custom dev/production build, which we already
+      // use (Sentry native is on too).
+      "@react-native-community/datetimepicker",
     ],
     extra: {
       eas: {

@@ -64,12 +64,36 @@ export default function ProfileScreen({ navigation }: any) {
   const expInfo = settings.experienceLevel ? EXP_DISPLAY[settings.experienceLevel] : null;
 
   const confirmClear = () => {
+    // First confirm: what's actually being wiped, with explicit
+    // counts so the user knows the magnitude. LOCAL-only wording
+    // (and a separate "Delete Server Data" path for the server-side
+    // version) because conflating them was the audit's complaint.
     Alert.alert(
-      "Clear data on this device?",
-      "Wipes all cycles, dose logs, journal entries, scans, and bloodwork from this device. Anonymous data already sent to our servers (if you opted into analytics) is NOT removed — use 'Delete Server Data' below for that. This cannot be undone.",
+      "Clear local data?",
+      `This will permanently delete from this device:\n\n• ${cycles.length} ${cycles.length === 1 ? "cycle" : "cycles"}\n• ${totalDoses} dose ${totalDoses === 1 ? "log" : "logs"}\n• ${totalEntries} journal ${totalEntries === 1 ? "entry" : "entries"}\n• All scans and bloodwork logs\n\nAnonymous research data already on our servers (if you opted in) is NOT removed — use "Delete Server Data" for that.\n\nThis cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Clear this device", style: "destructive", onPress: clearAllData },
+        {
+          text: "Continue",
+          style: "destructive",
+          // Second confirm: explicit final-step. The user has already
+          // seen the magnitude — this is the "really really sure"
+          // gate to catch fat-finger taps on the destructive button.
+          onPress: () => {
+            Alert.alert(
+              "Are you absolutely sure?",
+              "There's no recovery once this runs.",
+              [
+                { text: "Keep my data", style: "cancel" },
+                {
+                  text: "Yes, clear everything",
+                  style: "destructive",
+                  onPress: clearAllData,
+                },
+              ]
+            );
+          },
+        },
       ]
     );
   };

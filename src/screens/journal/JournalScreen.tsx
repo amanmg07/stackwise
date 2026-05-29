@@ -5,6 +5,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { LineChart } from "react-native-chart-kit";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { peptides as peptideDB } from "../../data/peptides";
 import { colors, spacing, safeTop, emptyStateStyle } from "../../theme";
 import { format, parseISO } from "date-fns";
@@ -460,7 +461,44 @@ function analyzeJournal(entries: JournalEntry[], weightUnit: "lbs" | "kg" = "lbs
 const PAGE_SIZE = 7;
 
 export default function JournalScreen({ navigation }: any) {
-  const { journal, doseLogs, settings, deleteJournalEntry } = useApp();
+  const { journal, doseLogs, settings, deleteJournalEntry, addJournalEntry } = useApp();
+  const { showToast } = useToast();
+
+  /**
+   * Swipe-delete a journal entry, with undo. We delete immediately so
+   * the UX feels snappy (Gmail / iOS Mail pattern) and offer 4 seconds
+   * to restore via a tap on the toast action. Analytics is not
+   * re-emitted on undo — the cascade-delete of the original event is
+   * accepted as eventual consistency, and the user's local data is
+   * what matters here.
+   */
+  const handleSwipeDelete = (entry: JournalEntry) => {
+    deleteJournalEntry(entry.id);
+    showToast(`Entry from ${format(parseISO(entry.date), "MMM d")} deleted`, {
+      action: { label: "Undo", onPress: () => addJournalEntry(entry) },
+    });
+  };
+
+  /**
+   * Long-press delete keeps a confirm Alert because the gesture is
+   * less obvious than swipe and easier to trigger accidentally.
+   * Same undo toast on confirm.
+   */
+  const handleLongPressDelete = (entry: JournalEntry) => {
+    Alert.alert(`Delete entry from ${format(parseISO(entry.date), "MMM d")}?`, undefined, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          deleteJournalEntry(entry.id);
+          showToast(`Entry from ${format(parseISO(entry.date), "MMM d")} deleted`, {
+            action: { label: "Undo", onPress: () => addJournalEntry(entry) },
+          });
+        },
+      },
+    ]);
+  };
   const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
   const insights = analyzeJournal(journal, settings.weightUnit);
   const streak = computeStreak(journal, doseLogs);
@@ -588,12 +626,9 @@ export default function JournalScreen({ navigation }: any) {
               return (
                 <TouchableOpacity
                   style={styles.deleteBtn}
-                  onPress={() => {
-                    Alert.alert("Delete Entry", `Delete entry from ${format(parseISO(item.date), "MMM d")}?`, [
-                      { text: "Cancel", style: "cancel" },
-                      { text: "Delete", style: "destructive", onPress: () => deleteJournalEntry(item.id) },
-                    ]);
-                  }}
+                  onPress={() => handleSwipeDelete(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Delete entry from ${format(parseISO(item.date), "MMM d")}`}
                 >
                   <Animated.View style={{ transform: [{ scale }], alignItems: "center" }}>
                     <Ionicons name="trash-outline" size={22} color="#fff" />
@@ -606,12 +641,7 @@ export default function JournalScreen({ navigation }: any) {
             <TouchableOpacity
               style={styles.card}
               onPress={() => navigation.navigate("NewEntry", { entryId: item.id })}
-              onLongPress={() => {
-                Alert.alert("Delete Entry", `Delete entry from ${format(parseISO(item.date), "MMM d")}?`, [
-                  { text: "Cancel", style: "cancel" },
-                  { text: "Delete", style: "destructive", onPress: () => deleteJournalEntry(item.id) },
-                ]);
-              }}
+              onLongPress={() => handleLongPressDelete(item)}
               activeOpacity={0.7}
             >
               <View style={styles.cardHeader}>
