@@ -195,25 +195,53 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setupNotificationCategories();
 
-    const sub = Notifications.addNotificationResponseReceivedListener((resp) => {
+    const sub = Notifications.addNotificationResponseReceivedListener(async (resp) => {
       if (resp.actionIdentifier !== ACTION_LOG_DOSES) return;
-      const active = cyclesRef.current.find((c) => c.isActive);
-      if (!active) return;
-      const newLogs = buildQuickDoseLogs(active, doseLogsRef.current);
-      if (newLogs.length === 0) return;
-      const updated = [...newLogs, ...doseLogsRef.current];
-      setDoseLogs(updated);
-      appStorage.saveDoseLogs(updated);
-      for (const log of newLogs) {
-        trackDoseLogged({
-          doseLogId: log.id,
-          cycleId: log.cycleId,
-          peptideId: log.peptideId,
-          amount: log.amount,
-          unit: log.unit,
-          route: log.route,
-          quickLogged: true,
-        });
+      // Cold-launch race fix: when the user taps the action while the
+      // app is killed, the response is queued and delivered to this
+      // listener AS SOON AS we register it — which can happen BEFORE
+      // the initial useEffect has loaded cycles/doseLogs from
+      // AsyncStorage into React state (and therefore before our refs
+      // are populated). Reading refs at that point sees the empty
+      // initial arrays, the active-cycle lookup fails, and the
+      // handler silently exits without logging anything.
+      //
+      // Fix: load fresh from AsyncStorage inside the handler. Robust
+      // to any hydration ordering, slightly slower but the latency
+      // cost (~10ms of disk read) is invisible vs the cold-start
+      // path the user is already on.
+      try {
+        const [storedCycles, storedDoseLogs] = await Promise.all([
+          appStorage.loadCycles(),
+          appStorage.loadDoseLogs(),
+        ]);
+        const active = storedCycles.find((c) => c.isActive);
+        if (!active) {
+          Sentry.captureMessage("LOG_DOSES action: no active cycle", { level: "info" });
+          return;
+        }
+        const newLogs = buildQuickDoseLogs(active, storedDoseLogs);
+        if (newLogs.length === 0) {
+          Sentry.captureMessage("LOG_DOSES action: all peptides already logged today", { level: "info" });
+          return;
+        }
+        const updated = [...newLogs, ...storedDoseLogs];
+        await appStorage.saveDoseLogs(updated);
+        setDoseLogs(updated);
+        for (const log of newLogs) {
+          trackDoseLogged({
+            doseLogId: log.id,
+            cycleId: log.cycleId,
+            peptideId: log.peptideId,
+            amount: log.amount,
+            unit: log.unit,
+            route: log.route,
+            quickLogged: true,
+          });
+        }
+        Sentry.captureMessage(`LOG_DOSES action: persisted ${newLogs.length} dose log(s)`, { level: "info" });
+      } catch (e) {
+        Sentry.captureException(e);
       }
     });
     return () => sub.remove();
