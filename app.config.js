@@ -16,7 +16,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.stackwse.app",
-      buildNumber: "4",
+      buildNumber: "5",
       backgroundColor: "#0a0a0a",
       infoPlist: {
         NSPhotoLibraryUsageDescription: "StackWise uses your photo library for Self Scan body composition analysis.",
