@@ -88,20 +88,27 @@ export function selectPeptidesDosedToday(
 
 /**
  * Day-N of the cycle (1-indexed, capped at total length). Cycles that
- * haven't started yet return 0.
+ * haven't started yet return 0. Floored at 1 once the cycle has
+ * started so we don't render "Day 0 of N" on the start date.
  */
 export function cycleDayNumber(cycle: Cycle, today: Date = new Date()): number {
   const start = parseISO(cycle.startDate + "T00:00:00");
   const days = differenceInCalendarDays(today, start);
   if (days < 0) return 0;
-  const end = parseISO(cycle.endDate + "T00:00:00");
-  const total = differenceInCalendarDays(end, start);
-  return Math.min(days + 1, total);
+  const total = cycleTotalDays(cycle);
+  // Math.max(1, ...) so we never show "Day 0" on the start date —
+  // a brand-new cycle reads as "Day 1 of N", not "Day 0 of N".
+  return Math.max(1, Math.min(days + 1, total));
 }
 
-/** Total planned cycle length in days. */
+/**
+ * Total planned cycle length in days. Floored at 1 so a cycle
+ * with startDate === endDate (1-day cycle) or a corrupted record
+ * with endDate < startDate never produces a "Day 1 of 0" garbage
+ * display on Home or CycleTracker.
+ */
 export function cycleTotalDays(cycle: Cycle): number {
   const start = parseISO(cycle.startDate + "T00:00:00");
   const end = parseISO(cycle.endDate + "T00:00:00");
-  return differenceInCalendarDays(end, start);
+  return Math.max(1, differenceInCalendarDays(end, start));
 }

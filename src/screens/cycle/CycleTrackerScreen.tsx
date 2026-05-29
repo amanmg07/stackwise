@@ -200,10 +200,23 @@ export default function CycleTrackerScreen({ navigation }: any) {
               style={styles.deleteBtn}
               onPress={() => {
                 const hasActivity = cycleLogs.length > 0;
+                // Itemize what's actually deleted so the user can
+                // make an informed call. Bloodwork + journal entries
+                // tied to this cycle stay (they're independently
+                // valuable); only dose logs and the cycle row itself
+                // are wiped. Reminders + analytics cascade is handled
+                // in AppContext.deleteCycle.
+                const itemList = [
+                  `• ${cycleLogs.length} dose ${cycleLogs.length === 1 ? "log" : "logs"}`,
+                  `• ${outcomes.filter((o) => o.cycleId === activeCycle.id).length} outcome check-${outcomes.filter((o) => o.cycleId === activeCycle.id).length === 1 ? "in" : "ins"}`,
+                  "• Scheduled check-in reminders for this cycle",
+                ].join("\n");
+                const keepNote =
+                  "Journal entries and bloodwork stay — they're kept independent of the cycle.";
                 const doDelete = () =>
                   Alert.alert(
                     "Delete Cycle",
-                    `Delete "${activeCycle.name}"? This will remove the cycle and all its data. This cannot be undone.`,
+                    `Delete "${activeCycle.name}"? This permanently removes:\n\n${itemList}\n\n${keepNote}\n\nThis cannot be undone.`,
                     [
                       { text: "Cancel", style: "cancel" },
                       { text: "Delete", style: "destructive", onPress: () => deleteCycle(activeCycle.id) },

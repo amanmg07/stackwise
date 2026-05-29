@@ -300,12 +300,26 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           ))}
         </View>
       ) : (
-        <View style={styles.emptyCycleCard}>
-          <Text style={styles.emptyCycleTitle}>No active cycle</Text>
-          <Text style={styles.emptyCycleDesc}>
-            Start one to see today's doses, check-ins, and progress here.
-          </Text>
-        </View>
+        // Empty-cycle card: punched-up version so first-time users
+        // see a clear primary action right at the top of Home
+        // instead of having to scroll down to the Build button.
+        // Tap → ProtocolPicker (the goals + routes flow).
+        <TouchableOpacity
+          style={styles.emptyCycleCard}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("ProtocolPicker")}
+        >
+          <View style={styles.emptyCycleIcon}>
+            <Ionicons name="rocket-outline" size={28} color={colors.accent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.emptyCycleTitle}>Start your first cycle</Text>
+            <Text style={styles.emptyCycleDesc}>
+              Pick a goal and we'll recommend peptides + supplements that fit. Today's doses, check-ins, and progress show up here once you do.
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+        </TouchableOpacity>
       )}
 
       {/* Today's journal */}
@@ -433,11 +447,19 @@ const styles = StyleSheet.create({
 
   // Empty-cycle state when no active cycle exists.
   emptyCycleCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
     backgroundColor: colors.surface, borderRadius: 14, padding: spacing.md,
-    borderWidth: 1, borderColor: colors.border,
+    borderWidth: 1, borderColor: colors.accent + "40",
     marginBottom: spacing.lg,
   },
-  emptyCycleTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
+  emptyCycleIcon: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: colors.accent + "15",
+    alignItems: "center", justifyContent: "center",
+  },
+  emptyCycleTitle: { fontSize: 15, fontWeight: "700", color: colors.text },
   emptyCycleDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 4, lineHeight: 17 },
 
   // Outcome check-in DUE banner (urgent). Lives inside streakSection
