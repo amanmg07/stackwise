@@ -269,7 +269,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
 
       {/* Today's journal */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's Journal</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: spacing.sm }]}>Today's Journal</Text>
         {todayEntry ? (
           <TouchableOpacity
             style={styles.journalLoggedRow}

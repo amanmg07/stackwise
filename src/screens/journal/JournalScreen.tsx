@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, Animated, Dimensions } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { LineChart } from "react-native-chart-kit";
@@ -469,6 +470,18 @@ export default function JournalScreen({ navigation }: any) {
   const visible = sorted.slice(0, visibleCount);
   const hasMore = visibleCount < sorted.length;
 
+  // Always land at the top of the list when Journal gains focus.
+  // Most commonly this fires after NewEntry save (which reset()s the
+  // stack to Journal), where the user's intent is "see the newest
+  // entry I just saved" — and the newest entry is at index 0. Also
+  // catches any future flow that returns to Journal scrolled-down.
+  const flatListRef = useRef<FlatList<JournalEntry>>(null);
+  useFocusEffect(
+    useCallback(() => {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, []),
+  );
+
   const header = () => {
     if (insights.length === 0) return null;
     return (
@@ -515,6 +528,7 @@ export default function JournalScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <FlatList
+        ref={flatListRef}
         data={visible}
         keyExtractor={(item) => item.id}
         // flexGrow:1 lets the ListEmptyComponent claim the full
