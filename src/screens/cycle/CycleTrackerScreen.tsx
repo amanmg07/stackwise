@@ -198,6 +198,8 @@ export default function CycleTrackerScreen({ navigation }: any) {
             </View>
             <TouchableOpacity
               style={styles.deleteBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Delete this cycle"
               onPress={() => {
                 const hasActivity = cycleLogs.length > 0;
                 // Itemize what's actually deleted so the user can
@@ -245,12 +247,16 @@ export default function CycleTrackerScreen({ navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.editBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Edit this cycle"
               onPress={() => navigation.navigate("NewCycle", { editCycleId: activeCycle.id })}
             >
               <Ionicons name="create-outline" size={20} color={colors.accent} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.shareBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Share this cycle"
               onPress={async () => {
                 const pepList = activeCycle.peptides
                   .map((cp) => {

@@ -184,6 +184,8 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </View>
         <TouchableOpacity
           style={styles.profileBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Open profile"
           onPress={() => navigation.navigate("Profile")}
         >
           <Ionicons name="person-circle-outline" size={32} color={colors.accent} />
@@ -203,6 +205,8 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
             <TouchableOpacity
               onPress={dismissDigest}
               hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss this week's digest"
             >
               <Ionicons name="close" size={18} color={colors.textSecondary} />
             </TouchableOpacity>

@@ -455,7 +455,9 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
                   <TouchableOpacity
                     style={styles.historyDeleteBtn}
                     onPress={() => confirmDeleteScan(s.id)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete scan from ${format(parseISO(s.date), "MMM d")}`}
                   >
                     <Ionicons name="close" size={16} color={colors.text} />
                   </TouchableOpacity>
