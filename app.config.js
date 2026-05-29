@@ -16,11 +16,19 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.stackwse.app",
-      buildNumber: "8",
+      // buildNumber removed — now managed by EAS via appVersionSource:
+      // 'remote' in eas.json. EAS auto-increments per build and injects
+      // the value at build time. Source value here would be ignored.
       backgroundColor: "#0a0a0a",
       infoPlist: {
         NSPhotoLibraryUsageDescription: "StackWise uses your photo library for Self Scan body composition analysis.",
         NSCameraUsageDescription: "StackWise uses your camera to take photos for Self Scan body composition analysis.",
+        // Standard/exempt encryption declaration. Setting this to false
+        // tells App Store Connect we don't use non-exempt encryption
+        // (we don't — only TLS via fetch + AES via standard iOS APIs),
+        // which skips the per-submission encryption-compliance prompt.
+        // See https://developer.apple.com/documentation/Security/complying-with-encryption-export-regulations
+        ITSAppUsesNonExemptEncryption: false,
       },
     },
     android: {
