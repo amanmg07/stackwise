@@ -310,7 +310,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
 
       {/* Today's journal */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { marginBottom: spacing.sm }]}>Today's Journal</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: spacing.xs }]}>Today's Journal</Text>
         {todayEntry ? (
           <TouchableOpacity
             style={styles.journalLoggedRow}
@@ -343,7 +343,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           declared what they want — past cycles are the templates. */}
       {pastCycles.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Run a past cycle again</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: spacing.xs }]}>Run a past cycle again</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -383,8 +383,10 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </Text>
       </TouchableOpacity>
 
-      {/* Self Scan */}
-      <Animated.View style={{ transform: [{ scale }], marginTop: 12, borderRadius: 14, overflow: "hidden" }}>
+      {/* Self Scan — sits right under the Build button as a paired
+          action; tight gap (spacing.xs = 4px) so the two read as one
+          action group rather than two separate sections. */}
+      <Animated.View style={{ transform: [{ scale }], marginTop: spacing.xs, borderRadius: 14, overflow: "hidden" }}>
         <TouchableOpacity
           onPress={() => navigation.navigate("ScannerTab")}
           activeOpacity={0.85}
@@ -422,7 +424,9 @@ const styles = StyleSheet.create({
   },
   sectionHeaderRow: {
     flexDirection: "row", alignItems: "center", gap: spacing.sm,
-    marginBottom: spacing.sm,
+    // Tight title→content gap (4px) so the header reads as part of
+    // the section rather than floating above it.
+    marginBottom: spacing.xs,
   },
   sectionTitle: { fontSize: 18, fontWeight: "700", color: colors.text },
   sectionSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
