@@ -3,16 +3,52 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, Alert, Anima
 import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
+import { useToast } from "../../context/ToastContext";
 import { peptides } from "../../data/peptides";
 import { colors, highlights, spacing, safeTop, safeBottom, emptyStateStyle } from "../../theme";
 import InjectionGuide from "../../components/InjectionGuide";
+import { DoseRow } from "../../components/DoseRow";
 import { format, differenceInDays, parseISO, differenceInCalendarDays } from "date-fns";
-import { trackCycleEnded } from "../../services/analyticsService";
-import { OUTCOME_WEEKS, OutcomeWeek, CycleEndReason } from "../../types";
+import { trackCycleEnded, trackDoseLogged } from "../../services/analyticsService";
+import { generateId } from "../../utils/id";
+import { Cycle, CyclePeptide, DoseLog, OUTCOME_WEEKS, OutcomeWeek, CycleEndReason } from "../../types";
 
 export default function CycleTrackerScreen({ navigation }: any) {
-  const { cycles, doseLogs, outcomes, deleteCycle, deleteDoseLog, updateCycle } = useApp();
+  const { cycles, doseLogs, outcomes, deleteCycle, deleteDoseLog, updateCycle, addDoseLog } = useApp();
+  const { showToast } = useToast();
   const activeCycle = cycles.find((c) => c.isActive);
+
+  /**
+   * One-tap dose-log from the + icon on each peptide row (same UX as
+   * the Home Today surface). Inherits the cycle's prescribed
+   * amount/unit/route — no per-dose site/source/notes review — so
+   * tagged quickLogged=true so buyer aggregates that need
+   * high-fidelity dose-response data can filter these out.
+   */
+  const quickLogDose = (cycle: Cycle, cp: CyclePeptide) => {
+    const log: DoseLog = {
+      id: generateId(),
+      cycleId: cycle.id,
+      peptideId: cp.peptideId,
+      amount: cp.doseAmount,
+      unit: cp.doseUnit,
+      route: cp.route,
+      timestamp: new Date().toISOString(),
+      quickLogged: true,
+    };
+    addDoseLog(log);
+    trackDoseLogged({
+      doseLogId: log.id,
+      cycleId: log.cycleId,
+      peptideId: log.peptideId,
+      amount: log.amount,
+      unit: log.unit,
+      route: log.route,
+      quickLogged: true,
+    });
+    const pepName = peptides.find((p) => p.id === cp.peptideId)?.name || cp.peptideId;
+    showToast(`${pepName} logged`);
+  };
 
   if (!activeCycle) {
     return (
@@ -279,39 +315,19 @@ export default function CycleTrackerScreen({ navigation }: any) {
             const pep = peptides.find((p) => p.id === cp.peptideId);
             const dosed = todayLogs.some((l) => l.peptideId === cp.peptideId);
             return (
-              <TouchableOpacity
+              <DoseRow
                 key={cp.peptideId}
-                style={styles.peptideRow}
+                cyclePeptide={cp}
+                peptide={pep}
+                dosed={dosed}
                 onPress={() =>
                   navigation.navigate("LogDose", {
                     cycleId: activeCycle.id,
                     peptideId: cp.peptideId,
                   })
                 }
-              >
-                <View style={[styles.statusDot, dosed && styles.statusDotDone]} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.peptideName}>{pep?.name || cp.peptideId}</Text>
-                  <Text style={styles.peptideDose}>
-                    {cp.doseAmount} {cp.doseUnit} · {cp.frequency}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.logBtn}
-                  onPress={() =>
-                    navigation.navigate("LogDose", {
-                      cycleId: activeCycle.id,
-                      peptideId: cp.peptideId,
-                    })
-                  }
-                >
-                  <Ionicons
-                    name={dosed ? "checkmark-circle" : "add-circle-outline"}
-                    size={28}
-                    color={dosed ? colors.success : colors.accent}
-                  />
-                </TouchableOpacity>
-              </TouchableOpacity>
+                onPressQuickLog={() => quickLogDose(activeCycle, cp)}
+              />
             );
           })}
 
