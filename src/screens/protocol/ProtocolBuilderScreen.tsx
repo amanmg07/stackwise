@@ -204,18 +204,10 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </View>
       )}
 
-      {/* Streak strip — top of the home column so the loss-aversion
-          signal is the first thing the user reads. */}
-      <View style={{ marginBottom: spacing.md }}>
-        <StreakStrip
-          info={streak}
-          onPressOpen={() => navigation.navigate("JournalTab")}
-          onPressTodayDot={() => navigation.navigate("JournalTab", { screen: "NewEntry" })}
-        />
-      </View>
-
       {/* Notification quick-log undo card (ticket 1.6). Auto-hides
-          when these doses stop being "today" — no manual dismiss. */}
+          when these doses stop being "today" — no manual dismiss.
+          Moved above the streak/milestone block so the streak +
+          milestone read as a single visually-contiguous section. */}
       {todayQuickLoggedDoses.length > 0 && (
         <TouchableOpacity
           style={styles.undoCard}
@@ -235,34 +227,45 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
         </TouchableOpacity>
       )}
 
-      {/* Milestone surface — due banner > upcoming countdown > nothing */}
-      {activeCycle && dueWeek !== null && (
-        <TouchableOpacity
-          style={styles.dueBanner}
-          onPress={() =>
-            navigation.navigate("CycleTab", {
-              screen: "OutcomeCheckIn",
-              params: { cycleId: activeCycle.id, weekNumber: dueWeek },
-            })
-          }
-          activeOpacity={0.7}
-        >
-          <Ionicons name="checkmark-circle-outline" size={22} color={colors.accent} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.dueBannerTitle}>Week {dueWeek} check-in is due</Text>
-            <Text style={styles.dueBannerDesc}>~60 seconds. Helps track this cycle's outcome.</Text>
+      {/* Streak + milestone — one logical section ("today's habit
+          status"). Inner gap is small so they read as grouped;
+          outer marginBottom is the full inter-section gap so the
+          next section (Today's Cycle) gets the same breathing room
+          as every other section. */}
+      <View style={styles.streakSection}>
+        <StreakStrip
+          info={streak}
+          onPressOpen={() => navigation.navigate("JournalTab")}
+          onPressTodayDot={() => navigation.navigate("JournalTab", { screen: "NewEntry" })}
+        />
+        {activeCycle && dueWeek !== null && (
+          <TouchableOpacity
+            style={styles.dueBanner}
+            onPress={() =>
+              navigation.navigate("CycleTab", {
+                screen: "OutcomeCheckIn",
+                params: { cycleId: activeCycle.id, weekNumber: dueWeek },
+              })
+            }
+            activeOpacity={0.7}
+          >
+            <Ionicons name="checkmark-circle-outline" size={22} color={colors.accent} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.dueBannerTitle}>Week {dueWeek} check-in is due</Text>
+              <Text style={styles.dueBannerDesc}>~60 seconds. Helps track this cycle's outcome.</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+          </TouchableOpacity>
+        )}
+        {activeCycle && dueWeek === null && nextMilestone && (
+          <View style={styles.countdownCard}>
+            <Ionicons name="hourglass-outline" size={16} color={colors.textSecondary} />
+            <Text style={styles.countdownText}>
+              Week {nextMilestone.week} check-in in {nextMilestone.daysAway} day{nextMilestone.daysAway === 1 ? "" : "s"}
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.accent} />
-        </TouchableOpacity>
-      )}
-      {activeCycle && dueWeek === null && nextMilestone && (
-        <View style={styles.countdownCard}>
-          <Ionicons name="hourglass-outline" size={16} color={colors.textSecondary} />
-          <Text style={styles.countdownText}>
-            Week {nextMilestone.week} check-in in {nextMilestone.daysAway} day{nextMilestone.daysAway === 1 ? "" : "s"}
-          </Text>
-        </View>
-      )}
+        )}
+      </View>
 
       {/* Today's doses */}
       {activeCycle ? (
@@ -409,6 +412,14 @@ const styles = StyleSheet.create({
   profileBtn: { padding: 4 },
 
   section: { marginBottom: spacing.lg },
+  // Streak + milestone wrapper. Inner `gap` keeps them visually
+  // grouped as one logical "today's habit status" section; outer
+  // marginBottom matches every other section so the page reads
+  // with consistent vertical rhythm.
+  streakSection: {
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
+  },
   sectionHeaderRow: {
     flexDirection: "row", alignItems: "center", gap: spacing.sm,
     marginBottom: spacing.sm,
@@ -425,23 +436,24 @@ const styles = StyleSheet.create({
   emptyCycleTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
   emptyCycleDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 4, lineHeight: 17 },
 
-  // Outcome check-in DUE banner (urgent).
+  // Outcome check-in DUE banner (urgent). Lives inside streakSection
+  // so its outer margin comes from the wrapper's gap — no marginBottom
+  // here.
   dueBanner: {
     flexDirection: "row", alignItems: "center", gap: spacing.sm,
     backgroundColor: colors.accent + "12",
     borderColor: colors.accent + "40",
     borderWidth: 1, borderRadius: 14, padding: spacing.md,
-    marginBottom: spacing.md,
   },
   dueBannerTitle: { fontSize: 14, fontWeight: "700", color: colors.accent },
   dueBannerDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
 
-  // Upcoming-milestone countdown (informational).
+  // Upcoming-milestone countdown (informational). Same wrapper as
+  // dueBanner — no marginBottom; relies on streakSection's gap.
   countdownCard: {
     flexDirection: "row", alignItems: "center", gap: spacing.sm,
     backgroundColor: colors.surface, borderRadius: 12, padding: 12,
     borderWidth: 1, borderColor: colors.border,
-    marginBottom: spacing.md,
   },
   countdownText: { fontSize: 13, color: colors.textSecondary },
 
@@ -485,7 +497,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.accent + "30",
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   digestHeader: {
     flexDirection: "row",
@@ -536,7 +548,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent + "10",
     borderRadius: 12, padding: spacing.md,
     borderWidth: 1, borderColor: colors.accent + "30",
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   undoCardTitle: { fontSize: 14, fontWeight: "700", color: colors.text },
   undoCardDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 4, lineHeight: 16 },
