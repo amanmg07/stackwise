@@ -345,7 +345,15 @@ export default function CycleTrackerScreen({ navigation }: any) {
           })}
 
           {recentLogs.length > 0 && (
-            <Text style={[styles.sectionTitle, { marginTop: spacing.lg }]}>Recent Doses</Text>
+            <>
+              <Text style={[styles.sectionTitle, { marginTop: spacing.lg }]}>Recent Doses</Text>
+              {/* UX Batch 4 — discoverability: tell users the swipe
+                  gesture exists. Without this hint, the only way to
+                  delete a dose is to learn the gesture by accident. */}
+              <Text style={styles.swipeHint}>
+                <Ionicons name="arrow-back" size={11} color={colors.textSecondary} /> Swipe left on a dose to delete
+              </Text>
+            </>
           )}
         </>
       }
@@ -424,6 +432,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13, fontWeight: "700", color: colors.textSecondary,
     textTransform: "uppercase", letterSpacing: 1, marginBottom: spacing.sm,
+  },
+  // UX Batch 4 — swipe-to-delete affordance hint under section title.
+  swipeHint: {
+    fontSize: 11,
+    fontStyle: "italic",
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   peptideRow: {
     flexDirection: "row", alignItems: "center", gap: 12,

@@ -37,6 +37,7 @@ import {
   getOrGenerateWeeklyDigest,
   loadDigestDismissed,
   markDigestDismissed,
+  entriesInWindow,
   DigestResult,
 } from "../../services/weeklyDigest";
 import { useToast } from "../../context/ToastContext";
@@ -95,6 +96,12 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
   // so the card returns after the next Sunday digest fires.
   const [digest, setDigest] = useState<DigestResult | null>(null);
   const [digestDismissed, setDigestDismissed] = useState<boolean>(true);
+  // UX Batch 4 — when the digest is skipped (<3 entries in the past
+  // 7 days), surface a small hint so the user knows it exists +
+  // what unlocks it. Without this, users had no idea the feature
+  // was waiting for more data.
+  const weekJournalCount = entriesInWindow(journal).length;
+  const entriesNeededForDigest = Math.max(0, 3 - weekJournalCount);
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -202,6 +209,24 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
           </View>
           <Text style={styles.digestBody}>{digest.content}</Text>
         </View>
+      )}
+
+      {/* UX Batch 4 — digest-locked hint. Only renders when the user
+          has logged 1 or 2 entries this week (so they know it
+          exists) and we don't already have a generated digest to
+          show. Suppressed at 0 entries because hinting at a feature
+          before any data exists is just clutter on first launch. */}
+      {!digest && weekJournalCount > 0 && entriesNeededForDigest > 0 && (
+        <TouchableOpacity
+          style={styles.digestLockedCard}
+          onPress={() => navigation.navigate("JournalTab", { screen: "NewEntry" })}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="sparkles-outline" size={16} color={colors.textSecondary} />
+          <Text style={styles.digestLockedText}>
+            Log {entriesNeededForDigest} more journal {entriesNeededForDigest === 1 ? "entry" : "entries"} this week to unlock your AI digest
+          </Text>
+        </TouchableOpacity>
       )}
 
       {/* Notification quick-log undo card (ticket 1.6). Auto-hides
@@ -543,6 +568,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     lineHeight: 21,
+  },
+  // UX Batch 4 — locked-state placeholder when the user is partway
+  // toward the 3-entry threshold for digest generation.
+  digestLockedCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    marginBottom: spacing.lg,
+  },
+  digestLockedText: {
+    flex: 1,
+    fontSize: 12,
+    color: colors.textSecondary,
+    lineHeight: 17,
   },
 
   // Ticket 2.3 — past cycles as run-again chips.
