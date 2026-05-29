@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, Linking } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, Linking, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../../context/AppContext";
 import { colors, highlights, spacing, safeBottom, inlineEmptyStyle } from "../../theme";
@@ -241,9 +241,21 @@ export default function ProfileScreen({ navigation }: any) {
               if (next) {
                 const granted = await requestNotificationPermission();
                 if (!granted) {
+                  // UX Batch 6 — explicit next-step guidance. Offer an
+                  // 'Open Settings' button on iOS so the user can fix
+                  // the permission in one tap instead of hunting.
                   Alert.alert(
-                    "Permission denied",
-                    "Enable notifications for StackWise in iOS Settings to receive reminders.",
+                    "Notifications are off",
+                    Platform.OS === "ios"
+                      ? "To get StackWise reminders, turn on Notifications in Settings → StackWise."
+                      : "To get StackWise reminders, turn on Notifications in your device's app settings.",
+                    [
+                      { text: "Not now", style: "cancel" },
+                      {
+                        text: "Open Settings",
+                        onPress: () => Linking.openSettings(),
+                      },
+                    ],
                   );
                   return;
                 }

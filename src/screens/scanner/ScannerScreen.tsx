@@ -173,7 +173,10 @@ export default function ScannerScreen({ navigation }: any) {
       if (asset.base64) {
         analyzeImage(asset.base64, displayUri);
       } else {
-        Alert.alert("Error", "Could not read image data. Please try again.");
+        Alert.alert(
+          "Couldn't read photo",
+          "The image didn't load fully. Try picking a different photo or taking a new one.",
+        );
       }
     }
   };
@@ -310,7 +313,19 @@ FINAL CHECK — before returning your JSON, review EVERY item in "improvements".
         }
       }
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Failed to analyze image. Please try again.");
+      // UX Batch 6 — actionable error copy. The most common real cases
+      // are network drop and AI service hiccup. Detect the network
+      // case and tell the user what to fix; otherwise show a generic
+      // 'try again' with the actual message when present.
+      const raw = (err?.message || "").toString();
+      const looksLikeNetwork =
+        /network|fetch|offline|timeout|abort|reach/i.test(raw);
+      const friendly = looksLikeNetwork
+        ? "Couldn't reach the AI service. Check your connection and try again."
+        : raw
+          ? `${raw}\n\nTry again, or pick a clearer well-lit photo.`
+          : "The AI couldn't analyze this photo. Try again with a clearer well-lit photo showing your face or body.";
+      Alert.alert("Couldn't analyze photo", friendly);
       setResult(null);
       setImageUri(null);
     } finally {

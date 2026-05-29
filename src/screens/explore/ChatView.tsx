@@ -206,10 +206,22 @@ export default function ChatView({ navigation }: Props) {
       await trackUsage("ai_chat");
       usage.refresh();
     } catch (err: any) {
+      // UX Batch 6 — actionable error copy. Common failure modes are:
+      // (a) no network, (b) Groq proxy 5xx, (c) timeout, (d) daily
+      // rate limit hit. Surface the actual message when present, with
+      // a guidance suffix that tells the user what to try.
+      const raw = (err?.message || "").toString();
+      const looksLikeNetwork =
+        /network|fetch|offline|timeout|abort|reach/i.test(raw);
+      const friendly = looksLikeNetwork
+        ? "Couldn't reach the AI service. Check your connection and try again."
+        : raw && !/^\s*$/.test(raw)
+          ? `${raw}\n\nTry again, or rephrase your question.`
+          : "The AI couldn't respond this time. Try again in a moment, or rephrase your question.";
       const errorMsg: ChatMessage = {
         id: generateId(),
         role: "assistant",
-        content: err.message || "Something went wrong. Please try again.",
+        content: friendly,
         timestamp: new Date().toISOString(),
       };
       setMessages([...updated, errorMsg]);
