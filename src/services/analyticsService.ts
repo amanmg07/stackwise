@@ -192,7 +192,16 @@ export async function deleteCycleAnalytics(cycleId: string): Promise<void> {
       // payload.cycle_id; without them the cycle's check-ins and
       // labs orphan in research_cycle_outcomes / research_bloodwork
       // after the cycle itself is gone (audit finding F3).
-      .in("event_type", ["cycle_created", "cycle_updated", "cycle_ended", "dose_logged", "cycle_outcome", "bloodwork_logged"])
+      //
+      // journal_entry added in the post-Phase-2 audit pass — entries
+      // logged with cycleId in scope (most are, since we autotag the
+      // active cycle on save) were orphaning to the deleted cycle in
+      // research_journal_entries until this list included them.
+      // NOTE: this only deletes the analytics-event row; the local
+      // JournalEntry object stays in AsyncStorage (the user keeps
+      // their entry — only the server-side aggregation reference
+      // is cleaned).
+      .in("event_type", ["cycle_created", "cycle_updated", "cycle_ended", "dose_logged", "cycle_outcome", "bloodwork_logged", "journal_entry"])
       .eq("anon_id", userId)
       .filter("payload->>cycle_id", "eq", cycleId)
       .select("id");

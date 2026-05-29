@@ -136,8 +136,12 @@ RULES:
   }
 
   if (activeCycle) {
+    // Cycle NAMES are user-chosen free-text — could contain identifying
+    // info ("Dr. Chen's protocol", "PCOS Jan 2026", etc.). Strip the
+    // name before sending to Groq; the peptide list + dates is the
+    // information the AI actually uses. Data-minimization guard from
+    // the post-Phase-2 data-pipeline audit.
     prompt += `\nUSER'S ACTIVE CYCLE:
-Name: ${activeCycle.name}
 Period: ${activeCycle.startDate} to ${activeCycle.endDate}
 Peptides: ${activeCycle.peptides.map((p) => {
       const pep = peptides.find((db) => db.id === p.peptideId);
@@ -152,14 +156,17 @@ Peptides: ${activeCycle.peptides.map((p) => {
     prompt += `\nRECENT JOURNAL:\n${entries.join("\n")}`;
   }
 
-  // Past cycles
+  // Past cycles — same data-minimization rule as the active cycle:
+  // drop the user-chosen name, keep dates + peptide list. Anonymous
+  // ordinal label ('Cycle 1', 'Cycle 2', etc.) so the AI can
+  // reference 'Cycle 2' coherently in its reply without seeing PII.
   if (pastCycles && pastCycles.length > 0) {
-    const past = pastCycles.slice(0, 5).map((c) => {
+    const past = pastCycles.slice(0, 5).map((c, idx) => {
       const peps = c.peptides.map((p) => {
         const pep = peptides.find((db) => db.id === p.peptideId);
         return pep?.name || p.peptideId;
       }).join(", ");
-      return `${c.name} (${c.startDate} to ${c.endDate}): ${peps}`;
+      return `Cycle ${idx + 1} (${c.startDate} to ${c.endDate}): ${peps}`;
     });
     prompt += `\nPAST CYCLES:\n${past.join("\n")}`;
   }

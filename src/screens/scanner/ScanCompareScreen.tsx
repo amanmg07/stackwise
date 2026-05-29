@@ -26,6 +26,16 @@ export default function ScanCompareScreen({ route, navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [comparison, setComparison] = useState<ScanComparison | null>(null);
 
+  // Computed unconditionally (not after the early return) and BEFORE
+  // the useEffect so the analytics call inside the effect references
+  // a clearly-in-scope value. The previous arrangement worked at
+  // runtime (closure resolves after render) but read as buggy in a
+  // post-Phase-2 data-pipeline audit. Use 0 when scans aren't loaded
+  // yet — the effect early-returns in that case before tracking.
+  const daysBetween = earlier && later
+    ? differenceInCalendarDays(parseISO(later.date), parseISO(earlier.date))
+    : 0;
+
   useEffect(() => {
     if (!earlier || !later) return;
     (async () => {
@@ -58,8 +68,6 @@ export default function ScanCompareScreen({ route, navigation }: any) {
       </View>
     );
   }
-
-  const daysBetween = differenceInCalendarDays(parseISO(later.date), parseISO(earlier.date));
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
