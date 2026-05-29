@@ -14,7 +14,7 @@
 // 23:59 / 00:01 boundary cases.
 // ────────────────────────────────────────────────────────────────────
 
-import { format, parseISO, subDays } from "date-fns";
+import { addDays, format, parseISO, startOfWeek, subDays } from "date-fns";
 import { JournalEntry, DoseLog } from "../types";
 
 export interface StreakDay {
@@ -22,8 +22,15 @@ export interface StreakDay {
   date: string;
   /** True if ≥1 journal entry or dose log exists for this local date. */
   logged: boolean;
-  /** True only for the rightmost cell — the in-progress current day. */
+  /** True for the cell representing the in-progress current day. */
   isToday: boolean;
+  /**
+   * True for days within the current calendar week that haven't
+   * happened yet (e.g. Fri+Sat when today is Thursday). Future days
+   * can't be "logged" or "missed" — they need their own visual state
+   * in the strip (muted outline, no affordance).
+   */
+  isFuture: boolean;
 }
 
 export interface StreakInfo {
@@ -31,8 +38,14 @@ export interface StreakInfo {
   current: number;
   /** True if today has at least one log. */
   todayLogged: boolean;
-  /** Oldest-first array of exactly 7 cells covering today and the previous 6 days. */
-  last7: StreakDay[];
+  /**
+   * The current calendar week — exactly 7 cells, Sunday first
+   * through Saturday last. Today sits at whatever column matches
+   * its day-of-week (Thursday = index 4). Days before today carry
+   * their real logged/missed state; days after today are flagged
+   * isFuture and have logged=false.
+   */
+  week: StreakDay[];
 }
 
 /** Format a Date as the local-timezone YYYY-MM-DD key used everywhere here. */
@@ -83,12 +96,23 @@ export function computeStreak(
   const todayKey = localDateKey(today);
   const todayLogged = logged.has(todayKey);
 
-  // 7-cell grid: 6 days ago → today (today is the rightmost cell).
-  const last7: StreakDay[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = subDays(today, i);
+  // 7-cell grid spanning the current calendar week, Sunday-first.
+  // weekStartsOn: 0 = Sunday in date-fns.
+  const sunday = startOfWeek(today, { weekStartsOn: 0 });
+  const week: StreakDay[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(sunday, i);
     const key = localDateKey(d);
-    last7.push({ date: key, logged: logged.has(key), isToday: i === 0 });
+    const isToday = key === todayKey;
+    const isFuture = key > todayKey;
+    week.push({
+      date: key,
+      // Future days can't be "logged" — keep this strictly false even
+      // if the set contained the date for some pathological reason.
+      logged: !isFuture && logged.has(key),
+      isToday,
+      isFuture,
+    });
   }
 
   // Walk backward. If today isn't logged yet, the streak is the run of
@@ -101,5 +125,5 @@ export function computeStreak(
     cursor = subDays(cursor, 1);
   }
 
-  return { current, todayLogged, last7 };
+  return { current, todayLogged, week };
 }

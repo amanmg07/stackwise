@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import * as Sentry from "@sentry/react-native";
-import { addDays, differenceInCalendarDays, parseISO } from "date-fns";
+import { addDays, differenceInCalendarDays, format, parseISO, subDays } from "date-fns";
 import { Cycle, DoseLog, JournalEntry } from "../types";
 import { computeStreak } from "../utils/streak";
 
@@ -419,8 +419,18 @@ export async function scheduleDailyReminderForState(input: {
 }): Promise<boolean> {
   const now = input.now ?? new Date();
   const streakInfo = computeStreak(input.journal, input.doseLogs, now);
-  // last7 is oldest-first, today is index 6 → yesterday is index 5.
-  const yesterdayLogged = streakInfo.last7[5]?.logged ?? false;
+  // Yesterday-was-logged: derive directly from raw data since the
+  // week grid (Sun-Sat) doesn't include yesterday on Sundays.
+  const yesterdayKey = format(subDays(now, 1), "yyyy-MM-dd");
+  const yesterdayLogged =
+    input.journal.some((e) => e.date === yesterdayKey) ||
+    input.doseLogs.some((l) => {
+      try {
+        return format(parseISO(l.timestamp), "yyyy-MM-dd") === yesterdayKey;
+      } catch {
+        return false;
+      }
+    });
 
   const activeCycle = input.cycles.find((c) => c.isActive);
   const activeCycleInfo = activeCycle

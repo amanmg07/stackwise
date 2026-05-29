@@ -37,27 +37,41 @@ function dose(timestamp: string, id = timestamp): DoseLog {
 }
 
 describe("computeStreak", () => {
-  const today = localDate(2026, 5, 27); // Wed 2026-05-27, local noon
+  // Wed 2026-05-27, noon local. Week-of-today (Sun 5-24 → Sat 5-30):
+  //   index 0 = Sun 5-24    index 4 = Thu 5-28 (future)
+  //   index 1 = Mon 5-25    index 5 = Fri 5-29 (future)
+  //   index 2 = Tue 5-26    index 6 = Sat 5-30 (future)
+  //   index 3 = Wed 5-27 (TODAY)
+  const today = localDate(2026, 5, 27);
+  const TODAY_INDEX = 3;
 
-  it("empty inputs → zero streak, all 7 dots empty, today not logged", () => {
+  it("empty inputs → zero streak, week grid spans Sun-Sat, today flagged correctly", () => {
     const s = computeStreak([], [], today);
     expect(s.current).toBe(0);
     expect(s.todayLogged).toBe(false);
-    expect(s.last7).toHaveLength(7);
-    expect(s.last7.every((d) => !d.logged)).toBe(true);
-    expect(s.last7[6].isToday).toBe(true);
-    expect(s.last7[6].date).toBe("2026-05-27");
-    expect(s.last7[0].date).toBe("2026-05-21");
+    expect(s.week).toHaveLength(7);
+    expect(s.week.every((d) => !d.logged)).toBe(true);
+    expect(s.week[TODAY_INDEX].isToday).toBe(true);
+    expect(s.week[TODAY_INDEX].date).toBe("2026-05-27");
+    expect(s.week[0].date).toBe("2026-05-24"); // Sunday
+    expect(s.week[6].date).toBe("2026-05-30"); // Saturday
+    // Future days flagged correctly
+    expect(s.week[4].isFuture).toBe(true);
+    expect(s.week[5].isFuture).toBe(true);
+    expect(s.week[6].isFuture).toBe(true);
+    // Today + past days not flagged future
+    expect(s.week[TODAY_INDEX].isFuture).toBe(false);
+    expect(s.week[0].isFuture).toBe(false);
   });
 
   it("single journal entry today → streak of 1", () => {
     const s = computeStreak([journal("2026-05-27")], [], today);
     expect(s.current).toBe(1);
     expect(s.todayLogged).toBe(true);
-    expect(s.last7[6].logged).toBe(true);
+    expect(s.week[TODAY_INDEX].logged).toBe(true);
   });
 
-  it("7 consecutive days ending today → streak of 7, all dots filled", () => {
+  it("7 consecutive days ending today → streak of 7, past+today cells filled, future cells unaffected", () => {
     const entries = [
       "2026-05-21",
       "2026-05-22",
@@ -69,7 +83,10 @@ describe("computeStreak", () => {
     ].map((d) => journal(d));
     const s = computeStreak(entries, [], today);
     expect(s.current).toBe(7);
-    expect(s.last7.every((d) => d.logged)).toBe(true);
+    // Past + today cells within the week (indices 0..3) should all
+    // be logged; future cells (4..6) stay isFuture and logged=false.
+    expect(s.week.slice(0, 4).every((d) => d.logged)).toBe(true);
+    expect(s.week.slice(4).every((d) => d.isFuture && !d.logged)).toBe(true);
   });
 
   it("today not logged but yesterday extends back 12 days → streak alive at 12", () => {
@@ -81,9 +98,9 @@ describe("computeStreak", () => {
     const s = computeStreak(entries, [], today);
     expect(s.todayLogged).toBe(false);
     expect(s.current).toBe(12);
-    // Today's dot is still the "not yet" cell — outlined ring in the UI.
-    expect(s.last7[6].isToday).toBe(true);
-    expect(s.last7[6].logged).toBe(false);
+    // Today's cell is the "not yet" cell — outlined ring in the UI.
+    expect(s.week[TODAY_INDEX].isToday).toBe(true);
+    expect(s.week[TODAY_INDEX].logged).toBe(false);
   });
 
   it("gap in the middle breaks the streak", () => {
@@ -143,17 +160,29 @@ describe("computeStreak", () => {
     expect(s.current).toBe(30);
   });
 
-  it("last7 is in chronological order, oldest first, today last", () => {
+  it("week always spans Sunday → Saturday regardless of today's day-of-week", () => {
     const s = computeStreak([], [], today);
-    const dates = s.last7.map((d) => d.date);
+    const dates = s.week.map((d) => d.date);
     expect(dates).toEqual([
-      "2026-05-21",
-      "2026-05-22",
-      "2026-05-23",
-      "2026-05-24",
-      "2026-05-25",
-      "2026-05-26",
-      "2026-05-27",
+      "2026-05-24", // Sun
+      "2026-05-25", // Mon
+      "2026-05-26", // Tue
+      "2026-05-27", // Wed (today)
+      "2026-05-28", // Thu (future)
+      "2026-05-29", // Fri (future)
+      "2026-05-30", // Sat (future)
     ]);
   });
+
+  it("future-day entries (clock skew, testing data) never light up future cells", () => {
+    // Pathological case: someone logs an entry dated tomorrow.
+    // The week cell for tomorrow stays isFuture + logged=false so the
+    // UI doesn't show a logged dot for a day that hasn't happened.
+    const entries = [journal("2026-05-28"), journal("2026-05-30")];
+    const s = computeStreak(entries, [], today);
+    expect(s.week[4].isFuture).toBe(true);
+    expect(s.week[4].logged).toBe(false);
+    expect(s.week[6].logged).toBe(false);
+  });
+
 });

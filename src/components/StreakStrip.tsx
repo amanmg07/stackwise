@@ -23,10 +23,14 @@ interface Props {
   onPressOpen?: () => void;
 }
 
-const DAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
+// Two-letter labels for the day-of-week initials below each dot.
+// Disambiguates the duplicates (Sun/Sat both 'S' and Tue/Thu both 'T')
+// in the previous single-letter scheme — users couldn't tell which 'T'
+// was today when today was Thursday.
+const DAY_INITIALS = ["Su", "M", "Tu", "W", "Th", "F", "Sa"];
 const DOT_SIZE = 14;
 
-/** Local-date YYYY-MM-DD → single-letter day-of-week initial. */
+/** Local-date YYYY-MM-DD → short day-of-week label (Su, M, Tu, W, Th, F, Sa). */
 function dayInitial(localDate: string): string {
   const [y, m, d] = localDate.split("-").map(Number);
   // new Date(y, m-1, d) constructs a local-midnight Date, so .getDay()
@@ -51,22 +55,29 @@ export function StreakStrip({ info, onPressTodayDot, onPressOpen }: Props) {
         <Text style={styles.label}>day{"\n"}streak</Text>
       </TouchableOpacity>
 
-      {/* Right: 7-dot grid, oldest → today. */}
+      {/* Right: 7-dot grid for the current calendar week, Sun → Sat. */}
       <View style={styles.dotsRow}>
-        {info.last7.map((d) => {
+        {info.week.map((d) => {
           const isTodayDot = d.isToday;
+          const isFutureDot = d.isFuture;
           const isTapTarget = isTodayDot && !d.logged && !!onPressTodayDot;
 
+          // Visual states in priority order:
+          //   logged       → filled amber
+          //   today, empty → outlined amber (the "tap me" affordance)
+          //   future       → thin grey outline (the day hasn't happened yet)
+          //   missed       → filled border-color (loss-aversion cue)
           const dotStyle = [
             styles.dot,
             d.logged && styles.dotLogged,
             !d.logged && isTodayDot && styles.dotToday,
-            !d.logged && !isTodayDot && styles.dotMissed,
+            !d.logged && !isTodayDot && isFutureDot && styles.dotFuture,
+            !d.logged && !isTodayDot && !isFutureDot && styles.dotMissed,
           ];
 
           // The today-dot becomes a tap target when not yet logged
-          // (quick-log path). Other cells / logged today fall through to
-          // the wrapping View — the left column handles "open Journal."
+          // (quick-log path). Other cells fall through to the wrapping
+          // View — the left column handles "open Journal."
           const Cell: React.ComponentType<any> = isTapTarget
             ? TouchableOpacity
             : View;
@@ -87,9 +98,10 @@ export function StreakStrip({ info, onPressTodayDot, onPressOpen }: Props) {
                 style={[
                   styles.dayLabel,
                   isTodayDot && styles.dayLabelToday,
+                  isFutureDot && styles.dayLabelFuture,
                 ]}
               >
-                {isTodayDot ? "·" : dayInitial(d.date)}
+                {dayInitial(d.date)}
               </Text>
             </View>
           );
@@ -153,6 +165,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: highlights.yellow,
   },
+  dotFuture: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
   dayLabel: {
     fontSize: 10,
     color: colors.textSecondary,
@@ -160,5 +177,10 @@ const styles = StyleSheet.create({
   dayLabelToday: {
     color: highlights.yellow,
     fontWeight: "700",
+  },
+  dayLabelFuture: {
+    // Slightly dimmer than the default caption color so future days
+    // recede into the background.
+    opacity: 0.5,
   },
 });
