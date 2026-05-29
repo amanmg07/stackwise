@@ -39,6 +39,10 @@ import {
   markDigestDismissed,
   DigestResult,
 } from "../../services/weeklyDigest";
+import { useToast } from "../../context/ToastContext";
+import { trackDoseLogged } from "../../services/analyticsService";
+import { generateId } from "../../utils/id";
+import { Cycle, CyclePeptide, DoseLog } from "../../types";
 
 /** Map a mood score (1–10) to the closest quick-log emoji. */
 function moodEmoji(mood: number): string {
@@ -49,8 +53,41 @@ function moodEmoji(mood: number): string {
 }
 
 export default function ProtocolBuilderScreen({ navigation }: any) {
-  const { cycles, doseLogs, journal, outcomes, scans, settings } = useApp();
+  const { cycles, doseLogs, journal, outcomes, scans, settings, addDoseLog } = useApp();
+  const { showToast } = useToast();
   const activeCycle = cycles.find((c) => c.isActive);
+
+  /**
+   * One-tap dose-log from the Home DoseRow's + icon. Inherits the
+   * cycle's prescribed amount/unit/route — no per-dose site/source/
+   * notes review — so flagged quickLogged=true to keep the buyer
+   * dataset's high-fidelity aggregates clean (same posture as the
+   * notification-tap path from ticket 1.6).
+   */
+  const quickLogDose = (cycle: Cycle, cp: CyclePeptide) => {
+    const log: DoseLog = {
+      id: generateId(),
+      cycleId: cycle.id,
+      peptideId: cp.peptideId,
+      amount: cp.doseAmount,
+      unit: cp.doseUnit,
+      route: cp.route,
+      timestamp: new Date().toISOString(),
+      quickLogged: true,
+    };
+    addDoseLog(log);
+    trackDoseLogged({
+      doseLogId: log.id,
+      cycleId: log.cycleId,
+      peptideId: log.peptideId,
+      amount: log.amount,
+      unit: log.unit,
+      route: log.route,
+      quickLogged: true,
+    });
+    const pepName = peptideDB.find((p) => p.id === cp.peptideId)?.name || cp.peptideId;
+    showToast(`${pepName} logged`);
+  };
 
   // Ticket 2.1 — weekly AI digest. On mount, check cache (fast path)
   // and only spend Groq tokens if a new week needs one and the user
@@ -255,6 +292,7 @@ export default function ProtocolBuilderScreen({ navigation }: any) {
                   params: { cycleId: activeCycle.id, peptideId: cp.peptideId },
                 })
               }
+              onPressQuickLog={() => quickLogDose(activeCycle, cp)}
             />
           ))}
         </View>

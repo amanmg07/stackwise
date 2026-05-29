@@ -15,9 +15,20 @@ interface Props {
   peptide?: Peptide;
   dosed: boolean;
   onPress: () => void;
+  /**
+   * Optional one-tap quick-log handler wired to the trailing + icon.
+   * When provided and the peptide hasn't been dosed today, the + icon
+   * becomes its own tap target — tap it to log the dose with the
+   * cycle's prescribed values and stay on the current screen. When
+   * already dosed, the icon is a checkmark with no interaction.
+   * When omitted, the icon is purely decorative and the row's onPress
+   * handles everything (legacy behavior used by CycleTrackerScreen).
+   */
+  onPressQuickLog?: () => void;
 }
 
-export function DoseRow({ cyclePeptide, peptide, dosed, onPress }: Props) {
+export function DoseRow({ cyclePeptide, peptide, dosed, onPress, onPressQuickLog }: Props) {
+  const quickLogEnabled = !!onPressQuickLog && !dosed;
   return (
     <TouchableOpacity
       style={styles.row}
@@ -33,11 +44,25 @@ export function DoseRow({ cyclePeptide, peptide, dosed, onPress }: Props) {
           {cyclePeptide.doseAmount} {cyclePeptide.doseUnit} · {cyclePeptide.frequency}
         </Text>
       </View>
-      <Ionicons
-        name={dosed ? "checkmark-circle" : "add-circle-outline"}
-        size={28}
-        color={dosed ? colors.success : colors.accent}
-      />
+      {quickLogEnabled ? (
+        <TouchableOpacity
+          onPress={onPressQuickLog}
+          style={styles.iconHit}
+          // Generous hitSlop because the icon is small and this is the
+          // primary one-tap path — frustrating misses kill the UX.
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel={`Quick-log a dose of ${peptide?.name || cyclePeptide.peptideId}`}
+        >
+          <Ionicons name="add-circle-outline" size={28} color={colors.accent} />
+        </TouchableOpacity>
+      ) : (
+        <Ionicons
+          name={dosed ? "checkmark-circle" : "add-circle-outline"}
+          size={28}
+          color={dosed ? colors.success : colors.accent}
+        />
+      )}
     </TouchableOpacity>
   );
 }
@@ -64,4 +89,5 @@ const styles = StyleSheet.create({
   statusDotDone: { backgroundColor: colors.success },
   name: { fontSize: 15, fontWeight: "600", color: colors.text },
   dose: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  iconHit: { padding: 4, marginRight: -4 },
 });
