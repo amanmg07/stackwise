@@ -95,7 +95,12 @@ export default function LogDoseScreen({ route, navigation }: any) {
       source: trimmedSource || undefined,
     });
     showToast("Dose logged!");
-    navigation.goBack();
+    // Cross-tab navigation from Home's DoseRow (ticket 1.1) lands
+    // here without a CycleTracker screen underneath, so goBack()
+    // falls through to the tab navigator's history (typically
+    // ending on Explore). reset() forces CycleStack back to the
+    // tracker regardless of how we got here.
+    navigation.reset({ index: 0, routes: [{ name: "CycleTracker" }] });
   };
 
   return (

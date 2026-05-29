@@ -277,7 +277,14 @@ export default function NewEntryScreen({ route, navigation }: any) {
       trackJournalEntry(trackPayload);
       showToast("Entry saved!");
     }
-    navigation.goBack();
+    // Always land on the Journal home page after save. goBack() is
+    // unreliable here because cross-tab nav from Home (1.1) puts
+    // NewEntry in the JournalStack without a Journal screen
+    // underneath — goBack() then falls through to the tab
+    // navigator's history and pops to whatever tab was last
+    // (typically Explore). reset() forces the stack to a single
+    // Journal route regardless of how we got here.
+    navigation.reset({ index: 0, routes: [{ name: "Journal" }] });
   };
 
   // ── Quick-log auto-save ──────────────────────────────────────────
