@@ -13,7 +13,7 @@ const SITES = ["Left Delt", "Right Delt", "Left Abdomen", "Right Abdomen", "Left
 
 export default function LogDoseScreen({ route, navigation }: any) {
   const { cycleId, peptideId: initPeptideId } = route.params;
-  const { cycles, addDoseLog } = useApp();
+  const { cycles, addDoseLog, doseLogs } = useApp();
   const { showToast } = useToast();
   const cycle = cycles.find((c) => c.id === cycleId);
   const cyclePeptide = cycle?.peptides.find((p) => p.peptideId === initPeptideId);
@@ -23,11 +23,20 @@ export default function LogDoseScreen({ route, navigation }: any) {
   const initUnit = cyclePeptide?.doseUnit || "mg";
   const initAmount = cyclePeptide?.doseAmount || 0.25;
 
+  // UX Batch 3 — pre-fill site + source from the user's last
+  // non-quick-logged dose for THIS peptide. Saves them from typing
+  // the same "Left Delt"/"Vendor X" every time. quickLogged doses
+  // never have site/source so they're filtered out — using one of
+  // those would leak empty strings into the fields.
+  const lastDoseForPeptide = doseLogs
+    .filter((l) => l.peptideId === initPeptideId && !l.quickLogged && (l.site || l.source))
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0];
+
   const [amount, setAmount] = useState(String(initAmount));
   const [unit, setUnit] = useState<"mcg" | "mg" | "g" | "IU">(initUnit);
   const [route_, setRoute] = useState<AdministrationRoute>(cyclePeptide?.route || "subcutaneous");
-  const [site, setSite] = useState("");
-  const [source, setSource] = useState("");
+  const [site, setSite] = useState(lastDoseForPeptide?.site || "");
+  const [source, setSource] = useState(lastDoseForPeptide?.source || "");
   const [notes, setNotes] = useState("");
 
   if (!cycle) {
@@ -47,8 +56,18 @@ export default function LogDoseScreen({ route, navigation }: any) {
     if (initUnit === "IU" || newUnit === "IU") {
       // IU isn't a weight, so we can't convert across — show the recommendation
       // only when the units match, otherwise leave blank for manual entry.
-      setAmount(newUnit === initUnit ? String(initAmount) : "");
+      const willBlank = newUnit !== initUnit;
+      setAmount(willBlank ? "" : String(initAmount));
       setUnit(newUnit);
+      // UX Batch 3 — let the user know the field cleared and what
+      // to do next, instead of silently emptying it (audit found
+      // users were tapping Save with an empty field, then getting
+      // a generic 'Invalid dose' alert).
+      if (willBlank) {
+        showToast(`Enter the dose manually in ${newUnit} — IU doesn't convert.`, {
+          variant: "info",
+        });
+      }
       return;
     }
 

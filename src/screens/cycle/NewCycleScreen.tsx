@@ -280,6 +280,14 @@ export default function NewCycleScreen({ route, navigation }: any) {
   const parsedWeeks = parseInt(durationWeeks) || 0;
   const canSave = name.trim().length > 0 && cyclePeptides.length > 0 && parsedWeeks >= 1 && parsedWeeks <= 52;
 
+  // UX Batch 3 — surface which specific requirements are still
+  // missing so the user knows what to fill in, instead of staring
+  // at a disabled button with no hint.
+  const missingRequirements: string[] = [];
+  if (name.trim().length === 0) missingRequirements.push("set a name");
+  if (cyclePeptides.length === 0) missingRequirements.push("add at least one peptide");
+  if (!(parsedWeeks >= 1 && parsedWeeks <= 52)) missingRequirements.push("set duration (1–52 weeks)");
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: safeBottom }}>
@@ -534,6 +542,15 @@ export default function NewCycleScreen({ route, navigation }: any) {
         multiline
       />
 
+      {!canSave && missingRequirements.length > 0 && (
+        <View style={styles.requireHint}>
+          <Ionicons name="information-circle-outline" size={14} color={colors.warning} />
+          <Text style={styles.requireHintText}>
+            Before starting: {missingRequirements.join(" · ")}
+          </Text>
+        </View>
+      )}
+
       <TouchableOpacity
         style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
         onPress={saveCycle}
@@ -633,6 +650,26 @@ const styles = StyleSheet.create({
     alignItems: "center", marginTop: 24,
   },
   saveBtnDisabled: { opacity: 0.4 },
+  // UX Batch 3 — inline hint shown above the save button listing
+  // requirements still missing. Warm amber so it reads as 'fix this'
+  // rather than 'error'.
+  requireHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: colors.warning + "15",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  requireHintText: {
+    flex: 1,
+    fontSize: 12,
+    color: colors.warning,
+    lineHeight: 16,
+  },
   goalRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   goalChip: {
     flexDirection: "row", alignItems: "center", gap: 5,
