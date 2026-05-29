@@ -89,9 +89,22 @@ export async function requestNotificationPermission(): Promise<boolean> {
  * instead of looking identical to success (the "says 8:00 but never
  * pings" class of failure).
  */
+/**
+ * Suffix appended to every daily-reminder body — points the user at
+ * the long-press → "✓ I took today's doses" action button. Without
+ * this hint, users don't know the gesture exists (the audit + a real
+ * tester report both flagged this as silent / undiscoverable).
+ *
+ * iOS-specific phrasing ("long-press") because that's the primary
+ * TestFlight audience; on Android the action button shows inline so
+ * the hint is slightly misleading but harmless — users see the button
+ * directly and don't actually need the gesture.
+ */
+const ACTION_HINT = "Long-press to log today's doses in one tap.";
+
 /** Default reminder body — used when no state-aware wrapper is called. */
 const DEFAULT_REMINDER_BODY =
-  "Quick tap to log doses or how you're feeling — keeps your trends accurate.";
+  `Quick tap to log doses or how you're feeling — keeps your trends accurate. ${ACTION_HINT}`;
 
 /**
  * Notification category for the daily reminder (ticket 1.6). Attached
@@ -389,17 +402,17 @@ export function pickReminderBody(state: ReminderState): string {
   // Recovery prompt fires only when both yesterday and today are
   // missing — if today is logged we already won, no need to nag.
   if (!state.yesterdayLogged && !state.todayLogged) {
-    return "You skipped yesterday. Tap to log how today's going.";
+    return `You skipped yesterday. Tap to log how today's going. ${ACTION_HINT}`;
   }
   if (state.streak >= 3) {
-    return `Day ${state.streak} of your streak — keep it going.`;
+    return `Day ${state.streak} of your streak — keep it going. ${ACTION_HINT}`;
   }
   if (
     state.activeCycle &&
     state.activeCycle.daysIntoCycle >= 0 &&
     state.activeCycle.daysIntoCycle < 7
   ) {
-    return `How's the first week of "${state.activeCycle.name}" going?`;
+    return `How's the first week of "${state.activeCycle.name}" going? ${ACTION_HINT}`;
   }
   return DEFAULT_REMINDER_BODY;
 }
