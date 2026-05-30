@@ -21,6 +21,7 @@ import {
   setupNotificationCategories,
   ACTION_LOG_DOSES,
   scheduleWeeklyDigestReminder,
+  requestNotificationPermission,
 } from "../services/notificationsService";
 import * as Notifications from "expo-notifications";
 import { buildQuickDoseLogs } from "../utils/quickDoseLog";
@@ -77,7 +78,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [outcomes, setOutcomes] = useState<CycleOutcome[]>([]);
   const [settings, setSettings] = useState<UserSettings>({
     weightUnit: "lbs",
-    notificationsEnabled: false,
+    // notifications default ON (matches storage DEFAULT_SETTINGS).
+    // The launch effect below requests OS permission and syncs back
+    // to false if denied so the toggle reflects reality.
+    notificationsEnabled: true,
     reminderTimes: ["08:00", "20:00"],
     onboardingDone: false,
     demographicsDone: false,
@@ -136,18 +140,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // schedule isn't durable across reinstalls/OS clears, and copy
       // is baked in at schedule time, so re-arming on every launch
       // keeps the next morning's reminder current to the user's state.
+      //
+      // Notifications now default ON (storage DEFAULT_SETTINGS) —
+      // so the first launch needs to also request OS permission.
+      // If user denies, sync notificationsEnabled back to false so
+      // the Profile toggle reflects reality. If already granted,
+      // requestNotificationPermission is a fast no-op.
       if (s.notificationsEnabled) {
-        scheduleDailyReminderForState({
-          times: parseReminderTimes(s.reminderTimes),
-          journal: migrated,
-          doseLogs: d,
-          cycles: c,
-        });
-        // Ticket 2.1 — Sunday 9 AM weekly digest reminder. Same
-        // notificationsEnabled gate so it tracks the daily-reminder
-        // setting; if users want it independently, that's a separate
-        // toggle for a future build.
-        scheduleWeeklyDigestReminder();
+        const granted = await requestNotificationPermission();
+        if (granted) {
+          scheduleDailyReminderForState({
+            times: parseReminderTimes(s.reminderTimes),
+            journal: migrated,
+            doseLogs: d,
+            cycles: c,
+          });
+          // Ticket 2.1 — Sunday 9 AM weekly digest reminder. Same
+          // notificationsEnabled gate so it tracks the daily-reminder
+          // setting; if users want it independently, that's a separate
+          // toggle for a future build.
+          scheduleWeeklyDigestReminder();
+        } else {
+          // OS denied — keep state honest. The toggle in Profile will
+          // now read OFF, which the user can flip back on to retry
+          // (which routes through requestNotificationPermission with
+          // a deep-link to iOS Settings if perma-denied).
+          const updated = { ...s, notificationsEnabled: false };
+          setSettings(updated);
+          appStorage.saveSettings(updated);
+        }
       }
     })();
 

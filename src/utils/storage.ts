@@ -14,7 +14,11 @@ const KEYS = {
 
 const DEFAULT_SETTINGS: UserSettings = {
   weightUnit: "lbs",
-  notificationsEnabled: false,
+  // notifications default ON — without them users discover the feature
+  // late and engagement craters. The AppContext launch effect will
+  // request OS permission once on first launch; if the user denies,
+  // it syncs this back to false so Profile reflects reality.
+  notificationsEnabled: true,
   reminderTimes: ["08:00", "20:00"],
   onboardingDone: false,
   demographicsDone: false,
